@@ -1,0 +1,106 @@
+\documentclass[english]{article}
+
+\usepackage{babel}
+\usepackage{graphicx}
+\usepackage{alltt}
+\usepackage{url}
+%\usepackage{ngerman}
+\usepackage{color}
+\usepackage{framed}
+
+\title{\huge\sffamily\bfseries Review of Group a by Group b}
+\author{Loris Reiff \and Miro Haller \and Raphael Eikenberg \and Robertas Maleckas}
+\date{\dots}
+
+
+\begin{document}
+\maketitle
+
+%% **** please observe the page limit ****
+%% (it is not allowed to change the font size or page geometry to gain more space!)
+%% comment or remove lines below before hand-in
+\begin{center}
+{\large\textcolor{red}{Page limit: 18 pages.}}
+\end{center}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tableofcontents
+\pagebreak
+
+\begin{framed}
+\noindent
+{\it
+Recall the following guidelines when writing your reports:
+\begin{itemize}
+\item Adhere to the given templates.
+
+\item Refer to the security principles in the book for justification.
+
+\item Use clear terminology: 
+\begin{itemize}
+\item secure = confidential + authentic. Be clear about
+which properties you are writing.
+\item Are pairwise distinct: certificate, private key, public key, archive to of certificate with private key. Please avoid mixing these up.
+\end{itemize}
+
+\item Use a spell checker before hand-in!
+
+\end{itemize}
+}
+\end{framed}
+
+
+\section{Background}
+
+\noindent {\bf Developers of the external system:} {\it x', y', z', ...} \\
+
+\noindent {\bf Date of the review:} ...
+
+
+\section{Report and Design Review}
+
+Study the documentation that came with the external system and evaluation. 
+
+\subsection{System Architecture and Security Concepts}
+
+Is the chosen architecture well-suited for the tasks specified in the requirements? Are the security design decisions well motivated and justified? List positive and negative aspects for each question.
+
+
+\subsection{Risk Analysis}
+
+Is the risk analysis coherent and complete? That is, are all relevant assets, threat sources, and threats listed? 
+%
+Are the risk definitions (likelihood, impact, and risk) reasonable?
+%
+Are the countermeasures appropriate?
+
+
+\section{Implementation Review}
+ 
+\subsection{Compliance with Requirements} 
+
+Does the system meet the functional and security requirements given in the assignment? Are they implemented correctly? If not, list any missing functionality or security measure.
+
+
+\subsection{System Security Testing}
+
+Systematically investigate the system. Are the countermeasures implemented as described? Do you see any security problems? Analyze the system using both black-box as well as white-box testing.
+
+
+\subsection{Backdoors}
+
+Describe all backdoors that you found on the system. It may be that you also find unintended backdoors (only the group's presentation will show whether they were intended or not).
+
+
+
+\section{Comparison}
+
+Compare your system with the external system you were given for the review. Are there any remarkable highlights in your system or the external system?
+
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "../../book"
+%%% End: 
