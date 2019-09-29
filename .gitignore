@@ -26,3 +26,6 @@ tags
 
 # MacOS
 .DS_Store
+
+# Vagrant
+.vagrant/
