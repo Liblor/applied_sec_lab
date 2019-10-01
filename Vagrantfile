@@ -121,7 +121,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     sudo sshpass -p "#{ANSIBLE_REMOTE_TMP_PW}" ssh-copy-id -i /home/#{ANSIBLE_UNAME}/.ssh/id_rsa.pub -o StrictHostKeyChecking=accept-new #{ANSIBLE_UNAME}@#{hostname}
 
                     # Remove temporary password for ansible users of remote servers again
-                    sudo sshpass -p "#{ANSIBLE_REMOTE_TMP_PW}" ssh #{ANSIBLE_UNAME}@#{hostname} "sudo passwd -d #{ANSIBLE_UNAME}"
+                    sudo sshpass -p "#{ANSIBLE_REMOTE_TMP_PW}" ssh #{ANSIBLE_UNAME}@#{hostname} "sudo passwd -d #{ANSIBLE_UNAME}; sudo usermod --lock #{ANSIBLE_UNAME}"
 
                     # Remove sensitive data from history
                     history -c
