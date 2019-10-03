@@ -6,7 +6,6 @@ using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using WebServer.Models;
-using WebServer.ViewModels;
 using WebServer.Models.Account;
 
 namespace WebServer.Controllers
@@ -16,15 +15,7 @@ namespace WebServer.Controllers
         [HttpGet, Authorize]
         public IActionResult Index()
         {
-            var viewModel = new UserData()
-            {
-                Id = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value,
-                FirstName = HttpContext.User.FindFirst(ClaimTypes.GivenName).Value,
-                LastName = HttpContext.User.FindFirst(ClaimTypes.Surname).Value,
-                Email = HttpContext.User.FindFirst(ClaimTypes.Email).Value,
-            };
-
-            return View(viewModel);
+            return View();
         }
 
         [HttpGet, AllowAnonymous]

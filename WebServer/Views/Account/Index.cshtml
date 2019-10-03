@@ -1,4 +1,4 @@
-﻿@model WebServer.ViewModels.UserData
+﻿@using System.Security.Claims;
 
 @{
     ViewData["Title"] = "My Account";
@@ -10,19 +10,19 @@
 	<tbody>
 		<tr>
 			<th scope="row">UID</th>
-			<td>@Model.Id</td>
+			<td>@Context.User.FindFirst(ClaimTypes.NameIdentifier).Value</td>
 		</tr>
 		<tr>
 			<th scope="row">First name</th>
-			<td>@Model.FirstName</td>
+			<td>@Context.User.FindFirst(ClaimTypes.GivenName).Value</td>
 		</tr>
 		<tr>
 			<th scope="row">Last name</th>
-			<td>@Model.LastName</td>
+			<td>@Context.User.FindFirst(ClaimTypes.Surname).Value</td>
 		</tr>
 		<tr>
 			<th scope="row">Email</th>
-			<td>@Model.Email</td>
+			<td>@Context.User.FindFirst(ClaimTypes.Email).Value</td>
 		</tr>
 	</tbody>
 </table>
