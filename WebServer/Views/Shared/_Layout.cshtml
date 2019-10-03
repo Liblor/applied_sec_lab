@@ -19,11 +19,29 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Cert" asp-action="Index">My Certificates</a>
+                            <a class="nav-link text-dark" asp-controller="Cert" asp-action="Index">My Certificates</a>
                         </li>
+                    </ul>
+                </div>
+                <div class="navbar-collapse collapse order-3 dual-collapse2">
+                    <ul class="navbar-nav ml-auto">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Index">Account</a>
+                            </li>
+                            <li class="nav-item">
+                                <form method="post" asp-controller="Account" asp-action="Logout">
+                                    <button type="submit" class="btn btn-link nav-link text-dark border-0">Log out</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Index">Account</a>
+                            <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Log in</a>
                         </li>
+                        }
                     </ul>
                 </div>
             </div>

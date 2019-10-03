@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace WebServer
 {
@@ -21,6 +16,14 @@ namespace WebServer
 				.ConfigureWebHostDefaults(webBuilder =>
 				{
 					webBuilder.UseStartup<Startup>();
+					webBuilder.ConfigureKestrel(kestrelOpts =>
+					{
+						kestrelOpts.ConfigureHttpsDefaults(httpsOpts => 
+                        {
+                            // Allow client cert auth but do not require it - we still want to support username/password auth
+							httpsOpts.ClientCertificateMode = ClientCertificateMode.AllowCertificate;
+                        });
+					});
 				});
 	}
 }
