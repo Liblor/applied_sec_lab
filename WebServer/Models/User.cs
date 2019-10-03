@@ -19,6 +19,8 @@ namespace WebServer.Models
 			var claims = new List<Claim>
 			{
 				new Claim(ClaimTypes.NameIdentifier, Id),
+				new Claim(ClaimTypes.GivenName, FirstName),
+				new Claim(ClaimTypes.Surname, LastName),
 				new Claim(ClaimTypes.Name, Name),
 				new Claim(ClaimTypes.Email, Email),
 			};

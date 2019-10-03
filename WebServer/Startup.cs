@@ -56,7 +56,7 @@ namespace WebServer
 			{
 				endpoints.MapControllerRoute(
 					name: "default",
-					pattern: "{controller=Cert}/{action=Index}/{id?}");
+					pattern: "{controller=Account}/{action=Index}/{id?}");
 			});
 		}
 	}
