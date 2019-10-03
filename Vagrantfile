@@ -26,7 +26,7 @@ master = {
 }
 
 hosts = {
-  "certserver" => {
+  "certservers" => {
       "aslcert01" => { :ip => "10.0.0.21" },
       # "aslcert02" => { :ip => "10.0.0.22" }
   },
@@ -35,17 +35,17 @@ hosts = {
   #     "asllegDB01" => { :ip => "10.0.0.51" },
   #     "asllegDB02" => { :ip => "10.0.0.52" }
   # },
-  # "webserver" => {
-      # "aslweb01" => { :ip => "10.0.0.31" },
+  "webservers" => {
+      "aslweb01" => { :ip => "10.0.0.31" },
       # "aslweb02" => { :ip => "10.0.0.32" }
-  # },
-  # "ldserver" => {
+  },
+  # "ldservers" => {
   #     "aslld01" => { :ip => "10.0.0.41" }
   # },
-  # "logserver" => {
+  # "logservers" => {
   #     "asllog01" => { :ip => "10.0.0.61" },
   # },
-  # "bkpserver" => {
+  # "bkpservers" => {
   #     "aslbkp01" => { :ip => "10.0.0.71" }
   # }
 }
