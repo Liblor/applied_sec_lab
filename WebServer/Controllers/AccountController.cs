@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using WebServer.Models;
@@ -39,21 +38,15 @@ namespace WebServer.Controllers
 					LastName = "User",
 					Id = "testuser"
 				};
-
-				var claims = new List<Claim>
-				{
-					new Claim(ClaimTypes.NameIdentifier, user.Id),
-					new Claim(ClaimTypes.Name, user.Name),
-					new Claim(ClaimTypes.Email, user.Email)
-				};
-
-				var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+				
 				var authProps = new AuthenticationProperties
 				{
 					// TODO: configure
 				};
 
-				await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity), authProps);
+				await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(user.ToClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme)),
+                    authProps);
 
 				// TODO: assess potential open redirect vulnerability
 				if (!string.IsNullOrWhiteSpace(returnUrl))
