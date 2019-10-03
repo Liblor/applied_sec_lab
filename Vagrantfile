@@ -9,6 +9,11 @@ ANSIBLE_PASSPHRASE_FILE = "ansible_passphrase.txt"
 ANSIBLE_UNAME = "ansible"
 ANSIBLE_REMOTE_TMP_PW = "ygqD-jh3LII1oNhurzQwAhoYe"
 
+MASTER_MEM = 1024
+REMOTE_MEM = 512
+CPU_CAP_PERCENTAGE = 60
+VRAM = 8
+
 # List of all hosts
 # Naming:
 #   All internal machines have the prefix als (Applied Security Lab) and
@@ -59,6 +64,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Set correct locale for guests to prevent annoying errors
     ENV['LC_ALL']="en_US.UTF-8"
 
+    # Limit resource usage
+    config.vm.provider "virtualbox" do |vb|
+        vb.customize ["modifyvm", :id, "--vram", VRAM]
+    end # provider
+
     # Create hosts
     hosts.each do |category_name, category_hosts|
         category_hosts.each do |hostname, info|
@@ -98,7 +108,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 end # hosts.each (peer)
 
                 hostconf.vm.provider "virtualbox" do |vb|
+                    vb.customize ["modifyvm", :id, "--cpuexecutioncap", CPU_CAP_PERCENTAGE]
                     vb.customize ["modifyvm", :id, "--name", "#{hostname}"]
+                    vb.memory = REMOTE_MEM
                 end # provider
             end # hostconf
         end # category_hosts.each
@@ -169,6 +181,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
             hostconf.vm.provider "virtualbox" do |vb|
                 vb.customize ["modifyvm", :id, "--name", "#{hostname}"]
+                vb.memory = MASTER_MEM
             end # provider
         end # hostconf
     end # master.each
