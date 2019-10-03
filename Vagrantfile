@@ -153,7 +153,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                         sudo sshpass -p "#{ANSIBLE_REMOTE_TMP_PW}" ssh #{ANSIBLE_UNAME}@#{hostname} "sudo passwd -d #{ANSIBLE_UNAME}; sudo usermod --lock #{ANSIBLE_UNAME}"
 
                         # Accept host keys for ansible user
-                        sudo su - ansible -c 'sshpass -p "#{ANSIBLE_REMOTE_TMP_PW}" ssh #{ANSIBLE_UNAME}@#{hostname} -o StrictHostKeyChecking=accept-new'
+                        sudo su - ansible -c 'sshpass -p "#{ANSIBLE_REMOTE_TMP_PW}" ssh -o StrictHostKeyChecking=accept-new #{ANSIBLE_UNAME}@#{hostname} exit'
 
                         # Remove sensitive data from history
                         history -c
