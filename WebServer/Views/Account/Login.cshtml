@@ -4,9 +4,8 @@
     ViewData["Title"] = "Login";
 }
 
-<div class="text-center">
-    <h1 class="display-4">@ViewData["Title"]</h1>
-</div>
+<h1 class="display-4 text-center">@ViewData["Title"]</h1>
+
 <div class="row justify-content-center">
     <div class="col-md-5">
         <form method="post" asp-controller="Account" asp-action="Login" asp-route-returnurl="@Context.Request.Query["ReturnUrl"]">
