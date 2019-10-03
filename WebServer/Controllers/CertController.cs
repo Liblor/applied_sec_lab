@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using WebServer.Models;
 
 namespace WebServer.Controllers
 {
+    [Authorize]
 	public class CertController : Controller
 	{
 		private readonly ILogger<CertController> _logger;
