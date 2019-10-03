@@ -6,6 +6,7 @@ using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using WebServer.Models;
+using WebServer.ViewModels;
 using WebServer.Models.Account;
 
 namespace WebServer.Controllers
@@ -15,7 +16,15 @@ namespace WebServer.Controllers
 		[HttpGet, Authorize]
 		public IActionResult Index()
 		{
-			return View();
+    		var viewModel = new UserData()
+    		{
+				Id = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value,
+				FirstName = HttpContext.User.FindFirst(ClaimTypes.GivenName).Value,
+				LastName = HttpContext.User.FindFirst(ClaimTypes.Surname).Value,
+				Email = HttpContext.User.FindFirst(ClaimTypes.Email).Value,
+    		};
+
+    		return View(viewModel);
 		}
 
 		[HttpGet, AllowAnonymous]
@@ -29,7 +38,7 @@ namespace WebServer.Controllers
 		{
 			if (ModelState.IsValid)
 			{
-				// TODO: validate credentials against DB 
+				// TODO: validate credentials against DB
 				// This should be constructed using info from the DB
 				var user = new User
 				{
@@ -38,7 +47,7 @@ namespace WebServer.Controllers
 					LastName = "User",
 					Id = "testuser"
 				};
-				
+
 				var authProps = new AuthenticationProperties
 				{
 					// TODO: configure

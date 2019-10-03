@@ -1,8 +1,32 @@
-﻿@{
+﻿@model WebServer.ViewModels.UserData
+
+@{
     ViewData["Title"] = "My Account";
 }
 
-<div class="text-center">
-    <h1 class="display-4">My account</h1>
-    <p>TODO: display the user's account details here</p>
+<h1 class="display-4 text-center">@ViewData["Title"]</h1>
+
+<table class="table table table-striped">
+	<tbody>
+		<tr>
+			<th scope="row">UID</th>
+			<td>@Model.Id</td>
+		</tr>
+		<tr>
+			<th scope="row">First name</th>
+			<td>@Model.FirstName</td>
+		</tr>
+		<tr>
+			<th scope="row">Last name</th>
+			<td>@Model.LastName</td>
+		</tr>
+		<tr>
+			<th scope="row">Email</th>
+			<td>@Model.Email</td>
+		</tr>
+	</tbody>
+</table>
+
+<div>
+<a asp-controller="Cert" asp-action="Index">Manage certificates</a>
 </div>
