@@ -1,7 +1,7 @@
 ﻿namespace WebServer
 {
-	public class Constants
-	{
-		public const string IMoviesUserAuthPolicy = "IMoviesUserAuth";
-	}
+    public class Constants
+    {
+        public const string IMoviesUserAuthPolicy = "IMoviesUserAuth";
+    }
 }

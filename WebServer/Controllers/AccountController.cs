@@ -11,73 +11,73 @@ using WebServer.Models.Account;
 
 namespace WebServer.Controllers
 {
-	public class AccountController : Controller
-	{
-		[HttpGet, Authorize]
-		public IActionResult Index()
-		{
-    		var viewModel = new UserData()
-    		{
-				Id = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value,
-				FirstName = HttpContext.User.FindFirst(ClaimTypes.GivenName).Value,
-				LastName = HttpContext.User.FindFirst(ClaimTypes.Surname).Value,
-				Email = HttpContext.User.FindFirst(ClaimTypes.Email).Value,
-    		};
+    public class AccountController : Controller
+    {
+        [HttpGet, Authorize]
+        public IActionResult Index()
+        {
+            var viewModel = new UserData()
+            {
+                Id = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value,
+                FirstName = HttpContext.User.FindFirst(ClaimTypes.GivenName).Value,
+                LastName = HttpContext.User.FindFirst(ClaimTypes.Surname).Value,
+                Email = HttpContext.User.FindFirst(ClaimTypes.Email).Value,
+            };
 
-    		return View(viewModel);
-		}
+            return View(viewModel);
+        }
 
-		[HttpGet, AllowAnonymous]
-		public IActionResult Login()
-		{
-			return View();
-		}
+        [HttpGet, AllowAnonymous]
+        public IActionResult Login()
+        {
+            return View();
+        }
 
-		[HttpPost, AllowAnonymous]
-		public async Task<IActionResult> Login(LoginDetails loginDetails, string returnUrl = null)
-		{
-			if (ModelState.IsValid)
-			{
-				// TODO: validate credentials against DB
-				// This should be constructed using info from the DB
-				var user = new User
-				{
-					Email = loginDetails.Email,
-					FirstName = "Test",
-					LastName = "User",
-					Id = "testuser"
-				};
+        [HttpPost, AllowAnonymous]
+        public async Task<IActionResult> Login(LoginDetails loginDetails, string returnUrl = null)
+        {
+            if (ModelState.IsValid)
+            {
+                // TODO: validate credentials against DB
+                // This should be constructed using info from the DB
+                var user = new User
+                {
+                    Email = loginDetails.Email,
+                    FirstName = "Test",
+                    LastName = "User",
+                    Id = "testuser"
+                };
 
-				var authProps = new AuthenticationProperties
-				{
-					// TODO: configure
-				};
+                var authProps = new AuthenticationProperties
+                {
+                    // TODO: configure
+                };
 
-				await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                     new ClaimsPrincipal(user.ToClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme)),
                     authProps);
 
-				// TODO: assess potential open redirect vulnerability
-				if (!string.IsNullOrWhiteSpace(returnUrl))
-					return Redirect(returnUrl);
+                // TODO: assess potential open redirect vulnerability
+                if (!string.IsNullOrWhiteSpace(returnUrl))
+                    return Redirect(returnUrl);
 
-				return RedirectToAction(nameof(Index));
-			}
+                return RedirectToAction(nameof(Index));
+            }
 
-			return View(loginDetails);
-		}
+            return View(loginDetails);
+        }
 
-		[HttpPost, Authorize]
-		public IActionResult Update(User user)
-		{
-			throw new NotImplementedException();
-		}
+        [HttpPost, Authorize]
+        public IActionResult Update(User user)
+        {
+            throw new NotImplementedException();
+        }
 
-		[HttpPost, Authorize]
-		public async Task<IActionResult> Logout()
-		{
-			await HttpContext.SignOutAsync();
-			return RedirectToAction(nameof(Login));
-		}
-	}
+        [HttpPost, Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync();
+            return RedirectToAction(nameof(Login));
+        }
+    }
 }
