@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace WebServer.Models
 {
@@ -13,5 +11,19 @@ namespace WebServer.Models
 		public string FirstName { get; set; }
 		public string LastName { get; set; }
 		public string Email { get; set; }
+
+		public string Name => $"{FirstName} {LastName}";
+
+		public ClaimsIdentity ToClaimsIdentity(string authScheme)
+		{
+			var claims = new List<Claim>
+			{
+				new Claim(ClaimTypes.NameIdentifier, Id),
+				new Claim(ClaimTypes.Name, Name),
+				new Claim(ClaimTypes.Email, Email),
+			};
+
+			return new ClaimsIdentity(claims, authScheme);
+		}
 	}
 }
