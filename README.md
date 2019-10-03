@@ -9,6 +9,9 @@ To install, do the following:
 - Install [vagrant](https://www.vagrantup.com/)
 - Run `vagrant up` inside this repository
 
+To stop the VMs:
+- `vagrant halt`
+
 To reinstall the architecture:
 - Run `vagrant destroy` (add option `-f` to destroy all VMs without asking)
 - Run `vagrant up`
