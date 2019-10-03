@@ -58,10 +58,16 @@ namespace WebServer.Controllers
             return View(loginDetails);
         }
 
+        [HttpGet, Authorize]
+        public IActionResult Update()
+        {
+            return View();
+        }
+
         [HttpPost, Authorize]
         public IActionResult Update(User user)
         {
-            throw new NotImplementedException();
+            return View();
         }
 
         [HttpPost, Authorize]
