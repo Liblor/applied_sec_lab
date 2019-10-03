@@ -1,0 +1,37 @@
+﻿@using System.Security.Claims;
+
+@model WebServer.Models.User
+
+@{
+    ViewData["Title"] = "Edit Account";
+}
+
+<h1 class="text-center">@ViewData["Title"]</h1>
+
+<div class="viewport d-flex flex-column mx-auto">
+    <form method="post" asp-controller="Account" asp-action="Update">
+		<table class="table table table-striped">
+			<tbody>
+				<tr>
+					<th scope="row"><label for="FirstName">First name</label></th>
+					<td><input type="text" name="FirstName" value="@Context.User.FindFirst(ClaimTypes.GivenName).Value" /></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="LastName">Last name</label></th>
+					<td><input type="text" name="LastName" value="@Context.User.FindFirst(ClaimTypes.Surname).Value" /></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="Email">Email</label></th>
+					<td><input type="email" name="Email" value="@Context.User.FindFirst(ClaimTypes.Email).Value" /></td>
+				</tr>
+			</tbody>
+		</table>
+
+		<div class="d-flex justify-content-center">
+			<div class="btn-group-vertical">
+				<button class="btn btn-primary" type="submit">Apply changes</button>
+				<a class="btn btn-secondary" asp-controller="Account" asp-action="Index">Cancel</a>
+			</div>
+		</div>
+	</form>
+</div>
