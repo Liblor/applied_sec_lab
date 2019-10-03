@@ -19,7 +19,7 @@
 ## [logging]
 ## 10.0.0.61    # asllog01
 
-## [backup]
+## [bkservers]
 ## 10.0.0.71
 
 ## [loadbalancers]

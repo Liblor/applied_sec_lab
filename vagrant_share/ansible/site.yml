@@ -1,5 +1,5 @@
 ---
-- import_playbook: backup.yml
+- import_playbook: bkservers.yml
 - import_playbook: dbservers.yml
 - import_playbook: webservers.yml
 - import_playbook: logging.yml
