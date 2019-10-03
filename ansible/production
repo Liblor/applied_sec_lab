@@ -1,0 +1,26 @@
+# Keep in sync with valgrant file
+
+
+## [certserver]
+## 10.0.0.21    # aslcert01
+## 10.0.0.22    # aslcert02
+
+
+# XXX: maybe separate group for legacy db?
+## [dbservers]
+## 10.0.0.23    # aslcertDB01
+## 10.0.0.51    # asllegDB01
+## 10.0.0.52    # asllegDB02
+
+[webservers]
+10.0.0.31    # aslweb01
+## 10.0.0.32    # aslweb02
+
+## [logging]
+## 10.0.0.61    # asllog01
+
+## [backup]
+## 10.0.0.71
+
+## [loadbalancers]
+## 10.0.0.41    # aslld01
