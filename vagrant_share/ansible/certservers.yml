@@ -1,0 +1,4 @@
+---
+- hosts: certservers
+  roles:
+    - dotnet

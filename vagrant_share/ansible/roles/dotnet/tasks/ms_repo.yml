@@ -1,0 +1,26 @@
+---
+- name: download microsoft's key
+  get_url:
+    url: https://packages.microsoft.com/keys/microsoft.asc 
+    dest: /tmp/microsoft.asc
+- name: dearmor microsoft's key
+  shell: gpg --dearmor < /tmp/microsoft.asc > /tmp/microsoft.asc.gpg
+- name: add it to trusted keys
+  command: mv /tmp/microsoft.asc.gpg /etc/apt/trusted.gpg.d/
+  become: yes
+- name: download microsoft's source list
+  get_url:
+    url: https://packages.microsoft.com/config/debian/10/prod.list
+    dest: /tmp/prod.list
+- name: add microsoft's source list
+  become: yes
+  command: mv /tmp/prod.list /etc/apt/sources.list.d/microsoft-prod.list
+- name: Change file ownership of source list
+  become: yes
+  file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+  with_items:
+    - /etc/apt/trusted.gpg.d/microsoft.asc.gpg
+    - /etc/apt/sources.list.d/microsoft-prod.list
