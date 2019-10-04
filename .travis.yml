@@ -10,5 +10,21 @@ mono: none
 dotnet: 3.0.100
 
 # Should run `dotnet test` once some tests are added
+# TODO: consider including version/buildid info in the artifact
 script:
-  dotnet build
+  - dotnet build --configuration Release
+  - dotnet publish --configuration Release --no-build
+  - tar -zcvf WebServer.tar.gz -C WebServer/bin/Debug/netcoreapp3.0/publish/ .
+
+deploy:
+  provider: releases
+  api_key:
+    secure: ME8HZZM3i7E4ApFAEwD1Wkhh+z2XJZ2duHrnwBAfjQp/kiiLHLVfpOAU5Wu/2b0oW/kRw9qenP9imU6ChphrQzXgytNYMR1NFNlQiL4qeTuAerrG3b4J593mfTas7aF4Pgl0znhw0+Tvs+YGQPI4bnP8VlTggr5Fuo4MLx5HZWcSxiHhaJ6BqDToGw33+/Hpzmm0Nt1IZz8VKqqOHNrqMP8KIeoo5cidnDt6L1QxXDx/i2FXlrV/5r+u7XCOF//OKR+hbAKYVc4iwCcycwAXp5KSg7FcBd4pecqq2zPWZ3ipdpEJU02Qg6z9xnvhKGgM6imq3cwB0Q1Xb07HzzcoIoqxPsfpSSq/45eeB4BhOQnK6gAkGNS/ycuIMmrdW8qArB9O9mXRdTrvDkHQagq3Js4pxAuZzEi6eD4eqYZJyK/lKqlq2DdvOHS9BSR/KW9bqhp4YeDp6eBy4T/3cRWdV/PR0zXTSO+QosGxm0fqFmjfuGTBQzQ1tLc0fvEjyKyWu4Kja8/k1XnsYVHlBfBQ2G6oBSlHmP5AWqKXiiDT7NnwoLRi8rx0DNPKj3k6HLX7vKms89QbOvEKi3TE7muDicHzownmT9IKX3Z7CzaRg75Nd8dr6fyOV7dfrhYAGF3BR/fdGlnH7Y72tjHaY+wnyQWNIPxq84ePHhJfwM15zZk=
+  file: WebServer.tar.gz
+  on:
+    repo: Liblor/applied_sec_lab
+
+# Disable telemetry and welcome messages in dotnet
+global:
+    - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true
+    - DOTNET_CLI_TELEMETRY_OPTOUT=1
