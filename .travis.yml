@@ -1,0 +1,10 @@
+language: csharp
+solution: WebServer.sln
+
+# No Mono runtime, use .NET Core SDK 3.X
+mono: none
+dotnet: 3.0.100
+
+# Should run `dotnet test` once some tests are added
+script:
+  dotnet build
