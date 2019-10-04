@@ -1,6 +1,14 @@
 # applied_sec_lab
 Applied Security Laboratory - AS19
 
+## Build status
+
+### Web server
+[![Build Status](https://travis-ci.com/Liblor/applied_sec_lab.svg?token=v2htoQjxNh7zAtUbzeQt&branch=master)](https://travis-ci.com/Liblor/applied_sec_lab)
+
+### Core CA
+TODO
+
 ## Install environment
 ### Vagrant
 Vagrant creates all VMs automatically, configures their networks and initializes the ansible master server.
