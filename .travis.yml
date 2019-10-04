@@ -1,3 +1,7 @@
+# Do not clone submodules (description/review) which require auth with Overleaf
+git:
+  submodules: false
+
 language: csharp
 solution: WebServer.sln
 
