@@ -44,10 +44,7 @@ namespace CertServer
 
 			app.UseEndpoints(endpoints =>
 			{
-				//endpoints.MapControllers();
-				endpoints.MapControllerRoute(
-					name: "api",
-					pattern: "api/{controller}");
+				endpoints.MapControllers();
 			});
 		}
 	}

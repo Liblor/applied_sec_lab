@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebServer", "WebServer\WebS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebServer.Tests", "WebServer.Tests\WebServer.Tests.csproj", "{2262B1C7-86D3-4D45-A350-A642C3873C6C}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CertServer", "CertServer\CertServer.csproj", "{9ABE82C3-4829-40D5-91DC-71350760A351}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{2262B1C7-86D3-4D45-A350-A642C3873C6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2262B1C7-86D3-4D45-A350-A642C3873C6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2262B1C7-86D3-4D45-A350-A642C3873C6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9ABE82C3-4829-40D5-91DC-71350760A351}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9ABE82C3-4829-40D5-91DC-71350760A351}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9ABE82C3-4829-40D5-91DC-71350760A351}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9ABE82C3-4829-40D5-91DC-71350760A351}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
