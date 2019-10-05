@@ -34,7 +34,7 @@
 					<td>@c.Fingerprint</td>
 					<td>@c.CreateDate</td>
 					<td>@c.ExpireDate</td>
-					<td><form method="post"><button class="btn btn-inline" asp-action="Revoke" asp-route-id="@c.Id" type="submit" title="Revoke"><i class="fas fa-trash-alt"></i></button></form></td>
+					<td><form method="post" asp-action="Revoke" asp-route-id="@c.Id"><button class="btn btn-inline" type="submit" title="Revoke"><i class="fas fa-trash-alt"></i></button></form></td>
 				</tr>
 			}
 		</tbody>
@@ -82,7 +82,7 @@
 
 	<div class="d-flex justify-content-center">
 		<div class="btn-group-vertical">
-			<a class="btn btn-primary" asp-controller="Cert" asp-action="New">Issue new certificate</a>
+			<form method="post" asp-action="New"><button class="btn btn-primary" type="submit">Issue new certificate</button></form>
 		</div>
 	</div>
 </div>
