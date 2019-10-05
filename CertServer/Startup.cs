@@ -47,7 +47,7 @@ namespace CertServer
 				//endpoints.MapControllers();
 				endpoints.MapControllerRoute(
 					name: "api",
-					pattern: "{controller}");
+					pattern: "api/{controller}");
 			});
 		}
 	}
