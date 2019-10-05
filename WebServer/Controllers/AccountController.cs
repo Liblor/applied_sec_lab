@@ -69,7 +69,8 @@ namespace WebServer.Controllers
         {
             if (ModelState.IsValid)
             {
-            	// TODO Try to write the new user information to the database.
+            	// TODO Try to write the new account information to the database.
+            	// TODO Revoke all certificates not matching the new information.
 
 				bool success = false;
 
@@ -79,7 +80,7 @@ namespace WebServer.Controllers
 				}
 				else
 				{
-        			ViewData["ErrorMessage"] = "Account information updated failed.";
+        			ViewData["ErrorMessage"] = "Updating account information failed.";
 				}
 
             	return View("Index");

@@ -1,7 +1,88 @@
-﻿@{
+﻿@model WebServer.ViewModels.CertificatesData
+
+@{
     ViewData["Title"] = "My Certificates";
 }
 
 <h1 class="text-center">@ViewData["Title"]</h1>
 
-<p>TODO: display the user's public certificates (active, expired, revoked) here</p>
+<div class="viewport d-flex flex-column mx-auto">
+	@{
+		if (ViewData.ContainsKey("SuccessMessage")) {
+			<div class="alert alert-success" role="alert">
+				@ViewData["SuccessMessage"]
+			</div>
+		}
+		if (ViewData.ContainsKey("ErrorMessage")) {
+			<div class="alert alert-danger" role="alert">
+				@ViewData["ErrorMessage"]
+			</div>
+		}
+	}
+
+	<h2>Valid Certificates</h2>
+	<table class="table table-striped">
+		<tbody>
+			<tr>
+				<th scope="row">Fingerprint</th>
+				<th scope="row">Create Date</th>
+				<th scope="row">Expire Date</th>
+				<th scope="row">Actions</th>
+			</tr>
+			@foreach (Certificate c in Model.Valid) {
+				<tr>
+					<td>@c.Fingerprint</td>
+					<td>@c.CreateDate</td>
+					<td>@c.ExpireDate</td>
+					<td></td>
+				</tr>
+			}
+		</tbody>
+	</table>
+
+	<h2>Revoked Certificates</h2>
+	<table class="table table-striped">
+		<tbody>
+			<tr>
+				<th scope="row">Fingerprint</th>
+				<th scope="row">Create Date</th>
+				<th scope="row">Expire Date</th>
+				<th scope="row">Actions</th>
+			</tr>
+			@foreach (Certificate c in Model.Revoked) {
+				<tr>
+					<td>@c.Fingerprint</td>
+					<td>@c.CreateDate</td>
+					<td>@c.ExpireDate</td>
+					<td></td>
+				</tr>
+			}
+		</tbody>
+	</table>
+
+	<h2>Expired Certificates</h2>
+	<table class="table table-striped">
+		<tbody>
+			<tr>
+				<th scope="row">Fingerprint</th>
+				<th scope="row">Create Date</th>
+				<th scope="row">Expire Date</th>
+				<th scope="row">Actions</th>
+			</tr>
+			@foreach (Certificate c in Model.Expired) {
+				<tr>
+					<td>@c.Fingerprint</td>
+					<td>@c.CreateDate</td>
+					<td>@c.ExpireDate</td>
+					<td></td>
+				</tr>
+			}
+		</tbody>
+	</table>
+
+	<div class="d-flex justify-content-center">
+		<div class="btn-group-vertical">
+			<a class="btn btn-primary" asp-controller="Cert" asp-action="Index">Issue certificate</a>
+		</div>
+	</div>
+</div>
