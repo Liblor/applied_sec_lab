@@ -69,26 +69,26 @@ namespace WebServer.Controllers
         {
             if (ModelState.IsValid)
             {
-            	// TODO Try to write the new account information to the database.
-            	// TODO Revoke all certificates not matching the new information.
+                // TODO Try to write the new account information to the database.
+                // TODO Revoke all certificates not matching the new information.
 
-				bool success = false;
+                bool success = false;
 
-				if (success)
-				{
-        			ViewData["SuccessMessage"] = "Account information updated successfully.";
-				}
-				else
-				{
-        			ViewData["ErrorMessage"] = "Updating account information failed.";
-				}
+                if (success)
+                {
+                    ViewData["SuccessMessage"] = "Account information updated successfully.";
+                }
+                else
+                {
+                    ViewData["ErrorMessage"] = "Updating account information failed.";
+                }
 
-            	return View("Index");
+                return View("Index");
             }
             else
             {
-            	return View();
-			}
+                return View();
+            }
         }
 
         [HttpPost, Authorize]

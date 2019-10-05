@@ -21,19 +21,19 @@ namespace WebServer.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-        	// TODO Query certificates from the database.
+            // TODO Query certificates from the database.
 
-			var valid = new HashSet<Certificate>();
-			var revoked = new HashSet<Certificate>();
-			var expired = new HashSet<Certificate>();
+            var valid = new HashSet<Certificate>();
+            var revoked = new HashSet<Certificate>();
+            var expired = new HashSet<Certificate>();
 
-			var c = new Certificate
-			{
-				Fingerprint = "test",
-				CreateDate = DateTime.Now,
-				ExpireDate = DateTime.Now.Subtract(new TimeSpan(365, 0, 0, 0, 0)),
-			};
-			valid.Add(c);
+            var c = new Certificate
+            {
+                Fingerprint = "test",
+                CreateDate = DateTime.Now,
+                ExpireDate = DateTime.Now.Subtract(new TimeSpan(365, 0, 0, 0, 0)),
+            };
+            valid.Add(c);
 
             var viewModel = new CertificatesData()
             {
@@ -50,18 +50,18 @@ namespace WebServer.Controllers
         [HttpPost]
         public IActionResult New()
         {
-			// TODO Request certificate.
+            // TODO Request certificate.
 
-			bool success = false;
+            bool success = false;
 
-			if (success)
-			{
-        		ViewData["SuccessMessage"] = "Certificate issued successfully.";
-			}
-			else
-			{
-        		ViewData["ErrorMessage"] = "Issuing certificate failed.";
-			}
+            if (success)
+            {
+                ViewData["SuccessMessage"] = "Certificate issued successfully.";
+            }
+            else
+            {
+                ViewData["ErrorMessage"] = "Issuing certificate failed.";
+            }
 
             return View("Index");
         }
@@ -70,18 +70,18 @@ namespace WebServer.Controllers
         [HttpPost]
         public IActionResult Revoke(string serialNumber)
         {
-			// TODO Revoke certificate.
+            // TODO Revoke certificate.
 
-			bool success = false;
+            bool success = false;
 
-			if (success)
-			{
-        		ViewData["SuccessMessage"] = "Certificate revoked successfully.";
-			}
-			else
-			{
-        		ViewData["ErrorMessage"] = "Revoking certificate failed.";
-			}
+            if (success)
+            {
+                ViewData["SuccessMessage"] = "Certificate revoked successfully.";
+            }
+            else
+            {
+                ViewData["ErrorMessage"] = "Revoking certificate failed.";
+            }
 
             return View("Index");
         }
