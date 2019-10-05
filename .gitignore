@@ -52,6 +52,7 @@ bld/
 
 # VS cache
 .vs/
+.vscode/
 
 # NUnit
 *.VisualState.xml
