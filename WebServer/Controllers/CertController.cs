@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -18,8 +19,7 @@ namespace WebServer.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
-        public IActionResult Index()
+        private static async Task<CertificatesData> FetchCertificatesData()
         {
             // TODO Query certificates from the database.
 
@@ -29,18 +29,27 @@ namespace WebServer.Controllers
 
             var c = new Certificate
             {
+            	Id = 0,
                 Fingerprint = "test",
                 CreateDate = DateTime.Now,
                 ExpireDate = DateTime.Now.Subtract(new TimeSpan(365, 0, 0, 0, 0)),
             };
             valid.Add(c);
 
-            var viewModel = new CertificatesData()
+            var data = new CertificatesData()
             {
                 Valid = valid,
                 Revoked = revoked,
                 Expired = expired,
             };
+
+			return data;
+		}
+
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+			var viewModel = await FetchCertificatesData();
 
             return View(viewModel);
         }
@@ -48,7 +57,7 @@ namespace WebServer.Controllers
         // TODO: Enable XSRF protection for HttpPost endpoints if not present by default
         // TODO: Rate limit
         [HttpPost]
-        public IActionResult New()
+        public async Task<IActionResult> New()
         {
             // TODO Request certificate.
 
@@ -56,19 +65,19 @@ namespace WebServer.Controllers
 
             if (success)
             {
-                ViewData["SuccessMessage"] = "Certificate issued successfully.";
+                TempData["SuccessMessage"] = "Certificate issued successfully.";
             }
             else
             {
-                ViewData["ErrorMessage"] = "Issuing certificate failed.";
+                TempData["ErrorMessage"] = "Issuing certificate failed.";
             }
 
-            return View("Index");
+            return RedirectToAction(nameof(Index));
         }
 
         // TODO: consider replacing string argument with a model object
         [HttpPost]
-        public IActionResult Revoke(string serialNumber)
+        public async Task<IActionResult> Revoke(int id)
         {
             // TODO Revoke certificate.
 
@@ -76,14 +85,14 @@ namespace WebServer.Controllers
 
             if (success)
             {
-                ViewData["SuccessMessage"] = "Certificate revoked successfully.";
+                TempData["SuccessMessage"] = "Certificate revoked successfully.";
             }
             else
             {
-                ViewData["ErrorMessage"] = "Revoking certificate failed.";
+                TempData["ErrorMessage"] = "Revoking certificate failed.";
             }
 
-            return View("Index");
+            return RedirectToAction(nameof(Index));
         }
     }
 }

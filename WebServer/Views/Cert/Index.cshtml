@@ -8,14 +8,14 @@
 
 <div class="viewport d-flex flex-column mx-auto">
 	@{
-		if (ViewData.ContainsKey("SuccessMessage")) {
+		if (TempData.ContainsKey("SuccessMessage")) {
 			<div class="alert alert-success" role="alert">
-				@ViewData["SuccessMessage"]
+				@TempData["SuccessMessage"]
 			</div>
 		}
-		if (ViewData.ContainsKey("ErrorMessage")) {
+		if (TempData.ContainsKey("ErrorMessage")) {
 			<div class="alert alert-danger" role="alert">
-				@ViewData["ErrorMessage"]
+				@TempData["ErrorMessage"]
 			</div>
 		}
 	}
@@ -34,7 +34,7 @@
 					<td>@c.Fingerprint</td>
 					<td>@c.CreateDate</td>
 					<td>@c.ExpireDate</td>
-					<td></td>
+					<td><form method="post"><button class="btn btn-inline" asp-action="Revoke" asp-route-id="@c.Id" type="submit" title="Revoke"><i class="fas fa-trash-alt"></i></button></form></td>
 				</tr>
 			}
 		</tbody>
@@ -54,7 +54,7 @@
 					<td>@c.Fingerprint</td>
 					<td>@c.CreateDate</td>
 					<td>@c.ExpireDate</td>
-					<td></td>
+					<td>-</td>
 				</tr>
 			}
 		</tbody>
@@ -74,7 +74,7 @@
 					<td>@c.Fingerprint</td>
 					<td>@c.CreateDate</td>
 					<td>@c.ExpireDate</td>
-					<td></td>
+					<td>-</td>
 				</tr>
 			}
 		</tbody>
@@ -82,7 +82,7 @@
 
 	<div class="d-flex justify-content-center">
 		<div class="btn-group-vertical">
-			<a class="btn btn-primary" asp-controller="Cert" asp-action="Index">Issue certificate</a>
+			<a class="btn btn-primary" asp-controller="Cert" asp-action="New">Issue new certificate</a>
 		</div>
 	</div>
 </div>
