@@ -11,14 +11,17 @@ namespace WebServer.Models
         public string Id { get; set; }
 
         [StringLength(256, MinimumLength = 1)]
+        [Display(Name = "First name")]
         [Required]
         public string FirstName { get; set; }
 
         [StringLength(256, MinimumLength = 1)]
+        [Display(Name = "Last name")]
         [Required]
         public string LastName { get; set; }
 
         [StringLength(256, MinimumLength = 1)]
+        [Display(Name = "Email Address")]
         [Required, EmailAddress]
         public string Email { get; set; }
 
