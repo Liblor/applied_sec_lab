@@ -3,7 +3,7 @@
 @model WebServer.Models.User
 
 @{
-    ViewData["Title"] = "Edit Account";
+    ViewData["Title"] = "Update Account Information";
 }
 
 <h1 class="text-center">@ViewData["Title"]</h1>
@@ -13,16 +13,25 @@
 		<table class="table table table-striped">
 			<tbody>
 				<tr>
-					<th scope="row"><label for="FirstName">First name</label></th>
-					<td><input type="text" name="FirstName" value="@Context.User.FindFirst(ClaimTypes.GivenName).Value" /></td>
+					<th scope="row"><label asp-for="FirstName">First name</label></th>
+					<td>
+						<input asp-for="FirstName" type="text" value="@Context.User.FindFirst(ClaimTypes.GivenName).Value" />
+                		<span asp-validation-for="FirstName" class="text-danger"></span>
+					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="LastName">Last name</label></th>
-					<td><input type="text" name="LastName" value="@Context.User.FindFirst(ClaimTypes.Surname).Value" /></td>
+					<th scope="row"><label asp-for="LastName">Last name</label></th>
+					<td>
+						<input asp-for="LastName" type="text" value="@Context.User.FindFirst(ClaimTypes.Surname).Value" />
+                		<span asp-validation-for="LastName" class="text-danger"></span>
+					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="Email">Email</label></th>
-					<td><input type="email" name="Email" value="@Context.User.FindFirst(ClaimTypes.Email).Value" /></td>
+					<th scope="row"><label asp-for="Email">Email</label></th>
+					<td>
+						<input asp-for="Email" type="email" value="@Context.User.FindFirst(ClaimTypes.Email).Value" />
+                		<span asp-validation-for="Email" class="text-danger"></span>
+					</td>
 				</tr>
 			</tbody>
 		</table>

@@ -67,7 +67,27 @@ namespace WebServer.Controllers
         [HttpPost, Authorize]
         public IActionResult Update(User user)
         {
-            return View();
+            if (ModelState.IsValid)
+            {
+            	// TODO Try to write the new user information to the database.
+
+				bool success = false;
+
+				if (success)
+				{
+        			ViewData["SuccessMessage"] = "Account information updated successfully.";
+				}
+				else
+				{
+        			ViewData["ErrorMessage"] = "Account information updated failed.";
+				}
+
+            	return View("Index");
+            }
+            else
+            {
+            	return View();
+			}
         }
 
         [HttpPost, Authorize]
