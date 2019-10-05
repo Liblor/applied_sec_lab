@@ -13,23 +13,23 @@
 		<table class="table table-striped">
 			<tbody>
 				<tr>
-					<th scope="row"><label asp-for="FirstName">First name</label></th>
+					<th scope="row"><label asp-for="FirstName"></label></th>
 					<td>
-						<input asp-for="FirstName" type="text" value="@Context.User.FindFirst(ClaimTypes.GivenName).Value" />
+						<input asp-for="FirstName" value="@Context.User.FindFirst(ClaimTypes.GivenName).Value" />
                 		<span asp-validation-for="FirstName" class="text-danger"></span>
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label asp-for="LastName">Last name</label></th>
+					<th scope="row"><label asp-for="LastName"></label></th>
 					<td>
-						<input asp-for="LastName" type="text" value="@Context.User.FindFirst(ClaimTypes.Surname).Value" />
+						<input asp-for="LastName" value="@Context.User.FindFirst(ClaimTypes.Surname).Value" />
                 		<span asp-validation-for="LastName" class="text-danger"></span>
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label asp-for="Email">Email</label></th>
+					<th scope="row"><label asp-for="Email"></label></th>
 					<td>
-						<input asp-for="Email" type="email" value="@Context.User.FindFirst(ClaimTypes.Email).Value" />
+						<input asp-for="Email" value="@Context.User.FindFirst(ClaimTypes.Email).Value" />
                 		<span asp-validation-for="Email" class="text-danger"></span>
 					</td>
 				</tr>
