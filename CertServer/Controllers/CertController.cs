@@ -10,8 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace CertServer.Controllers
 {
 
-	//[ApiController]
-	[Route("api")]
+	[ApiController, Route("api/[controller]")]
 	public class CertController : ControllerBase
 	{
 		[HttpGet]

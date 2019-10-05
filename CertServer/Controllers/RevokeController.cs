@@ -9,7 +9,8 @@ using Microsoft.Extensions.Logging;
 
 namespace CertServer.Controllers
 {
-    public class RevokeController : Controller
+	[ApiController, Route("api/[controller]")]
+    public class RevokeController : ControllerBase
     {
 		[HttpGet]
 		public string Get()
