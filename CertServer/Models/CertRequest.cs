@@ -11,6 +11,6 @@ namespace CertServer.Models
         public string Password { get; set; }
 
         [Required]
-        public string CipherSuite { get; set; }
+        public CipherSuite RequestedCipherSuite { get; set; }
     }
 }
