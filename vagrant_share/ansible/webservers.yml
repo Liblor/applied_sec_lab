@@ -1,4 +1,52 @@
 ---
 - hosts: webservers
+  become: yes
   roles:
     - dotnet
+    - nginxinc.nginx
+  vars:
+    nginx_http_template_enable: true
+    nginx_http_template:
+      default:
+        template_file: http/default.conf.j2
+        conf_file_name: default.conf
+        conf_file_location: /etc/nginx/conf.d/
+        port: 80
+        server_name: localhost
+        error_page: /usr/share/nginx/html
+        autoindex: false
+        reverse_proxy:
+          locations:
+            webserver1:
+              location: /
+              proxy_pass: http://localhost:5000
+              proxy_http_version: 1.1
+              proxy_set_header:
+                header_upgrade:
+                  name: Upgrade
+                  value: $http_upgrade
+                header_connection:
+                  name: Connection
+                  value: "keep-alive"
+                header_host:
+                  name: Host
+                  value: $host
+                header_x_forwarded_for:
+                  name: X-Forwarded-For
+                  value: $proxy_add_x_forwarded_for
+                header_x_forwarded_proto:
+                  name: X-Forwarded-Proto
+                  value: $scheme
+        upstreams:
+          upstream:
+            name: webservers
+            lb_method: least_conn
+            zone_name: webservers
+            zone_size: 64k
+            sticky_cookie: false
+            servers:
+              webserver_1:
+                address: localhost
+                port: 5000
+                weight: 1
+                health_check: max_fails=3 fail_timeout=5s

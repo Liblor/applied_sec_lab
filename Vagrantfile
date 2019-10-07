@@ -176,7 +176,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             end # category_hosts.each
 
             hostconf.vm.provision "shell", inline: <<-SHELL
-                sudo su - #{ANSIBLE_UNAME} -c 'eval "$(ssh-agent -s)"; sshpass -P "Enter" -p $(cat /vagrant/ansible_passphrase.txt) ssh-add ~/.ssh/id_rsa; ansible-playbook -i production site.yml'
+                sudo su - #{ANSIBLE_UNAME} -c 'eval "$(ssh-agent -s)"; sshpass -P "Enter" -p $(cat /vagrant/ansible_passphrase.txt) ssh-add ~/.ssh/id_rsa; ansible-galaxy install nginxinc.nginx; ansible-playbook -i production site.yml'
             SHELL
 
             hostconf.vm.provider "virtualbox" do |vb|
