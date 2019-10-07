@@ -10,18 +10,23 @@ using Microsoft.Extensions.Logging;
 namespace CertServer.Controllers
 {
 
-	[ApiController, Route("api/[controller]")]
+	[ApiController, Route("api")]
 	public class CertController : ControllerBase
 	{
 		[HttpGet]
 		public Dictionary<string, string> Get()
 		{
+			var url = string.Format("{0}://{1}{2}", 
+							Request.Scheme, 
+							Request.Host, 
+							Url.Action()
+						);
 			// XXX: Hacky (lots of love, C# noobs)
 			return new Dictionary<string, string>
 				{
-					{"issue", "/api/issue"},
-					{"revoke", "/api/revoke"},
-					{"ciphersuites", "/api/ciphersuites"},
+					{"issue", url + "/issue"},
+					{"revoke", url + "/revoke"},
+					{"ciphersuites", url + "/ciphersuites"},
 				};
 		}
 	}
