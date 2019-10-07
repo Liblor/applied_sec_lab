@@ -1,0 +1,33 @@
+# OpenSSL configuration file for creating a CSR for a server certificate
+
+# the fully qualified server (or service) name
+FQDN = CERT_SERVER_HOSTNAME
+
+# the name of your organization
+ORGNAME = iMovies
+
+# subjectAltName entries
+ALTNAMES = DNS:$FQDN
+
+[ req ]
+prompt                 = no
+days                   = 180
+serial                 = 1
+distinguished_name     = req_distinguished_name
+x509_extensions        = v3_ca
+
+[ req_distinguished_name ]
+countryName = CH
+stateOrProvinceName = Zurich
+localityName = Zurich
+organizationName = $ORGNAME
+commonName = $FQDN
+
+[ v3_ca ]
+# The extentions to add to a self-signed cert
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid:always,issuer:always
+basicConstraints       = CA:TRUE
+keyUsage               = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment, keyAgreement, keyCertSign
+subjectAltName         = $ALTNAMES
+issuerAltName          = issuer:copy

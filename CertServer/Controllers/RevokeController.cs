@@ -1,21 +1,16 @@
 using System;
-using System.Net;
-using System.Web;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using CertServer.Models;
 
 namespace CertServer.Controllers
 {
-	[ApiController, Route("api/[controller]")]
+	[ApiController, Route("api")]
     public class RevokeController : ControllerBase
     {
-		[HttpGet]
-		public string Get()
+		[HttpPost("[controller]")]
+		public IActionResult RevokeCertificate()
 		{
-            return "hi";
+            return Ok("hi");
 		}
     }
 }

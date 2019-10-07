@@ -13,10 +13,6 @@ namespace CertServer
 {
 	public class Startup
 	{
-		private static readonly string APIBasePath = "api";
-		private static readonly string APIName = "Core CA API";
-		private static readonly string APIVersion = "v1";
-
 		public Startup(IConfiguration configuration)
 		{
 			Configuration = configuration;
@@ -35,7 +31,7 @@ namespace CertServer
 			// Register the Swagger generator, defining one Swagger document
 			services.AddSwaggerGen(c =>
 			{
-				c.SwaggerDoc("v1", new OpenApiInfo { Title = APIName, Version = APIVersion });
+				c.SwaggerDoc("v1", new OpenApiInfo { Title = CAConfig.APIName, Version = CAConfig.APIVersion });
 				
 				// Set the comments path for the Swagger JSON and UI.
 				var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -65,10 +61,10 @@ namespace CertServer
 			app.UseSwaggerUI(c =>
 			{
 				c.SwaggerEndpoint(
-					string.Format("/{0}/swagger/{1}/swagger.json", APIBasePath, APIVersion),
-					string.Format("{0} {1}", APIName, APIVersion)
+					string.Format("/{0}/swagger/{1}/swagger.json", CAConfig.APIBasePath, CAConfig.APIVersion),
+					string.Format("{0} {1}", CAConfig.APIName, CAConfig.APIVersion)
 				);
-				c.RoutePrefix = APIBasePath + "/swagger";
+				c.RoutePrefix = CAConfig.APIBasePath + "/swagger";
 			});
 
 			app.UseRouting();
