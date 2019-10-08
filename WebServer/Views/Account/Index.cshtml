@@ -4,29 +4,44 @@
     ViewData["Title"] = "My Account";
 }
 
-<h1 class="display-4 text-center">@ViewData["Title"]</h1>
+<h1 class="text-center">@ViewData["Title"]</h1>
 
-<table class="table table table-striped">
-	<tbody>
-		<tr>
-			<th scope="row">UID</th>
-			<td>@Context.User.FindFirst(ClaimTypes.NameIdentifier).Value</td>
-		</tr>
-		<tr>
-			<th scope="row">First name</th>
-			<td>@Context.User.FindFirst(ClaimTypes.GivenName).Value</td>
-		</tr>
-		<tr>
-			<th scope="row">Last name</th>
-			<td>@Context.User.FindFirst(ClaimTypes.Surname).Value</td>
-		</tr>
-		<tr>
-			<th scope="row">Email</th>
-			<td>@Context.User.FindFirst(ClaimTypes.Email).Value</td>
-		</tr>
-	</tbody>
-</table>
 
-<div>
-<a asp-controller="Cert" asp-action="Index">Manage certificates</a>
+<div class="viewport d-flex flex-column mx-auto">
+	@{
+		if (ViewData.ContainsKey("SuccessMessage")) {
+			<div class="alert alert-success" role="alert">
+				@ViewData["SuccessMessage"]
+			</div>
+		}
+		if (ViewData.ContainsKey("ErrorMessage")) {
+			<div class="alert alert-danger" role="alert">
+				@ViewData["ErrorMessage"]
+			</div>
+		}
+	}
+
+	<table class="table table-striped">
+		<tbody>
+			<tr>
+				<th scope="row">First name</th>
+				<td>@Context.User.FindFirst(ClaimTypes.GivenName).Value</td>
+			</tr>
+			<tr>
+				<th scope="row">Last name</th>
+				<td>@Context.User.FindFirst(ClaimTypes.Surname).Value</td>
+			</tr>
+			<tr>
+				<th scope="row">Email</th>
+				<td>@Context.User.FindFirst(ClaimTypes.Email).Value</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<div class="d-flex justify-content-center">
+		<div class="btn-group-vertical">
+			<a class="btn btn-primary" asp-controller="Cert" asp-action="Index">Manage certificates</a>
+			<a class="btn btn-secondary" asp-controller="Account" asp-action="Update">Update account information</a>
+		</div>
+	</div>
 </div>
