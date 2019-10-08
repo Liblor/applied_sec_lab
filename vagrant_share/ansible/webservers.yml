@@ -17,9 +17,9 @@
         autoindex: false
         reverse_proxy:
           locations:
-            webserver1:
+            aspnet:
               location: /
-              proxy_pass: http://localhost:5000
+              proxy_pass: http://aspnet
               proxy_http_version: 1.1
               proxy_set_header:
                 header_upgrade:
@@ -39,14 +39,8 @@
                   value: $scheme
         upstreams:
           upstream:
-            name: webservers
-            lb_method: least_conn
-            zone_name: webservers
-            zone_size: 64k
-            sticky_cookie: false
+            name: aspnet
             servers:
-              webserver_1:
+              aspnet_1:
                 address: localhost
                 port: 5000
-                weight: 1
-                health_check: max_fails=3 fail_timeout=5s
