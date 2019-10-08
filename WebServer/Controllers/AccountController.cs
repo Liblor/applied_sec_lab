@@ -58,10 +58,37 @@ namespace WebServer.Controllers
             return View(loginDetails);
         }
 
+        [HttpGet, Authorize]
+        public IActionResult Update()
+        {
+            return View();
+        }
+
         [HttpPost, Authorize]
         public IActionResult Update(User user)
         {
-            throw new NotImplementedException();
+            if (ModelState.IsValid)
+            {
+                // TODO Try to write the new account information to the database.
+                // TODO Revoke all certificates not matching the new information.
+
+                bool success = false;
+
+                if (success)
+                {
+                    ViewData["SuccessMessage"] = "Account information updated successfully.";
+                }
+                else
+                {
+                    ViewData["ErrorMessage"] = "Updating account information failed.";
+                }
+
+                return View("Index");
+            }
+            else
+            {
+                return View();
+            }
         }
 
         [HttpPost, Authorize]
