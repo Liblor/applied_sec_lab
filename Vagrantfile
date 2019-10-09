@@ -167,7 +167,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             end # category_hosts.each
 
             hostconf.vm.provision "shell", inline: <<-SHELL
-                sudo su - #{ANSIBLE_UNAME} -c 'eval "$(ssh-agent -s)" ; sshpass -P "Enter" -p $(cat /vagrant/#{ANSIBLE_PASSPHRASE_FILE}) ssh-add ~/.ssh/id_rsa ; ansible-galaxy install nginxinc.nginx ; ansible-playbook -i production site.yml ; history -c ; unset HISTFILE ; rm -f ~/.bash_history'
+                sudo su - #{ANSIBLE_UNAME} -c 'eval "$(ssh-agent -s)" ; sshpass -P "Enter" -p $(cat /vagrant/#{ANSIBLE_PASSPHRASE_FILE}) ssh-add ~/.ssh/id_rsa ; ansible-galaxy install -r requirements.yml ; ansible-playbook -i production site.yml ; history -c ; unset HISTFILE ; rm -f ~/.bash_history'
 
                 # Remove sensitive data from history
                 history -c
