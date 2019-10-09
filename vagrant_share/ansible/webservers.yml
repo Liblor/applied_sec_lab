@@ -40,6 +40,10 @@
         upstreams:
           upstream:
             name: aspnet
+            lb_method: least_conn
+            zone_name: aspnet
+            zone_size: 64k
+            sticky_cookie: false
             servers:
               aspnet_1:
                 address: localhost
