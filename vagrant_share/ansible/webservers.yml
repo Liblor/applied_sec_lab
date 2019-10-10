@@ -2,7 +2,8 @@
 - hosts: webservers
   become: yes
   roles:
-    - dotnet
+    - aspdotnet
+    - asl-webserver
     - nginxinc.nginx
   vars:
     nginx_http_template_enable: true
@@ -15,6 +16,11 @@
         server_name: localhost
         error_page: /usr/share/nginx/html
         autoindex: false
+        add_headers:
+          x_frame_options:
+            name: X-Frame-Options
+            value: "SAMEORIGIN"
+            always: true
         reverse_proxy:
           locations:
             aspnet:

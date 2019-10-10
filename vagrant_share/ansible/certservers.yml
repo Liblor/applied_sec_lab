@@ -1,4 +1,7 @@
 ---
 - hosts: certservers
+  become: yes
   roles:
-    - dotnet
+    - aspdotnet
+    - asl-certserver
+    - nginxinc.nginx
