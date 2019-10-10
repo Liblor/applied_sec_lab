@@ -32,11 +32,14 @@
                     <ul class="navbar-nav ml-auto">
                         @if (User.Identity.IsAuthenticated)
                         {
-                            <li class="nav-item">
+                            @if (User.Identity.AuthenticationType == Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme)
+                            {
+                                <li class="nav-item">
                                 <form method="post" asp-controller="Account" asp-action="Logout">
                                     <button type="submit" class="btn btn-link nav-link text-dark border-0">Log out</button>
                                 </form>
-                            </li>
+                                </li>
+                             }
                         }
                         else
                         {
