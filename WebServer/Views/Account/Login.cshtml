@@ -20,6 +20,15 @@
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             <button type="submit" class="btn btn-primary">Log in</button>
+
+            @if (ViewData.ContainsKey("ErrorMessage"))
+            {
+                <div class="form-group">
+                    <span class="text-danger">
+                        @ViewData["ErrorMessage"]
+                    </span>
+                </div>
+            }
         </form>
     </div>
 </div>
