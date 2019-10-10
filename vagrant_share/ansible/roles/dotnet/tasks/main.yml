@@ -1,3 +1,0 @@
----
-- include_tasks: ms_repo.yml
-- include_tasks: dotnet-runtime.yml

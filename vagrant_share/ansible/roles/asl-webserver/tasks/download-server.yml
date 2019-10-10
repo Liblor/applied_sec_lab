@@ -1,0 +1,25 @@
+---
+- name: Creates directory
+  file:
+    path: /app
+    state: directory
+    owner: abc
+    group: abc
+    mode: 0770
+
+- name: Download the latest release of WebServer
+  get_url:
+    url: https://github.com/Liblor/applied_security_lab_deploy/releases/latest/download/WebServer.tar.gz
+    dest: /app/app.tar.gz
+    mode: '0640'
+
+- name: Unpack the downloaded archive
+  unarchive:
+    src: /app/app.tar.gz
+    dest: /app
+    remote_src: yes
+
+- name: Remove the archive
+  file:
+    state: absent
+    path: /app/app.tar.gz
