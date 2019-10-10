@@ -1,6 +1,0 @@
----
-- name: Update repositories cache and install "apt-transport-https" and "dotnet-sdk-3.0" package
-  become: yes
-  apt:
-    name: ["apt-transport-https", "dotnet-sdk-3.0"]
-    update_cache: yes
