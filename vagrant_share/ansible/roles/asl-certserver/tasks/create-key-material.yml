@@ -1,0 +1,51 @@
+# ECC:
+# openssl ecparam -genkey -name prime256v1 -out core_ca_key.pem
+# openssl req -new -sha256 -x509 -days 365 -config openssl.cnf -key core_ca_key.pem -out core_ca_cert.pem
+#
+# Combine certificate and privat key in one file
+# openssl pkcs12 -export -out core_ca_pub_priv_keys.pfx -inkey core_ca_key.pem -in core_ca_cert.pem -passout pass:TEST
+---
+- name: Create directory for key material
+  file:
+    path: /home/coreca/keys
+    state: directory
+    owner: coreca
+    group: coreca
+    mode: 0700
+
+- name: Generate RSA keys for core CA
+  openssl_privatekey:
+    path: /home/coreca/keys/core_ca_key.pem
+    type: RSA
+    size: 4096
+
+- name: Create CSR
+  openssl_csr:
+    path: /home/coreca/keys/core_ca_request.csr
+    privatekey_path: /home/coreca/keys/core_ca_key.pem
+
+    country_name: CH
+    state_or_province_name: Zurich
+    locality_name: Zurich
+    organization_name: iMovies
+    common_name: "{{ansible_hostname}}"
+    subject_alt_name: "DNS:{{ansible_hostname}}"
+
+    basic_constraints: "CA:true"
+    key_usage:
+      - keyCertSign
+      - cRLSign
+      - digitalSignature
+    force: true
+
+- name: Create Certificate
+  openssl_certificate:
+    path: /home/coreca/keys/core_ca_cert.pem
+    privatekey_path: /home/coreca/keys/core_ca_key.pem
+    csr_path: /home/coreca/keys/core_ca_request.csr
+    provider: selfsigned
+
+- name: Remove CSR
+  file:
+    path: /home/coreca/keys/core_ca_request.csr
+    state: absent
