@@ -1,0 +1,5 @@
+---
+- name: Add a user to run the CA
+  user:
+    name: coreca
+    shell: /bin/bash

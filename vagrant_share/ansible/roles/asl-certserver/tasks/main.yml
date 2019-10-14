@@ -1,1 +1,4 @@
 ---
+- import_tasks: create-user.yml
+- import_tasks: install-python-dependencies.yml
+- import_tasks: create-key-material.yml
