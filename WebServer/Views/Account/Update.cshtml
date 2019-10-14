@@ -1,0 +1,46 @@
+﻿@using System.Security.Claims;
+
+@model WebServer.Models.User
+
+@{
+    ViewData["Title"] = "Update Account Information";
+}
+
+<h1 class="text-center">@ViewData["Title"]</h1>
+
+<div class="viewport d-flex flex-column mx-auto">
+    <form method="post" asp-controller="Account" asp-action="Update">
+		<table class="table table-striped">
+			<tbody>
+				<tr>
+					<th scope="row"><label asp-for="FirstName"></label></th>
+					<td>
+						<input asp-for="FirstName" value="@Context.User.FindFirst(ClaimTypes.GivenName).Value" />
+                		<span asp-validation-for="FirstName" class="text-danger"></span>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label asp-for="LastName"></label></th>
+					<td>
+						<input asp-for="LastName" value="@Context.User.FindFirst(ClaimTypes.Surname).Value" />
+                		<span asp-validation-for="LastName" class="text-danger"></span>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label asp-for="Email"></label></th>
+					<td>
+						<input asp-for="Email" value="@Context.User.FindFirst(ClaimTypes.Email).Value" />
+                		<span asp-validation-for="Email" class="text-danger"></span>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<div class="d-flex justify-content-center">
+			<div class="btn-group-vertical">
+				<button class="btn btn-primary" type="submit">Apply changes</button>
+				<a class="btn btn-secondary" asp-controller="Account" asp-action="Index">Cancel</a>
+			</div>
+		</div>
+	</form>
+</div>
