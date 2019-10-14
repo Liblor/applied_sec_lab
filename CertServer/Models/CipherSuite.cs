@@ -3,6 +3,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CertServer.Models
 {
+    public static class CipherSuiteHelper 
+    {
+        public static bool IsVaildCipherSuite(CipherSuite cipherSuite)
+		{
+			return Array.Exists(CAConfig.CipherSuites, elem => elem.Equals(cipherSuite));
+		}
+    }
+
     public class CipherSuite
     {
         [Required]

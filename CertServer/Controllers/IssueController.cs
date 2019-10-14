@@ -4,46 +4,25 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Mvc;
 using CertServer.Models;
+using CertServer.Authentication;
 
 // XXX: For testing, generate a self signed root certificate with:
+
+// ECC:
 // openssl ecparam -genkey -name prime256v1 -out core_ca_key.pem
-// openssl req -new -sha256 -x509 -config openssl.cnf -key core_ca_key.pem -out core_ca_cert.pem
+// openssl req -new -sha256 -x509 -days 365 -config openssl.cnf -key core_ca_key.pem -out core_ca_cert.pem
 
 // Combine certificate and privat key in one file
 // openssl pkcs12 -export -out core_ca_pub_priv_keys.pfx -inkey core_ca_key.pem -in core_ca_cert.pem -passout pass:TEST
 
-// Convert key to pkcs8 format, which is one of the few that C# should actually be able to import.
-// openssl pkcs8 -topk8 -nocrypt -in core_ca_key.pem -out core_ca_key_pkcs8.pem
-
+// RSA:
+// openssl genrsa -out core_ca_key.pem 4096
 namespace CertServer.Controllers
 {
 	[ApiController, Route("api")]
 
     public class IssueController : ControllerBase
     {
-		private User GetUser(string user, string password)
-		{
-			// XXX: Implement user authentication against DB
-			if (true) 
-			{
-				return new User {
-					Uid = "testuser",
-					FirstName = "Test",
-					LastName = "User",
-					Email = ""
-				};
-			}
-			else
-			{
-				return null;
-			}
-		}
-
-		private bool IsVaildCipherSuite(CipherSuite cipherSuite)
-		{
-			return Array.Exists(CAConfig.CipherSuites, elem => elem.Equals(cipherSuite));
-		}
-
 		// XXX: Must be implemented. Using local DB? Or fetch largest serial number 
 		// from pub key DB? (trusting it but not having to worry about backups)
 		private byte[] GetNextSerialNumber()
@@ -70,7 +49,10 @@ namespace CertServer.Controllers
 		///
 		/// </remarks>
 		/// <param name="certRequest"></param>
-		/// <returns>Private key as well as the certificate for the public key</returns>
+		/// <returns>
+		///		Private key as well as the certificate for the public key, 
+		///		both encoded in base 64
+		/// </returns>
 		/// <response code="200">Certificate generation was successful</response>
 		/// <response code="400">Invalid cipher suite.</response>
 		/// <response code="401">Unauthorized request</response>
@@ -83,9 +65,9 @@ namespace CertServer.Controllers
 		{
 			CipherSuite cipherSuite = certRequest.RequestedCipherSuite;
 
-			if (IsVaildCipherSuite(cipherSuite))
+			if (CipherSuiteHelper.IsVaildCipherSuite(cipherSuite))
 			{
-				User user = GetUser(certRequest.Uid, certRequest.Password);
+				User user = UserDBAuthenticator.GetUser(certRequest.Uid, certRequest.Password);
 
 				if (user != null)
 				{
@@ -95,34 +77,30 @@ namespace CertServer.Controllers
 					// XXX: [added later] This version requires a password, the empty password does not work for reasons
 					X509Certificate2 coreCACert = new X509Certificate2(CAConfig.CoreCACertPath, CAConfig.CoreCACertPW);
 
-					// XXX: The following code should import a private key from pkcs8 format.
-					// It looks ugly, but this is because c# doesn't support this well.
-					// However, the last assignement is not available on macOS. Thus I search for
-					// an alternative.
-					
-					// var ecdsaAlg = ECDsa.Create();
-					//
-					// // Read private key in pkcs8 format, strip prefix and suffix and remove newlines
-					// var coreCAPrivKeyP8 = String.Join("", 
-					// 	System.IO.File.ReadLines(CAConfig.CoreCAPrivKeyPath).Where(
-					// 		l => !l.Contains("---")
-					// 	)
-					// ).Replace("\n", String.Empty);
-					//
-					// byte[] coreCAPrivKeyBytes = System.Convert.FromBase64String(coreCAPrivKeyP8);
-					// ecdsaAlg.ImportPkcs8PrivateKey(coreCAPrivKeyBytes, out int _);
-					// coreCACert.PrivateKey = ecdsaAlg;
-
 					HashAlgorithmName hashAlg = new HashAlgorithmName(cipherSuite.HashAlg);
+					byte[] privKeyExport = null;
 					CertificateRequest req = null; 
 					if (cipherSuite.Alg == "RSA")
 					{
+						RSA privKey = RSA.Create(cipherSuite.KeySize);
+						privKeyExport = privKey.ExportRSAPrivateKey();
 						// XXX: @Loris, use DB userid as CN name (because that is unique), is that ok?
 						req = new CertificateRequest(
 							"CN=" + user.Uid,
-							RSA.Create(cipherSuite.KeySize),
+							privKey,
 							hashAlg,
 							RSASignaturePadding.Pss
+						);
+					}
+					else if (cipherSuite.Alg == "ECDSA")
+					{
+						// ECDsaCng not supported on mac, try on debian.
+						ECDsa privKey = new ECDsaCng(cipherSuite.KeySize);
+						privKeyExport = privKey.ExportECPrivateKey();
+						req = new CertificateRequest(
+							"CN=" + user.Uid,
+							privKey,
+							hashAlg
 						);
 					}
 
@@ -143,32 +121,47 @@ namespace CertServer.Controllers
 						)
 					);
 
-					// XXX: @Loris, how long should the certificate be valid? (3rd parameter, 
-					// currently randomly chosen 90 days)
+					// ----------------------------------------------------------------------------------
+					// Version for ECC:
+
 					// XXX: This throws a "The certificate key algorithm is not supported." error
-					// maybe we have to try with a different algorithm for our core CA.
-					X509Certificate2 userCert = req.Create(
-						coreCACert.IssuerName,
-						X509SignatureGenerator.CreateForECDsa( (ECDsa) coreCACert.PrivateKey),
-						DateTimeOffset.UtcNow.AddDays(-1),
-            			DateTimeOffset.UtcNow.AddDays(90),
-						GetNextSerialNumber()
-					);
-
-					// XXX: The version below complains that the algorithms in the CA cert and the 
-					// CSR are different.
-
+					// try on debian to see if ecdsa keys are supported there.
+					//
 					// X509Certificate2 userCert = req.Create(
-					// 	coreCACert,
+					// 	coreCACert.IssuerName,
 					// 	DateTimeOffset.UtcNow.AddDays(-1),
             		// 	DateTimeOffset.UtcNow.AddDays(90),
 					// 	GetNextSerialNumber()
 					// );
+					// ----------------------------------------------------------------------------------
 
-					Console.WriteLine(
-						userCert.Export(X509ContentType.Pfx, "")
+					// It is necessary to use this constructor to be able to sign keys
+					// that use different algorithms than the one for the core CA's key
+					X509Certificate2 userCert = req.Create(
+						coreCACert.IssuerName,
+						X509SignatureGenerator.CreateForRSA( 
+							(RSA) coreCACert.PrivateKey,
+							RSASignaturePadding.Pkcs1
+						),
+						DateTimeOffset.UtcNow,
+            			DateTimeOffset.UtcNow.AddDays(CAConfig.UserCertValidityPeriod),
+						GetNextSerialNumber()
 					);
-					return Ok(CAConfig.CipherSuites);
+
+					// XXX: Send private key to backup server
+
+					// XXX: Register public key in DB
+
+					// XXX: X509ContentType.Pkcs12 fails on mac (in apple crypto libraries...), 
+					// try on debian
+					return Ok(
+						new UserCertificate {
+							PrivateKey = Convert.ToBase64String(privKeyExport),
+							Certificate = Convert.ToBase64String(
+								userCert.Export(X509ContentType.Cert)
+							),
+						}
+					);
 				}
 				else {
 					return Unauthorized();

@@ -11,7 +11,10 @@ namespace CertServer
 		public static readonly string CoreCACertPath = "./KeyStore/core_ca_pub_priv_keys.pfx";
         // XXX: Change password
         public static readonly string CoreCACertPW = "TEST";
-		public static readonly string CoreCAPrivKeyPath = "./KeyStore/core_ca_key_pkcs8.pem";
+
+        // XXX: @Loris, how long should the certificate be valid? (3rd parameter, 
+        // currently randomly chosen 90 days)
+        public static readonly int UserCertValidityPeriod = 90;
 
         public static readonly CipherSuite[] CipherSuites = 
         {
@@ -19,7 +22,22 @@ namespace CertServer
                 Alg = "RSA", 
                 HashAlg = "SHA512", 
                 KeySize = 4096
-            }
+            },
+            new CipherSuite {
+                Alg = "RSA", 
+                HashAlg = "SHA512", 
+                KeySize = 2048
+            },
+            new CipherSuite {
+                Alg = "ECDSA", 
+                HashAlg = "SHA512",
+                KeySize = 384
+            },
+            new CipherSuite {
+                Alg = "ECDSA", 
+                HashAlg = "SHA512",
+                KeySize = 521
+            },
         };
     }
 }
