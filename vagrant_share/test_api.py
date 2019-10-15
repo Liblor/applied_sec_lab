@@ -3,8 +3,11 @@
 import requests
 import json
 
-host = "aslcert01:5001"
+host = "aslcert01:80"
 # host = "localhost:5001"
+
+protocol = "http"
+# protocol = "https"
 
 payload_rsa = {
     "uid": "ab",
@@ -33,10 +36,10 @@ headers =  {
     "Content-Type": "application/json"
 }
 
-url_swagger = f"https://{host}/api/swagger/v1/swagger.json"
-url_ciphersuite = f"https://{host}/api/ciphersuites"
-url_issue = f"https://{host}/api/issue"
-url_revoke = f"https://{host}/api/revoke"
+url_swagger = f"{protocol}://{host}/api/swagger/v1/swagger.json"
+url_ciphersuite = f"{protocol}://{host}/api/ciphersuites"
+url_issue = f"{protocol}://{host}/api/issue"
+url_revoke = f"{protocol}://{host}/api/revoke"
 
 payload = json.dumps(payload)
 # response_swagger = requests.get(url_swagger, verify=False)
@@ -65,7 +68,7 @@ payload = {
 }
 
 # payload = json.dumps(payload)
-# response_revoke = requests.post("https://localhost:5001/api/revoke", headers=headers, data=payload, verify=False)
+# response_revoke = requests.post(url_revoke, headers=headers, data=payload, verify=False)
 # print(response_revoke)
 # print(response_revoke.headers)
 # print(response_revoke.text)
