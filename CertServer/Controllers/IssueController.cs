@@ -6,17 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using CertServer.Models;
 using CertServer.Authentication;
 
-// XXX: For testing, generate a self signed root certificate with:
-
-// ECC:
-// openssl ecparam -genkey -name prime256v1 -out core_ca_key.pem
-// openssl req -new -sha256 -x509 -days 365 -config openssl.cnf -key core_ca_key.pem -out core_ca_cert.pem
-
-// Combine certificate and privat key in one file
-// openssl pkcs12 -export -out core_ca_pub_priv_keys.pfx -inkey core_ca_key.pem -in core_ca_cert.pem -passout pass:TEST
-
-// RSA:
-// openssl genrsa -out core_ca_key.pem 4096
 namespace CertServer.Controllers
 {
 	[ApiController, Route("api")]
@@ -74,7 +63,6 @@ namespace CertServer.Controllers
 					// Load the certificate
 					// XXX: @Loris, do you see an advantage in storing the certificate password protected,
 					// and hard coding the password here?
-					// XXX: [added later] This version requires a password, the empty password does not work for reasons
 					X509Certificate2 coreCACert = new X509Certificate2(CAConfig.CoreCACertPath);
 
 					HashAlgorithmName hashAlg = new HashAlgorithmName(cipherSuite.HashAlg);
