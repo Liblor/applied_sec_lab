@@ -10,8 +10,6 @@ namespace CertServer
 
 		public static readonly string CoreCACertPath = "/home/coreca/keys/core_ca_cert_and_priv_key.pfx";
 
-        // XXX: @Loris, how long should the certificate be valid? (3rd parameter, 
-        // currently randomly chosen 90 days)
         public static readonly int UserCertValidityPeriod = 150;
 
         public static readonly CipherSuite[] CipherSuites = 

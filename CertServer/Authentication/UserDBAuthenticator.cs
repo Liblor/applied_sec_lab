@@ -6,7 +6,7 @@ namespace CertServer.Authentication
     {
 		public static User GetUser(string uid, string password)
 		{
-			// XXX: Implement user authentication against DB
+			// XXX: Implement user authentication against DB, use functionality from webserver to prevent code duplication?
 			if (true) 
 			{
 				return new User {
