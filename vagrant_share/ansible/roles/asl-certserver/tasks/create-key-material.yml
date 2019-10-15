@@ -1,9 +1,3 @@
-# ECC:
-# openssl ecparam -genkey -name prime256v1 -out core_ca_key.pem
-# openssl req -new -sha256 -x509 -days 365 -config openssl.cnf -key core_ca_key.pem -out core_ca_cert.pem
-#
-# Combine certificate and privat key in one file
-# openssl pkcs12 -export -out core_ca_pub_priv_keys.pfx -inkey core_ca_key.pem -in core_ca_cert.pem -passout pass:TEST
 ---
 - name: Create directory for key material
   file:
@@ -18,11 +12,15 @@
     path: /home/coreca/keys/core_ca_key.pem
     type: RSA
     size: 4096
+    owner: coreca
+    group: coreca
 
 - name: Create CSR
   openssl_csr:
     path: /home/coreca/keys/core_ca_request.csr
     privatekey_path: /home/coreca/keys/core_ca_key.pem
+    owner: coreca
+    group: coreca
 
     country_name: CH
     state_or_province_name: Zurich
@@ -44,8 +42,23 @@
     privatekey_path: /home/coreca/keys/core_ca_key.pem
     csr_path: /home/coreca/keys/core_ca_request.csr
     provider: selfsigned
+    owner: coreca
+    group: coreca
 
 - name: Remove CSR
   file:
     path: /home/coreca/keys/core_ca_request.csr
     state: absent
+
+- name: Combine certificate and private key
+  openssl_pkcs12:
+    action: export
+    path: /home/coreca/keys/core_ca_cert_and_priv_key.pfx
+    privatekey_path: /home/coreca/keys/core_ca_key.pem
+    certificate_path: /home/coreca/keys/core_ca_cert.pem
+    friendly_name: "{{ansible_hostname}}"
+    state: present
+
+    owner: coreca
+    group: coreca
+    mode: 0600

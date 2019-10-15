@@ -75,7 +75,7 @@ namespace CertServer.Controllers
 					// XXX: @Loris, do you see an advantage in storing the certificate password protected,
 					// and hard coding the password here?
 					// XXX: [added later] This version requires a password, the empty password does not work for reasons
-					X509Certificate2 coreCACert = new X509Certificate2(CAConfig.CoreCACertPath, CAConfig.CoreCACertPW);
+					X509Certificate2 coreCACert = new X509Certificate2(CAConfig.CoreCACertPath);
 
 					HashAlgorithmName hashAlg = new HashAlgorithmName(cipherSuite.HashAlg);
 					byte[] privKeyExport = null;
@@ -94,8 +94,7 @@ namespace CertServer.Controllers
 					}
 					else if (cipherSuite.Alg == "ECDSA")
 					{
-						// ECDsaCng not supported on mac, try on debian.
-						ECDsa privKey = new ECDsaCng(cipherSuite.KeySize);
+						ECDsa privKey = ECDsa.Create();
 						privKeyExport = privKey.ExportECPrivateKey();
 						req = new CertificateRequest(
 							"CN=" + user.Uid,
@@ -121,20 +120,6 @@ namespace CertServer.Controllers
 						)
 					);
 
-					// ----------------------------------------------------------------------------------
-					// Version for ECC:
-
-					// XXX: This throws a "The certificate key algorithm is not supported." error
-					// try on debian to see if ecdsa keys are supported there.
-					//
-					// X509Certificate2 userCert = req.Create(
-					// 	coreCACert.IssuerName,
-					// 	DateTimeOffset.UtcNow.AddDays(-1),
-            		// 	DateTimeOffset.UtcNow.AddDays(90),
-					// 	GetNextSerialNumber()
-					// );
-					// ----------------------------------------------------------------------------------
-
 					// It is necessary to use this constructor to be able to sign keys
 					// that use different algorithms than the one for the core CA's key
 					X509Certificate2 userCert = req.Create(
@@ -152,13 +137,11 @@ namespace CertServer.Controllers
 
 					// XXX: Register public key in DB
 
-					// XXX: X509ContentType.Pkcs12 fails on mac (in apple crypto libraries...), 
-					// try on debian
 					return Ok(
 						new UserCertificate {
 							PrivateKey = Convert.ToBase64String(privKeyExport),
 							Certificate = Convert.ToBase64String(
-								userCert.Export(X509ContentType.Cert)
+								userCert.Export(X509ContentType.Pkcs12)
 							),
 						}
 					);
