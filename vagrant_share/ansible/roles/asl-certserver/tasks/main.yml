@@ -2,3 +2,5 @@
 - import_tasks: create-user.yml
 - import_tasks: install-python-dependencies.yml
 - import_tasks: create-key-material.yml
+- import_tasks: download-server.yml
+- import_tasks: create-service.yml

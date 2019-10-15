@@ -48,7 +48,8 @@ namespace CertServer
 				app.UseDeveloperExceptionPage();
 			}
 
-			app.UseHttpsRedirection();
+			// XXX: Only run https server
+			// app.UseHttpsRedirection();
 
 			// Enable middleware to serve generated Swagger as a JSON endpoint.
 			app.UseSwagger(c =>
