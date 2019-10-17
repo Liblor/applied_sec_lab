@@ -34,7 +34,7 @@ def generate_table(asset_name, filename, no_start=1):
     out = """\\subsubsection{{\\it Evaluation Asset %s }}
 \\label{subsubsec:eval:%s}
 \\begin{footnotesize}
-\\begin{prettytablex}{llp{5.5cm}lll}
+\\begin{prettytablex}{lp{3cm}p{4.5cm}lll}
 No. & Threat & Countermeasure(s) & L & I & Risk \\\\
 \\hline
 """ % (asset_name, asset_name)
