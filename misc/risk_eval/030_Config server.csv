@@ -1,10 +1,10 @@
-Threat	Countermeasure	Likelihood	Impact
-"Nature: Server rendered useless, e.g.\ by hardware failure or natural disaster"	"Fast automatic reconfiguration of new ansible server with Vagrant, Ansible playbooks with server configurations stored in remote git repository"	Low	Low
-Employees: Disgruntled or manipulated administrator abuses privileges. Uses SSH keys to compromise other machines; intentionally misconfigures servers	Background checks for high-privilege system administrators	Low	High
-"Independent contractors: Physical access of datacenter maintainers, obtaining SSH keys or server config files from memory dump; theft of hard disks"	"SSH key material protected by passphrases. 
+Threat	Countermeasure	Likelihood	Impact	Additional Countermeasures
+"Nature: Server rendered useless, e.g.\ by hardware failure or natural disaster"	"Fast automatic reconfiguration of new ansible server with Vagrant, Ansible playbooks with server configurations stored in remote git repository"	Low	Low	
+Employees: Disgruntled or manipulated administrator abuses privileges. Uses SSH keys to compromise other machines; intentionally misconfigures servers	Background checks for high-privilege system administrators	Low	High	
+"Independent contractors: Physical access of datacenter maintainers, obtaining SSH keys or server config files from memory dump; theft of hard disks"	"SSH key material protected by passphrases.
 
-Countermeasures listed above for hardware failure are effective against disk theft as well."	Low	Medium
-"Organized Crime: Ransomware for financial gains through blackmailing, spreading from the config server to infrastructure"	"Specially hardened server, only SSH port publicly available, system administrators are reminded by apticron to keep software up to date; passphrases protect SSH keys, preventing direct access to other servers.
+Countermeasures listed above for hardware failure are effective against disk theft as well."	Low	Medium	
+"Organized Crime: Ransomware for financial gains through blackmailing, spreading from the config server to infrastructure"	"Specially hardened server, firewall, only SSH port publicly available, system administrators are reminded by apticron to keep software up to date; passphrases protect SSH keys, preventing direct access to other servers.
 
-Countermeasures listed above for hardware failure are effective against loss of disks access through encryption as well."	Low	Low
-"Skilled Hackers: Gains access to config server, installs keylogger to obtain passphrases of system administrators, compromises whole infrastructure"	" Specially hardened server, only SSH port publicly available, system administrators are reminded by apticron to keep software up to date, automatic scan for rootkits using rkhunter."	Medium	High
+Countermeasures listed above for hardware failure are effective against loss of disks access through encryption as well."	Low	Low	
+"Skilled Hackers: Gains access to config server, installs keylogger to obtain passphrases of system administrators, compromises whole infrastructure"	" Specially hardened server, firewall, only SSH port publicly available, system administrators are reminded by apticron to keep software up to date, automatic scan for rootkits using rkhunter."	Medium	High	Setting up a sophisticated intrusion detection system would decrease the chance of undetected compromise.
