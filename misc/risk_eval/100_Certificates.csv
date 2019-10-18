@@ -1,1 +1,4 @@
 Threat	Countermeasure	Likelihood	Impact
+Employees: the owner of the certificate loses access to the corresponding private key	A replacement certificate is issued, restoring a secure communications channel	Medium	Low
+Ex-employees: certificate holders following their departure from iMovies misuse their certificates prior to revocation	Certificates are revoked in a timely manner upon a holder's departure from the company	Low	Medium
+Skilled hacker or government agency: a motivated individual obtains an employee's login credentials and obtains a new certificate to impersonate them	An employee may not have multiple active certificates; this would trigger a revocation, alerting the user of a potential account compromise	Low	High
