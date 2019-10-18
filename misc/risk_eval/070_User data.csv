@@ -1,5 +1,5 @@
 Threat	Countermeasure	Likelihood	Impact
 Script Kiddy: A script kiddy hacks a database server, backup server or the config server	None of the mentioned servers is directly accessible from the internet, we keep our software updated	Low	High
-Organized Crime, Skilled Hacker: A skilled hacker penetrates a database server, backup server or the config server	None of the mentioned servers is directly accessible from the internet	High	High
-Gov. Agency: A team of skilled hackers penetrates a database server, backup server or the config server	None of the mentioned servers is directly accessible from the internet	High	High
+Organized Crime, Skilled Hacker: A skilled hacker penetrates a database server, backup server or the config server	The database and backup servers are not directly accessible from the internet. The config server is carefully hardened and exposes only SSH. Additionally it is behind two firewalls	High	High
+Gov. Agency: A team of skilled hackers penetrates a database server, backup server or the config server	The database and backup servers are not directly accessible from the internet. The config server is carefully hardened and exposes only SSH. Additionally it is behind two firewalls	High	High
 Gov. Agency: A gov. agency gains physical access to a database server, backup server or the config server	Strict access control to servers, and background check of people with access	Medium	High
