@@ -55,7 +55,7 @@ No. & Threat & Countermeasure(s) & L & I & Risk \\\\
                 else:
                     risk_acceptance += f"{no} & {row[ADDITIONAL_CNTR_MSRS_TITLE]}"
 
-            out += f"{no} & {row['Threat']} & {row['Countermeasure']}\\\\\n\\hline"
+            out += f"{no} & {row['Threat']} & {row['Countermeasure']} "
             out += f"& {{\\it {row['Likelihood']}}} & {{\it {row['Impact']}}} & {{\it {risk}}} \\\\\n\\hline"
             no += 1
 
