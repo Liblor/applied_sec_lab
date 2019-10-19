@@ -1,0 +1,4 @@
+---
+- name: Add System.Security.Cryptography.Pkcs for core CA
+  command: dotnet add package System.Security.Cryptography.Pkcs
+  become_user: coreca

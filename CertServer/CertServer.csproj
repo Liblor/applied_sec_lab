@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0-rc4" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="4.6.0" />
   </ItemGroup>
 
 </Project>
