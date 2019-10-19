@@ -6,8 +6,8 @@ using CertServer.Models;
 namespace CertServer.Controllers
 {
 	[ApiController, Route("api")]
-    public class RevokeController : ControllerBase
-    {		
+	public class RevokeController : ControllerBase
+	{		
 		/// <summary>
 		/// Revoke a certificate.
 		/// </summary>
@@ -36,11 +36,11 @@ namespace CertServer.Controllers
 			if (user != null)
 			{
 				// XXX: Implement revocation
-            	return Ok();
+				return Ok();
 			}
 			else {
 				return Unauthorized();
 			}
 		}
-    }
+	}
 }
