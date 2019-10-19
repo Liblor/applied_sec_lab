@@ -49,11 +49,11 @@ No. & Threat & Countermeasure(s) & L & I & Risk \\\\
             risk = get_risklevel(row["Likelihood"], row["Impact"])
 
             if risk != "Low":
-                if ADDITIONAL_CNTR_MSRS_TITLE not in row:
+                if ADDITIONAL_CNTR_MSRS_TITLE not in row or row[ADDITIONAL_CNTR_MSRS_TITLE] is None:
                     print(row['Threat'])
                     warnings.warn(f"Missing additional countermeasures for threat {no} of risk {risk}!")
                 else:
-                    risk_acceptance += f"{no} & {row[ADDITIONAL_CNTR_MSRS_TITLE]}"
+                    risk_acceptance += f"{no} & {row[ADDITIONAL_CNTR_MSRS_TITLE]}\\\\\n\\hline "
 
             out += f"{no} & {row['Threat']} & {row['Countermeasure']} "
             out += f"& {{\\it {row['Likelihood']}}} & {{\it {row['Impact']}}} & {{\it {risk}}} \\\\\n\\hline"
@@ -75,9 +75,10 @@ def generate_all_tables(filenames):
     risk_acceptance = """\\begin{footnotesize}
 \\begin{prettytablex}{p{2cm}X}
 No. of threat & Proposed additional countermeasure including expected impact  \\\\
-\\hline"""
+\\hline """
 
     for fn in filenames:
+        print(f"Parsing file \"{fn}\"")
         asset_name = filename_to_assetname(fn)
         txt, risk_acceptance, no = generate_table(asset_name, fn, no, risk_acceptance)
         out += txt
