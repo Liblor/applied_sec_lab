@@ -103,7 +103,7 @@ namespace CertServer.Controllers
 					// XXX: @Loris, agree with flags?
 					req.CertificateExtensions.Add(
 						new X509KeyUsageExtension(
-							X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.NonRepudiation,
+							X509KeyUsageFlags.KeyEncipherment | X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.NonRepudiation,
 							false
 						)
 					);
