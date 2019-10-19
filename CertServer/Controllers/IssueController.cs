@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +30,7 @@ namespace CertServer.Controllers
 		///     {
 		///        	"uid": "ab",
 		///			"password": "plain",
+		///			"certPassphrase": "enterSomeUniquePassphraseHere",
 		///			"requestedCipherSuite": {
 		///				"Alg": "RSA",
 		///				"HashAlg": "SHA512",
@@ -72,7 +74,6 @@ namespace CertServer.Controllers
 					{
 						RSA privKey = RSA.Create(cipherSuite.KeySize);
 						privKeyExport = privKey.ExportRSAPrivateKey();
-						// XXX: @Loris, use DB userid as CN name (because that is unique), is that ok?
 						req = new CertificateRequest(
 							"CN=" + user.Uid,
 							privKey,
@@ -91,8 +92,13 @@ namespace CertServer.Controllers
 						);
 					}
 
+					// Add email as SAN
+					SubjectAlternativeNameBuilder sanBuilder = new SubjectAlternativeNameBuilder();
+					sanBuilder.AddEmailAddress(user.Email);
+					req.CertificateExtensions.Add(sanBuilder.Build());
+
+					// Arguments: Is no CA, no restricted nr of path levels, (nr of path levels), is not critical
 					req.CertificateExtensions.Add(
-						// Arguments: Is no CA, no restricted nr of path levels, (nr of path levels), is not critical
 						new X509BasicConstraintsExtension(false, false, 0, false)
 					);
 					
@@ -100,10 +106,33 @@ namespace CertServer.Controllers
 						new X509SubjectKeyIdentifierExtension(req.PublicKey, false)
 					);
 
-					// XXX: @Loris, agree with flags?
 					req.CertificateExtensions.Add(
 						new X509KeyUsageExtension(
-							X509KeyUsageFlags.KeyEncipherment | X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.NonRepudiation,
+							X509KeyUsageFlags.KeyEncipherment
+							| X509KeyUsageFlags.DigitalSignature
+							| X509KeyUsageFlags.NonRepudiation,
+							false
+						)
+					);
+
+					OidCollection oidCollection = new OidCollection();
+					// Set Client Authentication Oid
+					oidCollection.Add(new Oid("1.3.6.1.5.5.7.3.2"));
+					// Set Secure Email / Email protection Oid
+					oidCollection.Add(new Oid("1.3.6.1.5.5.7.3.4"));
+
+					req.CertificateExtensions.Add(
+						new X509EnhancedKeyUsageExtension(
+							oidCollection,
+							false
+						)
+					);
+
+					// Add CRL Distribution Point (CDP)
+					req.CertificateExtensions.Add(
+						new X509Extension(
+							new Oid("2.5.29.31"),
+							Encoding.ASCII.GetBytes(CAConfig.CrlDistributionPoint),
 							false
 						)
 					);

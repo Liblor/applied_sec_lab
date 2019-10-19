@@ -13,7 +13,7 @@ namespace CertServer.Authentication
 					Uid = "testuser",
 					FirstName = "Test",
 					LastName = "User",
-					Email = ""
+					Email = "test.user@imovies.local",
 				};
 			}
 			else
