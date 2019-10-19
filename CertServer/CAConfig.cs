@@ -8,6 +8,8 @@ namespace CertServer
 		public static readonly string APIName = "Core CA API";
 		public static readonly string APIVersion = "v1";
 
+		public static readonly string CrlDistributionPoint = CAConfig.APIBasePath + "/cdp";
+
 		public static readonly string CoreCACertPath = "/home/coreca/keys/core_ca_cert_and_priv_key.pfx";
 
 		public static readonly int UserCertValidityPeriod = 150;

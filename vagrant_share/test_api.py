@@ -12,6 +12,7 @@ protocol = "http"
 payload_rsa = {
     "uid": "ab",
     "password": "plain",
+    "certPassphrase": "someSecretPhrase",
     "requestedCipherSuite": {
         "Alg": "RSA",
         "HashAlg": "SHA512",
@@ -22,6 +23,7 @@ payload_rsa = {
 payload_ecdsa = {
     "uid": "ab",
     "password": "plain",
+    "certPassphrase": "someSecretPhrase",
     "requestedCipherSuite": {
         "Alg": "ECDSA",
         "HashAlg": "SHA512",
