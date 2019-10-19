@@ -10,8 +10,8 @@ namespace CertServer.Controllers
 {
 	[ApiController, Route("api")]
 
-    public class IssueController : ControllerBase
-    {
+	public class IssueController : ControllerBase
+	{
 		// XXX: Must be implemented. Using local DB? Or fetch largest serial number 
 		// from pub key DB? (trusting it but not having to worry about backups)
 		private byte[] GetNextSerialNumber()
@@ -93,11 +93,11 @@ namespace CertServer.Controllers
 
 					req.CertificateExtensions.Add(
 						// Arguments: Is no CA, no restricted nr of path levels, (nr of path levels), is not critical
-            			new X509BasicConstraintsExtension(false, false, 0, false)
+						new X509BasicConstraintsExtension(false, false, 0, false)
 					);
 					
 					req.CertificateExtensions.Add(
-            			new X509SubjectKeyIdentifierExtension(req.PublicKey, false)
+						new X509SubjectKeyIdentifierExtension(req.PublicKey, false)
 					);
 
 					// XXX: @Loris, agree with flags?
@@ -117,7 +117,7 @@ namespace CertServer.Controllers
 							RSASignaturePadding.Pkcs1
 						),
 						DateTimeOffset.UtcNow,
-            			DateTimeOffset.UtcNow.AddDays(CAConfig.UserCertValidityPeriod),
+						DateTimeOffset.UtcNow.AddDays(CAConfig.UserCertValidityPeriod),
 						GetNextSerialNumber()
 					);
 
@@ -143,5 +143,5 @@ namespace CertServer.Controllers
 				return BadRequest("Invalid cipher suite.");
 			}
 		}
-    }
+	}
 }
