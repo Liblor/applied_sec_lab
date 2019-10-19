@@ -1,8 +1,9 @@
 using System;
 using System.Linq;
 using System.Text;
-using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
+using System.Security.Cryptography.Pkcs;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Mvc;
 using CertServer.Models;
 using CertServer.Authentication;
@@ -41,8 +42,8 @@ namespace CertServer.Controllers
 		/// </remarks>
 		/// <param name="certRequest"></param>
 		/// <returns>
-		///		Private key as well as the certificate for the public key, 
-		///		both encoded in base 64
+		///		Returns a pkcs 12 archive which includes the issued certificate as well as
+		///		the users private key.
 		/// </returns>
 		/// <response code="200">Certificate generation was successful</response>
 		/// <response code="400">Invalid cipher suite.</response>
@@ -63,31 +64,37 @@ namespace CertServer.Controllers
 				if (user != null)
 				{
 					// Load the certificate
-					// XXX: @Loris, do you see an advantage in storing the certificate password protected,
-					// and hard coding the password here?
 					X509Certificate2 coreCACert = new X509Certificate2(CAConfig.CoreCACertPath);
 
 					HashAlgorithmName hashAlg = new HashAlgorithmName(cipherSuite.HashAlg);
-					byte[] privKeyExport = null;
+					AsymmetricAlgorithm privKey = null;
+
 					CertificateRequest req = null; 
+
+					PbeParameters pbeParameters = new PbeParameters(
+						PbeEncryptionAlgorithm.Aes256Cbc,
+						HashAlgorithmName.SHA512,
+						10000
+					);
+
 					if (cipherSuite.Alg == "RSA")
 					{
-						RSA privKey = RSA.Create(cipherSuite.KeySize);
-						privKeyExport = privKey.ExportRSAPrivateKey();
+						privKey = RSA.Create(cipherSuite.KeySize);
+
 						req = new CertificateRequest(
 							"CN=" + user.Uid,
-							privKey,
+							(RSA) privKey,
 							hashAlg,
 							RSASignaturePadding.Pss
 						);
 					}
 					else if (cipherSuite.Alg == "ECDSA")
 					{
-						ECDsa privKey = ECDsa.Create();
-						privKeyExport = privKey.ExportECPrivateKey();
+						privKey = ECDsa.Create();
+
 						req = new CertificateRequest(
 							"CN=" + user.Uid,
-							privKey,
+							(ECDsa) privKey,
 							hashAlg
 						);
 					}
@@ -150,16 +157,49 @@ namespace CertServer.Controllers
 						GetNextSerialNumber()
 					);
 
-					// XXX: Send private key to backup server
+					// XXX: Send privKeyExport to backup server
 
 					// XXX: Register public key in DB
 
+					// Create pkcs12 file including the user certificate and private key
+					Pkcs12Builder pkcs12Builder = new Pkcs12Builder();
+
+					Pkcs12SafeContents pkcs12Cert = new Pkcs12SafeContents();
+					pkcs12Cert.AddCertificate(userCert);
+					pkcs12Builder.AddSafeContentsUnencrypted(pkcs12Cert);
+
+					Pkcs12SafeContents pkcs12PrivKey = new Pkcs12SafeContents();
+					pkcs12PrivKey.AddShroudedKey(
+						privKey,
+						certRequest.CertPassphrase,
+						pbeParameters
+					);
+
+					pkcs12Builder.AddSafeContentsUnencrypted(pkcs12PrivKey);
+
+					pkcs12Builder.SealWithMac(
+						certRequest.CertPassphrase,
+						HashAlgorithmName.SHA512,
+						10000
+					);
+
+					// Since the size of the pkcs12 encoding is unknown,
+					// we might need to retry
+					Span<Byte> pkcs12ArchiveRaw;
+					int pkcs12ArchiveSize = 1024;
+					int bytesWritten = 0;
+
+					do {
+						pkcs12ArchiveSize *= 2;
+						pkcs12ArchiveRaw = new byte[pkcs12ArchiveSize];
+
+					} while(!pkcs12Builder.TryEncode(pkcs12ArchiveRaw, out bytesWritten));
+
+					byte[] pkcs12Archive = pkcs12ArchiveRaw.ToArray().Take(bytesWritten).ToArray();
+
 					return Ok(
 						new UserCertificate {
-							PrivateKey = Convert.ToBase64String(privKeyExport),
-							Certificate = Convert.ToBase64String(
-								userCert.Export(X509ContentType.Pkcs12)
-							),
+							Pkcs12Archive = Convert.ToBase64String(pkcs12Archive)
 						}
 					);
 				}
