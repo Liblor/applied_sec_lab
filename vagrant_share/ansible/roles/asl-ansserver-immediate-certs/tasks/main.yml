@@ -1,0 +1,3 @@
+---
+- import_tasks: generate-immediate-certs.yml
+- import_tasks: distribute-immediate-certs.yml

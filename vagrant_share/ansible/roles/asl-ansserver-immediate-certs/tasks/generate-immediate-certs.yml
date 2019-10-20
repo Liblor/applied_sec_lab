@@ -1,0 +1,63 @@
+---
+- name: Create directory for immediate certificates
+  file:
+    path: ./immediate_certs
+    state: directory
+    mode: 0700
+
+- name: Generate RSA keys for intermediate cert
+  openssl_privatekey:
+    path: "./immediate_certs/{{item}}_immediate_ca_key.pem"
+    type: RSA
+    size: 4096
+  with_inventory_hostnames:
+    - certservers
+
+- name: Create CSR
+  openssl_csr:
+    path: "./immediate_certs/{{item}}_immediate_ca_request.csr"
+    privatekey_path: "./immediate_certs/{{item}}_immediate_ca_key.pem"
+
+    country_name: CH
+    state_or_province_name: Zurich
+    locality_name: Zurich
+    organization_name: iMovies
+    common_name: "iMovies {{item}} Immediate CA"
+
+    basic_constraints: "CA:true"
+    key_usage:
+      - keyCertSign
+      - cRLSign
+      - digitalSignature
+    force: true
+  with_inventory_hostnames:
+    - certservers
+
+- name: Create Certificate
+  openssl_certificate:
+    path: "./immediate_certs/{{item}}_immediate_ca_cert.pem"
+    csr_path: "./immediate_certs/{{item}}_immediate_ca_request.csr"
+    provider: ownca
+    ownca_path: /vagrant/key_store/core_ca_cert.pem
+    ownca_privatekey_path: /vagrant/key_store/core_ca_key.pem
+  with_inventory_hostnames:
+    - certservers
+
+- name: Combine certificate and private key
+  openssl_pkcs12:
+    action: export
+    path: "./immediate_certs/{{item}}_immediate_ca_cert_and_priv_key.pfx"
+    privatekey_path: "./immediate_certs/{{item}}_immediate_ca_key.pem"
+    certificate_path: "./immediate_certs/{{item}}_immediate_ca_cert.pem"
+    friendly_name: "{{item}}"
+    state: present
+    mode: 0600
+  with_inventory_hostnames:
+    - certservers
+
+- name: Remove CSR
+  file:
+    path: "./immediate_certs/{{item}}_immediate_ca_request.csr"
+    state: absent
+  with_inventory_hostnames:
+    - certservers

@@ -1,0 +1,6 @@
+---
+- hosts: ansserver
+  connection: local
+  become: yes
+  roles:
+    - asl-ansserver-immediate-certs

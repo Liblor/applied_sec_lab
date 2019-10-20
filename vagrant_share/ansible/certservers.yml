@@ -3,6 +3,7 @@
   become: yes
   roles:
     - aspdotnet
+    - pyopenssl
     - asl-certserver
     - nginxinc.nginx
 # XXX: Verify this configuration, currently just copied from web server
