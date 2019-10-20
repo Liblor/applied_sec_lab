@@ -1,0 +1,36 @@
+---
+- name: Generate RSA keys for core CA
+  openssl_privatekey:
+    path: /vagrant/key_store/core_ca_key.pem
+    type: RSA
+    size: 4096
+
+- name: Create CSR
+  openssl_csr:
+    path: /vagrant/key_store/core_ca_request.csr
+    privatekey_path: /vagrant/key_store/core_ca_key.pem
+
+    country_name: CH
+    state_or_province_name: Zurich
+    locality_name: Zurich
+    organization_name: iMovies
+    common_name: "iMovies Core CA"
+
+    basic_constraints: "CA:true"
+    key_usage:
+      - keyCertSign
+      - cRLSign
+      - digitalSignature
+    force: true
+
+- name: Create Certificate
+  openssl_certificate:
+    path: /vagrant/key_store/core_ca_cert.pem
+    privatekey_path: /vagrant/key_store/core_ca_key.pem
+    csr_path: /vagrant/key_store/core_ca_request.csr
+    provider: selfsigned
+
+- name: Remove CSR
+  file:
+    path: /vagrant/key_store/core_ca_request.csr
+    state: absent

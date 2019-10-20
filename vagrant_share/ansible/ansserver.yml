@@ -1,0 +1,8 @@
+---
+- hosts: ansserver
+  connection: local
+  become: yes
+  roles:
+    - pyopenssl
+    - asl-ansserver-init
+    - asl-ansserver-immediate-certs
