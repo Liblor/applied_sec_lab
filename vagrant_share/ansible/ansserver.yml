@@ -5,4 +5,4 @@
   roles:
     - pyopenssl
     - asl-ansserver-init
-    - asl-ansserver-immediate-certs
+    - asl-ansserver-intermediate-certs
