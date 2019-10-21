@@ -12,7 +12,7 @@ namespace CertServer
 
 		public static readonly string CoreCACertPath = "/home/coreca/keys/"
 			+ System.Environment.MachineName
-			+ "_immediate_ca_cert_and_priv_key.pfx";
+			+ "_intermediate_ca_cert_and_priv_key.pfx";
 
 		public static readonly int UserCertValidityPeriod = 150;
 

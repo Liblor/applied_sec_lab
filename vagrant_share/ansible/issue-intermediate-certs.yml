@@ -3,4 +3,4 @@
   connection: local
   become: yes
   roles:
-    - asl-ansserver-immediate-certs
+    - asl-ansserver-intermediate-certs
