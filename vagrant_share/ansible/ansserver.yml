@@ -1,8 +1,10 @@
 ---
-- hosts: ansserver
+- hosts: ansservers
   connection: local
   become: yes
   roles:
     - pyopenssl
     - asl-ansserver-init
-    - asl-ansserver-intermediate-certs
+
+- import_playbook: issue-intermediate-certs.yml
+- import_playbook: issue-tls-certs.yml
