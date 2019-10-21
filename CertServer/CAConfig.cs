@@ -10,7 +10,7 @@ namespace CertServer
 
 		public static readonly string CrlDistributionPoint = CAConfig.APIBasePath + "/cdp";
 
-		public static readonly string CoreCACertPath = "/home/coreca/keys/"
+		public static readonly string CoreCACertPath = "/home/coreca/pki/private/"
 			+ System.Environment.MachineName
 			+ "_intermediate_ca_cert_and_priv_key.pfx";
 

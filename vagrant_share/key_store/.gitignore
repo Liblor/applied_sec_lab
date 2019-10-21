@@ -1,1 +1,4 @@
+# Do not commit certificates
 *.pem
+*.crt
+*.csr

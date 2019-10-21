@@ -7,7 +7,7 @@
 
 - name: Create CSR
   openssl_csr:
-    path: /vagrant/key_store/core_ca_request.csr
+    path: /vagrant/key_store/core_ca.csr
     privatekey_path: /vagrant/key_store/core_ca_key.pem
 
     country_name: CH
@@ -25,12 +25,12 @@
 
 - name: Create Certificate
   openssl_certificate:
-    path: /vagrant/key_store/core_ca_cert.pem
+    path: /vagrant/key_store/core_ca.crt
     privatekey_path: /vagrant/key_store/core_ca_key.pem
-    csr_path: /vagrant/key_store/core_ca_request.csr
+    csr_path: /vagrant/key_store/core_ca.csr
     provider: selfsigned
 
 - name: Remove CSR
   file:
-    path: /vagrant/key_store/core_ca_request.csr
+    path: /vagrant/key_store/core_ca.csr
     state: absent
