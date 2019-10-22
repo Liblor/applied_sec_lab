@@ -57,4 +57,4 @@
               aspnet_1:
                 address: localhost
                 # XXX: Change to 443 once certificates for https are setup
-                port: 5001
+                port: 5000

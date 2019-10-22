@@ -10,9 +10,9 @@ namespace CertServer
 
 		public static readonly string CrlDistributionPoint = CAConfig.APIBasePath + "/cdp";
 
-		public static readonly string CoreCACertPath = "/home/coreca/pki/private/"
+		public static readonly string CoreCACertPath = "/home/coreca/pki/private/iMovies_"
 			+ System.Environment.MachineName
-			+ "_intermediate_ca_cert_and_priv_key.pfx";
+			+ "_Intermediate_CA_cert_and_priv_key.pfx";
 
 		public static readonly int UserCertValidityPeriod = 150;
 
