@@ -6,5 +6,27 @@
     - pyopenssl
     - asl-ansserver-init
 
+- hosts: all, !ansservers
+  become: yes
+  tasks:
+    - name: Distribute core CA certificate
+      synchronize:
+        src: /vagrant/key_store/iMovies_Root_CA.crt
+        dest: /usr/share/ca-certificates/mozilla/
+
+    - name: Chown core CA certificate
+      file:
+        path: /usr/share/ca-certificates/mozilla/iMovies_Root_CA.crt
+        owner: root
+        group: root
+
+    - name: Create symlink to core CA certificate
+      file:
+        src: /usr/share/ca-certificates/mozilla/iMovies_Root_CA.crt
+        dest: /etc/ssl/certs/iMovies_Root_CA.crt
+        owner: root
+        group: root
+        state: link
+
 - import_playbook: issue-intermediate-certs.yml
 - import_playbook: issue-tls-certs.yml

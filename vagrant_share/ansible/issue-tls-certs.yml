@@ -109,8 +109,8 @@
         path: "/home/coreca/tls_certs/{{ item.path | basename | splitext | first }}.crt"
         csr_path: "{{ item.path }}"
         provider: ownca
-        ownca_path: /home/coreca/pki/certs/{{ansible_hostname}}_intermediate_ca.crt
-        ownca_privatekey_path: /home/coreca/pki/private/{{ansible_hostname}}_intermediate_ca_key.pem
+        ownca_path: /home/coreca/pki/certs/iMovies_{{ansible_hostname}}_Intermediate_CA.crt
+        ownca_privatekey_path: /home/coreca/pki/private/iMovies_{{ansible_hostname}}_Intermediate_CA_key.pem
         # Hack since the "+730d" syntax of this template seems to be broken
         ownca_not_after: "{{ lookup('pipe','date +\"%Y%m%d%H%M%SZ\" -d \"+365 days\"') }}"
       with_items:

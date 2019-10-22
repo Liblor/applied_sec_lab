@@ -13,7 +13,7 @@
 
     - name: Generate RSA keys for intermediate cert
       openssl_privatekey:
-        path: "./intermediate_certs/{{item}}_intermediate_ca_key.pem"
+        path: "./intermediate_certs/iMovies_{{item}}_Intermediate_CA_key.pem"
         type: RSA
         size: 4096
         owner: ansible
@@ -23,8 +23,8 @@
 
     - name: Create intermediate cert CSR
       openssl_csr:
-        path: "./intermediate_certs/{{item}}_intermediate_ca.csr"
-        privatekey_path: "./intermediate_certs/{{item}}_intermediate_ca_key.pem"
+        path: "./intermediate_certs/iMovies_{{item}}_Intermediate_CA.csr"
+        privatekey_path: "./intermediate_certs/iMovies_{{item}}_Intermediate_CA_key.pem"
 
         country_name: CH
         state_or_province_name: Zurich
@@ -46,11 +46,11 @@
 
     - name: Create intermediate certificate
       openssl_certificate:
-        path: "./intermediate_certs/{{item}}_intermediate_ca.crt"
-        csr_path: "./intermediate_certs/{{item}}_intermediate_ca.csr"
+        path: "./intermediate_certs/iMovies_{{item}}_Intermediate_CA.crt"
+        csr_path: "./intermediate_certs/iMovies_{{item}}_Intermediate_CA.csr"
         provider: ownca
-        ownca_path: /vagrant/key_store/core_ca.crt
-        ownca_privatekey_path: /vagrant/key_store/core_ca_key.pem
+        ownca_path: /vagrant/key_store/iMovies_Root_CA.crt
+        ownca_privatekey_path: /vagrant/key_store/iMovies_Root_CA_key.pem
         # Hack since the "+730d" syntax of this template seems to be broken
         ownca_not_after: "{{ lookup('pipe','date +\"%Y%m%d%H%M%SZ\" -d \"+730 days\"') }}"
 
@@ -61,7 +61,7 @@
 
     - name: Remove CSR
       file:
-        path: "./intermediate_certs/{{item}}_intermediate_ca.csr"
+        path: "./intermediate_certs/iMovies_{{item}}_Intermediate_CA.csr"
         state: absent
       with_inventory_hostnames:
         - certservers
@@ -82,34 +82,34 @@
 
     - name: Distribute intermediate CA certificates
       synchronize:
-        src: "./intermediate_certs/{{ansible_hostname}}_intermediate_ca.crt"
+        src: "./intermediate_certs/iMovies_{{ansible_hostname}}_Intermediate_CA.crt"
         dest: /home/coreca/pki/certs/
         rsync_path: "sudo rsync"
 
     - name: Fix intermediate CA certificates owner
       file:
-        path: "/home/coreca/pki/certs/{{ansible_hostname}}_intermediate_ca.crt"
+        path: "/home/coreca/pki/certs/iMovies_{{ansible_hostname}}_Intermediate_CA.crt"
         owner: coreca
         group: coreca
 
     - name: Distribute intermediate CA private keys
       synchronize:
-        src: "./intermediate_certs/{{ansible_hostname}}_intermediate_ca_key.pem"
+        src: "./intermediate_certs/iMovies_{{ansible_hostname}}_Intermediate_CA_key.pem"
         dest: /home/coreca/pki/private/
         rsync_path: "sudo rsync"
 
     - name: Fix intermediate CA private keys owner
       file:
-        path: "/home/coreca/pki/private/{{ansible_hostname}}_intermediate_ca_key.pem"
+        path: "/home/coreca/pki/private/iMovies_{{ansible_hostname}}_Intermediate_CA_key.pem"
         owner: coreca
         group: coreca
 
     - name: Combine certificate and private key
       openssl_pkcs12:
         action: export
-        path: "/home/coreca/pki/private/{{ansible_hostname}}_intermediate_ca_cert_and_priv_key.pfx"
-        privatekey_path: "/home/coreca/pki/private/{{ansible_hostname}}_intermediate_ca_key.pem"
-        certificate_path: "/home/coreca/pki/certs/{{ansible_hostname}}_intermediate_ca.crt"
+        path: "/home/coreca/pki/private/iMovies_{{ansible_hostname}}_Intermediate_CA_cert_and_priv_key.pfx"
+        privatekey_path: "/home/coreca/pki/private/iMovies_{{ansible_hostname}}_Intermediate_CA_key.pem"
+        certificate_path: "/home/coreca/pki/certs/iMovies_{{ansible_hostname}}_Intermediate_CA.crt"
         friendly_name: "{{ansible_hostname}}"
         state: present
 
