@@ -1,13 +1,25 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
-using CertServer.Authentication;
+using CertServer.DataModifiers;
 using CertServer.Models;
 
 namespace CertServer.Controllers
 {
 	[ApiController, Route("api")]
 	public class RevokeController : ControllerBase
-	{		
+	{
+		private readonly PublicCertificatesDBModifier _pubCertsDBModifier;
+		private readonly UserDBAuthenticator _userDBAuthenticator;
+
+		public RevokeController(
+			PublicCertificatesDBModifier pubCertsDBModifier,
+			UserDBAuthenticator userDBAuthenticator
+		)
+		{
+			_pubCertsDBModifier = pubCertsDBModifier;
+			_userDBAuthenticator = userDBAuthenticator;
+		}
+
 		/// <summary>
 		/// Revoke a certificate.
 		/// </summary>
@@ -24,6 +36,7 @@ namespace CertServer.Controllers
 		/// </remarks>
 		/// <param name="revokeRequest"></param>
 		/// <response code="200">Certificate revoked</response>
+		/// <response code="400">Bad request</response>
 		/// <response code="401">Unauthorized request</response>
 		[Produces("application/json")]
 		[ProducesResponseType(200)]
@@ -31,12 +44,18 @@ namespace CertServer.Controllers
 		[HttpPost("[controller]")]
 		public IActionResult RevokeCertificate(RevokeRequest revokeRequest)
 		{
-			User user = UserDBAuthenticator.GetUser(revokeRequest.Uid, revokeRequest.Password);
+			User user = _userDBAuthenticator.AuthenticateAndGetUser(revokeRequest.Uid, revokeRequest.Password);
 
 			if (user != null)
 			{
-				// XXX: Implement revocation
-				return Ok();
+				if (_pubCertsDBModifier.RevokeCertificate(user, revokeRequest.SerialNumber))
+				{
+					return Ok();
+				}
+				else
+				{
+					return BadRequest();
+				}
 			}
 			else {
 				return Unauthorized();

@@ -4,10 +4,14 @@ using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+
+using CertServer.Data;
+using CertServer.DataModifiers;
 
 namespace CertServer
 {
@@ -38,6 +42,28 @@ namespace CertServer
 				var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
 				c.IncludeXmlComments(xmlPath);
 			});
+
+			services.AddDbContext<IMoviesPublicCertificatesContext>(
+				opt => opt.UseMySql(
+					Configuration.GetConnectionString("IMoviesPublicCertificatesDB")
+				)
+			);
+
+			services.AddDbContext<IMoviesPrivateKeysContext>(
+				opt => opt.UseMySql(
+					Configuration.GetConnectionString("IMoviesPrivateKeysDB")
+				)
+			);
+
+			services.AddDbContext<IMoviesUserContext>(
+				opt => opt.UseMySql(
+					Configuration.GetConnectionString("IMoviesUserDB")
+				)
+			);
+
+			services.AddScoped<PublicCertificatesDBModifier>();
+			services.AddScoped<PrivateKeysDBModifier>();
+			services.AddScoped<UserDBAuthenticator>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

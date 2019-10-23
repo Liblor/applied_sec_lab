@@ -2,15 +2,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CertServer.Models
 {
-	public class RevokeRequest
+	public class DownloadPrivateKeyRequest
 	{
 		[Required]
-		public string Uid { get; set; }
+		public string Uid { get; set; } 
 
 		[Required]
 		public string Password { get; set; }
-
-		[Required]
-		public long SerialNumber { get; set; }
 	}
 }
