@@ -1,0 +1,127 @@
+---
+- hosts: ansservers
+  connection: local
+  become: yes
+  tasks:
+    - name: Create directory for intermediate certificates
+      file:
+        path: ./intermediate_certs
+        state: directory
+        mode: 0700
+        owner: ansible
+        group: ansible
+
+    - name: Generate RSA keys for intermediate cert
+      openssl_privatekey:
+        path: "./intermediate_certs/iMovies_{{item}}_Intermediate_CA_key.pem"
+        type: RSA
+        size: 4096
+        owner: ansible
+        group: ansible
+      with_inventory_hostnames:
+        - certservers
+
+    - name: Create intermediate cert CSR
+      openssl_csr:
+        path: "./intermediate_certs/iMovies_{{item}}_Intermediate_CA.csr"
+        privatekey_path: "./intermediate_certs/iMovies_{{item}}_Intermediate_CA_key.pem"
+
+        country_name: CH
+        state_or_province_name: Zurich
+        locality_name: Zurich
+        organization_name: iMovies
+        common_name: "iMovies {{item}} intermediate CA"
+
+        basic_constraints: "CA:true"
+        key_usage:
+          - keyCertSign
+          - cRLSign
+          - digitalSignature
+
+        force: true
+        owner: ansible
+        group: ansible
+      with_inventory_hostnames:
+        - certservers
+
+    - name: Create intermediate certificate
+      openssl_certificate:
+        path: "./intermediate_certs/iMovies_{{item}}_Intermediate_CA.crt"
+        csr_path: "./intermediate_certs/iMovies_{{item}}_Intermediate_CA.csr"
+        provider: ownca
+        ownca_path: /vagrant/key_store/iMovies_Root_CA.crt
+        ownca_privatekey_path: /vagrant/key_store/iMovies_Root_CA_key.pem
+        # Hack since the "+730d" syntax of this template seems to be broken
+        ownca_not_after: "{{ lookup('pipe','date +\"%Y%m%d%H%M%SZ\" -d \"+730 days\"') }}"
+
+        owner: ansible
+        group: ansible
+      with_inventory_hostnames:
+        - certservers
+
+    - name: Remove CSR
+      file:
+        path: "./intermediate_certs/iMovies_{{item}}_Intermediate_CA.csr"
+        state: absent
+      with_inventory_hostnames:
+        - certservers
+
+- hosts: certservers
+  become: yes
+  tasks:
+    - name: Create keys folder
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: coreca
+        group: coreca
+        # mode: 0600
+      with_items:
+        - /home/coreca/pki/private/
+        - /home/coreca/pki/certs/
+
+    - name: Distribute intermediate CA certificates
+      synchronize:
+        src: "./intermediate_certs/iMovies_{{ansible_hostname}}_Intermediate_CA.crt"
+        dest: /home/coreca/pki/certs/
+        rsync_path: "sudo rsync"
+
+    - name: Fix intermediate CA certificates owner
+      file:
+        path: "/home/coreca/pki/certs/iMovies_{{ansible_hostname}}_Intermediate_CA.crt"
+        owner: coreca
+        group: coreca
+
+    - name: Distribute intermediate CA private keys
+      synchronize:
+        src: "./intermediate_certs/iMovies_{{ansible_hostname}}_Intermediate_CA_key.pem"
+        dest: /home/coreca/pki/private/
+        rsync_path: "sudo rsync"
+
+    - name: Fix intermediate CA private keys owner
+      file:
+        path: "/home/coreca/pki/private/iMovies_{{ansible_hostname}}_Intermediate_CA_key.pem"
+        owner: coreca
+        group: coreca
+
+    - name: Combine certificate and private key
+      openssl_pkcs12:
+        action: export
+        path: "/home/coreca/pki/private/iMovies_{{ansible_hostname}}_Intermediate_CA_cert_and_priv_key.pfx"
+        privatekey_path: "/home/coreca/pki/private/iMovies_{{ansible_hostname}}_Intermediate_CA_key.pem"
+        certificate_path: "/home/coreca/pki/certs/iMovies_{{ansible_hostname}}_Intermediate_CA.crt"
+        friendly_name: "{{ansible_hostname}}"
+        state: present
+
+        owner: coreca
+        group: coreca
+        mode: 0600
+
+- hosts: ansservers
+  connection: local
+  become: yes
+  tasks:
+    - name: Remove intermediate CA certificates and keys from config server
+      file:
+        path: ./intermediate_certs
+        state: absent

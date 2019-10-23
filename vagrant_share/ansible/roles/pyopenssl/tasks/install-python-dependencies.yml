@@ -1,0 +1,9 @@
+- name: Install pip and setuptools
+  apt:
+    name:
+      - python-pip
+      - python-setuptools
+
+- name: Install pyOpenSSL python package
+  pip:
+    name: pyOpenSSL
