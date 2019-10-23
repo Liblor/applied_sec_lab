@@ -1,12 +1,13 @@
 using System;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Storage;
 using System.Linq;
-using System.Text;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.AspNetCore.Mvc;
+
 using CertServer.Models;
-using CertServer.Authentication;
+using CertServer.DataModifiers;
 
 namespace CertServer.Controllers
 {
@@ -14,11 +15,19 @@ namespace CertServer.Controllers
 
 	public class IssueController : ControllerBase
 	{
-		// XXX: Must be implemented. Using local DB? Or fetch largest serial number 
-		// from pub key DB? (trusting it but not having to worry about backups)
-		private byte[] GetNextSerialNumber()
+		private readonly PublicCertificatesDBModifier _pubCertsDBModifier;
+		private readonly PrivateKeysDBModifier _privKeysModifier;
+		private readonly UserDBAuthenticator _userDBAuthenticator;
+
+		public IssueController(
+			PublicCertificatesDBModifier pubCertsDBModifier,
+			PrivateKeysDBModifier privKeysModifier,
+			UserDBAuthenticator userDBAuthenticator
+		)
 		{
-			return new byte[] { 1, 3, 3, 7 };
+			_pubCertsDBModifier = pubCertsDBModifier;
+			_privKeysModifier = privKeysModifier;
+			_userDBAuthenticator = userDBAuthenticator;
 		}
 
 		/// <summary>
@@ -46,7 +55,7 @@ namespace CertServer.Controllers
 		///		the users private key.
 		/// </returns>
 		/// <response code="200">Certificate generation was successful</response>
-		/// <response code="400">Invalid cipher suite.</response>
+		/// <response code="400">Invalid cipher suite</response>
 		/// <response code="401">Unauthorized request</response>
 		[Produces("application/json")]
 		[ProducesResponseType(200)]
@@ -59,7 +68,7 @@ namespace CertServer.Controllers
 
 			if (CipherSuiteHelper.IsVaildCipherSuite(cipherSuite))
 			{
-				User user = UserDBAuthenticator.GetUser(certRequest.Uid, certRequest.Password);
+				User user = _userDBAuthenticator.AuthenticateAndGetUser(certRequest.Uid, certRequest.Password);
 
 				if (user != null)
 				{
@@ -77,7 +86,7 @@ namespace CertServer.Controllers
 						10000
 					);
 
-					if (cipherSuite.Alg == "RSA")
+					if (cipherSuite.Alg.Equals("RSA"))
 					{
 						privKey = RSA.Create(cipherSuite.KeySize);
 
@@ -88,7 +97,7 @@ namespace CertServer.Controllers
 							RSASignaturePadding.Pss
 						);
 					}
-					else if (cipherSuite.Alg == "ECDSA")
+					else if (cipherSuite.Alg.Equals("ECDSA"))
 					{
 						privKey = ECDsa.Create();
 
@@ -144,22 +153,41 @@ namespace CertServer.Controllers
 						)
 					);
 
-					// It is necessary to use this constructor to be able to sign keys
-					// that use different algorithms than the one for the core CA's key
-					X509Certificate2 userCert = req.Create(
-						coreCACert.IssuerName,
-						X509SignatureGenerator.CreateForRSA( 
-							(RSA) coreCACert.PrivateKey,
-							RSASignaturePadding.Pkcs1
-						),
-						DateTimeOffset.UtcNow,
-						DateTimeOffset.UtcNow.AddDays(CAConfig.UserCertValidityPeriod),
-						GetNextSerialNumber()
-					);
+					// Use transaction to prevent race conditions on the serial number
+					X509Certificate2 userCert;
 
-					// XXX: Send privKeyExport to backup server
+					using (
+						IDbContextTransaction scope = _pubCertsDBModifier.GetScope()
+					)
+					{
+						// It is necessary to use this constructor to be able to sign keys
+						// that use different algorithms than the one for the core CA's key
+						userCert = req.Create(
+							coreCACert.IssuerName,
+							X509SignatureGenerator.CreateForRSA( 
+								(RSA) coreCACert.PrivateKey,
+								RSASignaturePadding.Pkcs1
+							),
+							DateTimeOffset.UtcNow,
+							DateTimeOffset.UtcNow.AddDays(CAConfig.UserCertValidityPeriod),
+							_pubCertsDBModifier.GetMaxSerialNr()
+						);
 
-					// XXX: Register public key in DB
+						// XXX: Send privKeyExport to backup server
+
+						// Add certificate to DB
+						_pubCertsDBModifier.AddCertificate(
+							new PublicCertificate {
+								Uid = user.Uid,
+								Certificate = Convert.ToBase64String(
+									userCert.Export(X509ContentType.Pkcs12)
+								),
+								IsRevoked = false
+							}
+						);
+
+						scope.Commit();
+					}
 
 					// Create pkcs12 file including the user certificate and private key
 					Pkcs12Builder pkcs12Builder = new Pkcs12Builder();
@@ -195,20 +223,32 @@ namespace CertServer.Controllers
 
 					} while(!pkcs12Builder.TryEncode(pkcs12ArchiveRaw, out bytesWritten));
 
-					byte[] pkcs12Archive = pkcs12ArchiveRaw.ToArray().Take(bytesWritten).ToArray();
+					string pkcs12ArchiveB64 = Convert.ToBase64String(
+						pkcs12ArchiveRaw.ToArray().Take(bytesWritten).ToArray()
+					);
+
+					// Add encrypted private key to DB
+					_privKeysModifier.AddPrivateKey(
+						new PrivateKey {
+							Uid = user.Uid,
+							KeyPkcs12 = pkcs12ArchiveB64
+						}
+					);
 
 					return Ok(
 						new UserCertificate {
-							Pkcs12Archive = Convert.ToBase64String(pkcs12Archive)
+							Pkcs12Archive = pkcs12ArchiveB64
 						}
 					);
 				}
 				else {
+					// XXX: Log unauthorized access attempt
 					return Unauthorized();
 				}
 			}
 			else
 			{
+				// XXX: Log requested invalid cipher suite
 				return BadRequest("Invalid cipher suite.");
 			}
 		}
