@@ -11,7 +11,7 @@
   tasks:
     - name: Distribute core CA certificate
       synchronize:
-        src: /vagrant/key_store/iMovies_Root_CA.crt
+        src: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA.crt"
         dest: /usr/share/ca-certificates/mozilla/
 
     - name: Chown core CA certificate

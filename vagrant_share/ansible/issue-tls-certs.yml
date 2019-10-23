@@ -6,51 +6,40 @@
       file:
         path: "{{ item }}"
         state: directory
-        owner: ansible
-        group: ansible
+        owner: "{{ ANSIBLE_UNAME }}"
+        group: "{{ ANSIBLE_UNAME }}"
       with_items:
-        - /home/ansible/tls_csr
-        - /home/ansible/tls_certs
+        - "/home/{{ ANSIBLE_UNAME }}/tls_csr"
+        - "/home/{{ ANSIBLE_UNAME }}/tls_certs"
 
 - hosts: all, !ansservers
   become: yes
   roles:
     - pyopenssl
   tasks:
-    - name: Create folder for TLS keys
+    - name: Create folder for TLS keys, CSR and certs
       file:
-        path: /etc/pki/tls/private
+        path: "{{ item }}"
         state: directory
         mode: 0750
         # XXX: Do we have a general user that runs those
         # services, so that we can only give that user access?
-
-    - name: Create folder for TLS CSR
-      file:
-        path: /etc/pki/tls/csr
-        state: directory
-        mode: 0750
-        # XXX: Do we have a general user that runs those
-        # services, so that we can only give that user access?
-
-    - name: Create folder for TLS CSR
-      file:
-        path: /etc/pki/tls/certs
-        state: directory
-        mode: 0750
-        # XXX: Do we have a general user that runs those
-        # services, so that we can only give that user access?
+      with_items:
+        - /etc/pki/tls/private
+        - /etc/pki/tls/csr
+        - /etc/pki/tls/certs
 
     - name: Create HTTPS keys
       openssl_privatekey:
-        path: "/etc/pki/tls/private/{{ansible_hostname}}_tls_key.pem"
+        path: "/etc/pki/tls/private/iMovies_{{ansible_hostname}}_tls_key.pem"
         type: RSA
         size: 4096
+        force: "{{ FORCE_TLS_CERT_REGEN }}"
 
     - name: Create CSR for HTTPS keys
       openssl_csr:
-        path: "/etc/pki/tls/csr/{{ansible_hostname}}_tls.csr"
-        privatekey_path: "/etc/pki/tls/private/{{ansible_hostname}}_tls_key.pem"
+        path: "/etc/pki/tls/csr/iMovies_{{ansible_hostname}}_tls.csr"
+        privatekey_path: "/etc/pki/tls/private/iMovies_{{ansible_hostname}}_tls_key.pem"
 
         country_name: CH
         state_or_province_name: Zurich
@@ -68,13 +57,15 @@
           - serverAuth
           - clientAuth
 
-        force: true
+        force: "{{ FORCE_TLS_CERT_REGEN }}"
 
     - name: Transfer CSR to config server
       synchronize:
         mode: pull
-        src: "/etc/pki/tls/csr/{{ansible_hostname}}_tls.csr"
-        dest: /home/ansible/tls_csr/
+        src: "/etc/pki/tls/csr/iMovies_{{ansible_hostname}}_tls.csr"
+        dest: "/home/{{ ANSIBLE_UNAME }}/tls_csr/"
+        group: false
+        owner: false
       delegate_to: "{{ groups['ansservers'][0] }}"
 
 # The first core ca signs all internal tls certificates
@@ -85,59 +76,58 @@
       file:
         path: "{{ item }}"
         state: directory
-        owner: coreca
-        group: coreca
+        owner: "{{ CORECA_UNAME }}"
+        group: "{{ CORECA_UNAME }}"
       with_items:
-        - /home/coreca/tls_certs
-        - /home/coreca/tls_csr
+        - "/home/{{ CORECA_UNAME }}/tls_certs"
+        - "/home/{{ CORECA_UNAME }}/tls_csr"
 
     - name: Transfer CSR to cert server
       synchronize:
-        src: /home/ansible/tls_csr/
-        dest: /home/coreca/tls_csr/
+        src: "/home/{{ ANSIBLE_UNAME }}/tls_csr/"
+        dest: "/home/{{ CORECA_UNAME }}/tls_csr/"
+        group: false
+        owner: false
 
     # Loop over all files in tls_csr and sign their certificate, the name of which
     # is for <name>.csr --> <name>.crt
     - name: Gather CSR's to sign
       find:
-        paths: /home/coreca/tls_csr
+        paths: "/home/{{ CORECA_UNAME }}/tls_csr"
         patterns: "*.csr"
       register: csr_files_glob
 
     - name: Sign remote server CSR's
       openssl_certificate:
-        path: "/home/coreca/tls_certs/{{ item.path | basename | splitext | first }}.crt"
+        path: "/home/{{ CORECA_UNAME }}/tls_certs/{{ item.path | basename | splitext | first }}.crt"
         csr_path: "{{ item.path }}"
         provider: ownca
-        ownca_path: /home/coreca/pki/certs/iMovies_{{ansible_hostname}}_Intermediate_CA.crt
-        ownca_privatekey_path: /home/coreca/pki/private/iMovies_{{ansible_hostname}}_Intermediate_CA_key.pem
+        ownca_path: "/home/{{ CORECA_UNAME }}/pki/certs/iMovies_{{ansible_hostname}}_Intermediate_CA.crt"
+        ownca_privatekey_path: "/home/{{ CORECA_UNAME }}/pki/private/iMovies_{{ansible_hostname}}_Intermediate_CA_key.pem"
         # Hack since the "+730d" syntax of this template seems to be broken
         ownca_not_after: "{{ lookup('pipe','date +\"%Y%m%d%H%M%SZ\" -d \"+365 days\"') }}"
+        force: "{{ FORCE_TLS_CERT_REGEN }}"
       with_items:
         - "{{ csr_files_glob.files }}"
 
     - name: Transfer certs to config server
       synchronize:
         mode: pull
-        src: "/home/coreca/tls_certs/"
-        dest: /home/ansible/tls_certs/
+        src: "/home/{{ CORECA_UNAME }}/tls_certs/"
+        dest: "/home/{{ ANSIBLE_UNAME }}/tls_certs/"
+        group: false
+        owner: false
       delegate_to: "{{ groups['ansservers'][0] }}"
-
-    - name: Remove folders for TLS CSR and certificates
-      file:
-        path: "{{ item }}"
-        state: absent
-      with_items:
-        - /home/coreca/tls_csr
-        - /home/coreca/tls_certs
 
 - hosts: all, !ansservers
   become: yes
   tasks:
     - name: Transfer certs to corresponding hosts
       synchronize:
-        src: "/home/ansible/tls_certs/{{ ansible_hostname }}_tls.crt"
+        src: "/home/{{ ANSIBLE_UNAME }}/tls_certs/iMovies_{{ ansible_hostname }}_tls.crt"
         dest: /etc/pki/tls/certs/
+        group: false
+        owner: false
 
     # XXX: Do we have a general user that runs those
     # services, so that we can only give that user access?
@@ -146,15 +136,3 @@
     #     path: "/etc/pki/tls/certs/{{ ansible_hostname }}_tls.crt"
     #     owner: XXX
     #     group: XXX
-
-- hosts: ansservers
-  connection: local
-  become: yes
-  tasks:
-    - name: Remove folder for TLS CSR and certificates
-      file:
-        path: "{{ item }}"
-        state: absent
-      with_items:
-        - /home/ansible/tls_csr
-        - /home/ansible/tls_certs

@@ -1,25 +1,25 @@
 ---
 - name: Creates directory
   file:
-    path: /home/coreca/app
+    path: "/home/{{ CORECA_UNAME }}/app"
     state: directory
-    owner: coreca
-    group: coreca
+    owner: "{{ CORECA_UNAME }}"
+    group: "{{ CORECA_UNAME }}"
     mode: 0770
 
 # - name: Download the latest release of WebServer
 #   get_url:
 #     url: https://github.com/Liblor/applied_security_lab_deploy/releases/latest/download/CertServer.tar.gz
-#     dest: /home/coreca/app/CertServer.tar.gz
+#     dest: "/home/{{ CORECA_UNAME }}/app/CertServer.tar.gz"
 #     mode: 0640
 
 - name: Unpack the downloaded archive
   unarchive:
-    src: /home/coreca/app/CertServer.tar.gz
-    dest: /home/coreca/app
+    src: "/home/{{ CORECA_UNAME }}/app/CertServer.tar.gz"
+    dest: "/home/{{ CORECA_UNAME }}/app"
     remote_src: yes
 
 - name: Remove the archive
   file:
     state: absent
-    path: /home/coreca/app/CertServer.tar.gz
+    path: "/home/{{ CORECA_UNAME }}/app/CertServer.tar.gz"

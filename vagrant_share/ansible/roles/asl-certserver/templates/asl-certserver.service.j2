@@ -2,11 +2,11 @@
 Description=Applied Security Lab CertServer
 
 [Service]
-WorkingDirectory=/home/coreca/app
-ExecStart=/usr/bin/dotnet /home/coreca/app/CertServer.dll
+WorkingDirectory=/home/{{ CORECA_UNAME }}/app
+ExecStart=/usr/bin/dotnet /home/{{ CORECA_UNAME }}/app/CertServer.dll
 Restart=always
 RestartSec=10
 KillSignal=SIGINT
-User=coreca
+User={{ CORECA_UNAME }}
 Environment=ASPNETCORE_ENVIRONMENT=Production
 Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
