@@ -1,14 +1,15 @@
 ---
 - name: Generate RSA keys for core CA
   openssl_privatekey:
-    path: /vagrant/key_store/iMovies_Root_CA_key.pem
+    path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA_key.pem"
     type: RSA
     size: 4096
+    force: "{{ FORCE_ROOT_CA_CERT_REGEN }}"
 
 - name: Create CSR
   openssl_csr:
-    path: /vagrant/key_store/iMovies_Root_CA.csr
-    privatekey_path: /vagrant/key_store/iMovies_Root_CA_key.pem
+    path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA.csr"
+    privatekey_path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA_key.pem"
 
     country_name: CH
     state_or_province_name: Zurich
@@ -21,16 +22,13 @@
       - keyCertSign
       - cRLSign
       - digitalSignature
-    force: true
+
+    force: "{{ FORCE_ROOT_CA_CERT_REGEN }}"
 
 - name: Create Certificate
   openssl_certificate:
-    path: /vagrant/key_store/iMovies_Root_CA.crt
-    privatekey_path: /vagrant/key_store/iMovies_Root_CA_key.pem
-    csr_path: /vagrant/key_store/iMovies_Root_CA.csr
+    path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA.crt"
+    privatekey_path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA_key.pem"
+    csr_path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA.csr"
     provider: selfsigned
-
-- name: Remove CSR
-  file:
-    path: /vagrant/key_store/iMovies_Root_CA.csr
-    state: absent
+    force: "{{ FORCE_ROOT_CA_CERT_REGEN }}"

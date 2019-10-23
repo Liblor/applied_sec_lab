@@ -1,5 +1,5 @@
 ---
 - name: Add a user to run the CA
   user:
-    name: coreca
+    name: "{{ CORECA_UNAME }}"
     shell: /bin/bash
