@@ -7,11 +7,11 @@
     group: coreca
     mode: 0770
 
-# - name: Download the latest release of WebServer
-#   get_url:
-#     url: https://github.com/Liblor/applied_security_lab_deploy/releases/latest/download/CertServer.tar.gz
-#     dest: /home/coreca/app/CertServer.tar.gz
-#     mode: 0640
+- name: Download the latest release of CertServer
+  get_url:
+    url: https://github.com/Liblor/applied_security_lab_deploy/releases/latest/download/CertServer.tar.gz
+    dest: /home/coreca/app/CertServer.tar.gz
+    mode: 0640
 
 - name: Unpack the downloaded archive
   unarchive:
