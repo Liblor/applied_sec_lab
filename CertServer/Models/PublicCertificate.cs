@@ -7,7 +7,7 @@ namespace CertServer.Models
     {
 		[Key]
 		[Column("serialNr")]
-        public long SerialNr { get; set; }
+        public ulong SerialNr { get; set; }
 
         [Column("uid")]
         public string Uid { get; set; }

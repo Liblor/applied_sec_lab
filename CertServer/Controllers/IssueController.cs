@@ -148,7 +148,7 @@ namespace CertServer.Controllers
 					req.CertificateExtensions.Add(
 						new X509Extension(
 							new Oid("2.5.29.31"),
-							Encoding.ASCII.GetBytes(CAConfig.CrlDistributionPoint),
+							System.Text.Encoding.ASCII.GetBytes(CAConfig.CrlDistributionPoint),
 							false
 						)
 					);

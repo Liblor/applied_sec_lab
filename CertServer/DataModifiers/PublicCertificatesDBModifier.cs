@@ -1,8 +1,13 @@
+using Microsoft.EntityFrameworkCore.Storage;
+using Org.BouncyCastle.X509;
+using System;
+using System.IO;
+using System.Linq;
+using System.Numerics;
+using System.Security.Cryptography.X509Certificates;
+
 using CertServer.Data;
 using CertServer.Models;
-using Microsoft.EntityFrameworkCore.Storage;
-using System;
-using System.Linq;
 
 namespace CertServer.DataModifiers
 {
@@ -21,7 +26,7 @@ namespace CertServer.DataModifiers
 			_dbContext.SaveChanges();
 		}
 
-		public bool RevokeCertificate(User user, long serialNr) 
+		public bool RevokeCertificate(User user, ulong serialNr) 
 		{
 			PublicCertificate publicCert = _dbContext.PublicCertificates.Find(serialNr);
 
@@ -53,7 +58,7 @@ namespace CertServer.DataModifiers
 
 		public byte[] GetMaxSerialNr()
 		{
-			long maxSerialNr;
+			ulong maxSerialNr;
 
 			if (_dbContext.PublicCertificates.Any())
 			{
@@ -68,9 +73,9 @@ namespace CertServer.DataModifiers
 			// if (maxSerialNr > threshold * ulong.MaxValue) {}
 
 			// Return big endian representation of this integer
-			return BitConverter.GetBytes(
-				System.Net.IPAddress.NetworkToHostOrder(maxSerialNr)
-			);
+			byte[] serialNrBytes = BitConverter.GetBytes(maxSerialNr);
+			Array.Reverse(serialNrBytes);
+			return serialNrBytes;
 		}
 
 		public IDbContextTransaction GetScope() 
@@ -78,9 +83,42 @@ namespace CertServer.DataModifiers
 			return _dbContext.Database.BeginTransaction();
 		}
 
-		public void GenerateCRL()
+		public void GenerateCRL(X509Certificate2 coreCACert)
 		{
-			// XXX: Not possible with System.Security.Cryptography, move to bouncycastle?
+			X509V2CrlGenerator crlGen = new X509V2CrlGenerator();
+
+			DateTime now = DateTime.UtcNow;
+            crlGen.SetIssuerDN(new X509Name(coreCACert.SubjectName));
+            crlGen.SetThisUpdate(now);
+            crlGen.SetNextUpdate(now.AddMinutes(10));
+            crlGen.SetSignatureAlgorithm("SHA512WithRSAEncryption");
+
+			foreach (PublicCertificate pubCert in _dbContext.PublicCertificates)
+			{
+				if (pubCert.IsRevoked)
+				{
+					//XXX: add crlreason to pubCert DB
+					crlGen.AddCrlEntry(new BigInteger(pubCert.SerialNr), now, CrlReason.KeyCompromise);
+				}
+			}
+
+			FileStream coreCaCertFileStream = new FileStream(CAConfig.CoreCACertPath, FileMode.Open);
+			X509Certificate coreCaCert = new X509CertificateParser().ReadCertificate(coreCaCertFileStream);
+			coreCaCertFileStream.Close();
+
+			var authorityKeyIdentifierExtension = new AuthorityKeyIdentifier(
+					SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(coreCaCert.GetPublicKey()),
+					new GeneralNames(new GeneralName(coreCaCert.IssuerDN)),
+					(ulong) coreCaCert.SerialNumber
+			);
+
+			crlGen.AddExtension(
+				X509Extensions.AuthorityKeyIdentifier, 
+				false,
+                authorityKeyIdentifierExtension
+			);
+
+			X509Crl newCrl = crlGen.Generate(coreCaCert.Private);
 		}
     }
 }
