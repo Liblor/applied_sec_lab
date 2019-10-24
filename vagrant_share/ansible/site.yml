@@ -1,7 +1,7 @@
 ---
+- import_playbook: certservers.yml
 - import_playbook: ansserver.yml
 - import_playbook: bkservers.yml
 - import_playbook: dbservers.yml
 - import_playbook: webservers.yml
 - import_playbook: logservers.yml
-- import_playbook: certservers.yml
