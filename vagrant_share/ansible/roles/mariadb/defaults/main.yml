@@ -1,0 +1,4 @@
+---
+db_package: "mariadb-server"
+mysql_root_username : "root"
+mysql_root_password : "{{ lookup('file', '/vagrant/mysql_root_psw.txt') }}"
