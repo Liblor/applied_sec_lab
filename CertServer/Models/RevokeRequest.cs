@@ -11,6 +11,6 @@ namespace CertServer.Models
 		public string Password { get; set; }
 
 		[Required]
-		public long SerialNumber { get; set; }
+		public ulong SerialNumber { get; set; }
 	}
 }
