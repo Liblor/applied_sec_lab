@@ -1,0 +1,13 @@
+[mysqld]
+bind-address=0.0.0.0
+
+[galera]
+wsrep_on=ON
+wsrep_provider=/usr/lib/galera/libgalera_smm.so
+wsrep_cluster_address="gcomm://{{ db_cluster_ips }}"
+binlog_format=row
+default_storage_engine=InnoDB
+innodb_autoinc_lock_mode=2
+bind-address=0.0.0.0
+wsrep_cluster_name="imovies_db_cluster"
+wsrep_sst_method=rsync

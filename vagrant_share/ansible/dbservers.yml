@@ -1,2 +1,6 @@
 ---
 - hosts: dbservers
+  become: yes
+  roles:
+    - mariadb
+    - asl-dbserver
