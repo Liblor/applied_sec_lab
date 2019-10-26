@@ -12,3 +12,6 @@ bind-address=0.0.0.0
 wsrep_cluster_name="imovies_db_cluster"
 wsrep_sst_method=rsync
 wsrep_node_address="{{ inventory_hostname }}"
+
+[mariadb]
+disable_unix_socket

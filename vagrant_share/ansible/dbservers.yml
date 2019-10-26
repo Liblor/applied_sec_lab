@@ -4,3 +4,7 @@
   roles:
     - mariadb
     - asl-dbserver
+- hosts: asldb01
+  become: yes
+  roles:
+    - init_db

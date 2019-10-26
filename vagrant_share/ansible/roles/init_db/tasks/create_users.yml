@@ -1,0 +1,70 @@
+---
+- name: Create database user 'aslcert01'
+  mysql_user:
+    name: aslcert01
+    # TODO change & move password
+    password: 12345
+    priv: >-
+      imovies.users:SELECT
+      (uid, lastname, firstname, email, pwd)/imovies.users:UPDATE
+      (pwd)/imovies_ca.public_certificates:SELECT
+      (serial_number, uid, public_cert, revoked)/imovies_ca.public_certificates:INSERT
+      (serial_number, uid, public_cert, revoked)/imovies_ca.public_certificates:UPDATE
+      (serial_number, uid, public_cert, revoked)/imovies_ca.private_certificates:SELECT
+      (sk_id, uid, private_cert)/imovies_ca.private_certificates:UPDATE
+      (sk_id, uid, private_cert)/imovies_ca.private_certificates:INSERT
+      (sk_id, uid, private_cert)
+    host: aslcert01
+    state: present
+    login_user: "{{ mysql_user }}"
+    login_password: "{{ mysql_password }}"
+
+- name: Create database user 'aslcert02'
+  mysql_user:
+    name: aslcert02
+    # TODO change & move password
+    password: 12345
+    priv: >-
+      imovies.users:SELECT
+      (uid, lastname, firstname, email, pwd)/imovies.users:UPDATE
+      (pwd)/imovies_ca.public_certificates:SELECT
+      (serial_number, uid, public_cert, revoked)/imovies_ca.public_certificates:INSERT
+      (serial_number, uid, public_cert, revoked)/imovies_ca.public_certificates:UPDATE
+      (serial_number, uid, public_cert, revoked)/imovies_ca.private_certificates:SELECT
+      (sk_id, uid, private_cert)/imovies_ca.private_certificates:UPDATE
+      (sk_id, uid, private_cert)/imovies_ca.private_certificates:INSERT
+      (sk_id, uid, private_cert)
+    host: aslcert02
+    state: present
+    login_user: "{{ mysql_user }}"
+    login_password: "{{ mysql_password }}"
+
+- name: Create database user 'aslweb01'
+  mysql_user:
+    name: aslweb01
+    # TODO change & move password
+    password: 12345
+    priv: >-
+      imovies.users:SELECT
+      (uid, lastname, firstname, email, pwd)/imovies.users:UPDATE
+      (lastname, firstname, email)/imovies_ca.public_certificates:SELECT
+      (serial_number, uid, public_cert, revoked)
+    host: aslweb01
+    state: present
+    login_user: "{{ mysql_user }}"
+    login_password: "{{ mysql_password }}"
+
+- name: Create database user 'aslweb02'
+  mysql_user:
+    name: aslweb02
+    # TODO change & move password
+    password: 12345
+    priv: >-
+      imovies.users:SELECT
+      (uid, lastname, firstname, email, pwd)/imovies.users:UPDATE
+      (lastname, firstname, email)/imovies_ca.public_certificates:SELECT
+      (serial_number, uid, public_cert, revoked)
+    host: aslweb02
+    state: present
+    login_user: "{{ mysql_user }}"
+    login_password: "{{ mysql_password }}"
