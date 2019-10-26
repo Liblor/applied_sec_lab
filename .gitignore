@@ -70,3 +70,6 @@ TestResult.xml
 
 # Vagrant
 .vagrant/
+
+# VSCode
+.vscode/

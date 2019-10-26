@@ -1,0 +1,12 @@
+---
+- name: Install MariaDB
+  package:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  with_items:
+    - "mariadb-server"
+    - "mariadb-client"
+    - "galera-3"
+    - "python-mysqldb"
+    - "rsync"

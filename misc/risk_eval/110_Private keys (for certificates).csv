@@ -1,0 +1,6 @@
+Threat	Countermeasure	Likelihood	Impact	Additional Countermeasures
+Nature: hardware failure causes loss of private key material	All private keys are back up with high redundancy	Low	Low
+Employees: either through negligence or malice an employee allows unauthorized party access to their private key	Password-Based Encryption (PBE) is enforced upon certificate issuance	Medium	High	Train employees regularly both theoretically and with phishing attack simulations to raise their awareness.
+Script Kiddies: a script kiddie brute-forces the private key using publicly available tools or scripts	Sufficiently large keys are generated using industry-standard methods	Low	Medium
+Skilled Hackers: a capable and motivated party steals an employee's private key through a targeted hacking attack	Private keys are encrypted using a passphrase upon certificate issuance	Low	High
+Governmental Agencies: a well-funded state actor brute-forces the private key using great computational resources or standard-library CSPRNG weaknesses unknown to the public	Large keys are used in combination with limited certificate validity periods	Medium	High

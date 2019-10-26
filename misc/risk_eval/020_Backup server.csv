@@ -1,0 +1,5 @@
+Threat	Countermeasure	Likelihood	Impact
+"Nature: Earthquake, major natural disaster destroys server, hardware failure"	"On-site server monitoring staff with the ability to hot swap malfunctioning drives, interrupt-free backup routine"	Low	Low
+"Employees: Misconfigured or disabled backup routine"	"Regular manual backup evaluation"	Low	Low
+"Governmental Agency: Physical compomise of the system"	"Strictly restricted access to the hardware, regular hardware inspection"	Low	Medium
+"Skilled hacker, organized crime: Gain control over backup server"	"Specially hardened server, firewall, only SSH port exposed"	Low	Medium
