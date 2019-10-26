@@ -1,0 +1,32 @@
+---
+#
+# Perform the steps of mysql_secure_installation
+#
+- name: Remove anonymous users
+  command: 'mysql -NBe "{{ item }}"'
+  with_items:
+    - DELETE FROM mysql.user WHERE User=''
+
+- name: Disallow root login remotely
+  command: 'mysql -NBe "{{ item }}"'
+  with_items:
+    - DELETE FROM mysql.user WHERE User='{{ mysql_root_username }}' AND Host NOT IN ('localhost', '127.0.0.1', '::1')
+
+- name: Remove test database
+  command: 'mysql -NBe "{{ item }}"'
+  with_items:
+    - DROP DATABASE IF EXISTS test
+    - DELETE FROM mysql.db WHERE Db='test' OR Db='test\_%'
+
+- name: Reload privilege tables
+  command: 'mysql -NBe "{{ item }}"'
+  with_items:
+    - FLUSH PRIVILEGES
+
+
+# TODO: Make sure, password isn't logged in some history
+- name: Set root password
+  command: 'mysql -NBe "{{ item }}"'
+  with_items:
+    - ALTER USER '{{ mysql_root_username }}'@'localhost' IDENTIFIED BY '{{ mysql_root_password }}'
+  changed_when: false
