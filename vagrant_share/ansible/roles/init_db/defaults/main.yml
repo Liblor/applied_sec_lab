@@ -1,3 +1,0 @@
----
-mysql_user: "root"
-mysql_password: "{{ lookup('file', '/vagrant/mysql_root_psw.txt') }}"
