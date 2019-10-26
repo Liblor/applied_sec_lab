@@ -1,9 +1,8 @@
 ---
 - name: Create database user 'aslcert01'
   mysql_user:
-    name: aslcert01
-    # TODO change & move password
-    password: 12345
+    name: "{{ mysql_aslcert01_username }}"
+    password: "{{ mysql_aslcert01_password }}"
     priv: >-
       imovies.users:SELECT
       (uid, lastname, firstname, email, pwd)/imovies.users:UPDATE
@@ -16,14 +15,13 @@
       (sk_id, uid, private_cert)
     host: aslcert01
     state: present
-    login_user: "{{ mysql_user }}"
-    login_password: "{{ mysql_password }}"
+    login_user: "{{ mysql_root_username }}"
+    login_password: "{{ mysql_root_password }}"
 
 - name: Create database user 'aslcert02'
   mysql_user:
-    name: aslcert02
-    # TODO change & move password
-    password: 12345
+    name: "{{ mysql_aslcert02_username }}"
+    password: "{{ mysql_aslcert02_password }}"
     priv: >-
       imovies.users:SELECT
       (uid, lastname, firstname, email, pwd)/imovies.users:UPDATE
@@ -36,14 +34,13 @@
       (sk_id, uid, private_cert)
     host: aslcert02
     state: present
-    login_user: "{{ mysql_user }}"
-    login_password: "{{ mysql_password }}"
+    login_user: "{{ mysql_root_username }}"
+    login_password: "{{ mysql_root_password }}"
 
 - name: Create database user 'aslweb01'
   mysql_user:
-    name: aslweb01
-    # TODO change & move password
-    password: 12345
+    name: "{{ mysql_aslweb01_username }}"
+    password: "{{ mysql_aslweb01_password }}"
     priv: >-
       imovies.users:SELECT
       (uid, lastname, firstname, email, pwd)/imovies.users:UPDATE
@@ -51,14 +48,13 @@
       (serial_number, uid, public_cert, revoked)
     host: aslweb01
     state: present
-    login_user: "{{ mysql_user }}"
-    login_password: "{{ mysql_password }}"
+    login_user: "{{ mysql_root_username }}"
+    login_password: "{{ mysql_root_password }}"
 
 - name: Create database user 'aslweb02'
   mysql_user:
-    name: aslweb02
-    # TODO change & move password
-    password: 12345
+    name: "{{ mysql_aslweb02_username }}"
+    password: "{{ mysql_aslweb02_password }}"
     priv: >-
       imovies.users:SELECT
       (uid, lastname, firstname, email, pwd)/imovies.users:UPDATE
@@ -66,5 +62,5 @@
       (serial_number, uid, public_cert, revoked)
     host: aslweb02
     state: present
-    login_user: "{{ mysql_user }}"
-    login_password: "{{ mysql_password }}"
+    login_user: "{{ mysql_root_username }}"
+    login_password: "{{ mysql_root_password }}"
