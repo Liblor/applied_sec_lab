@@ -1,0 +1,25 @@
+---
+- name: Create a database 'imovies_ca'
+  mysql_db:
+    name: imovies_ca
+    state: present
+    login_user: "{{ mysql_user }}"
+    login_password: "{{ mysql_password }}"
+
+- name: Copy .sql for 'imovies_ca'
+  copy:
+    src: imovies_ca.sql
+    dest: /tmp
+
+- name: Create tables for 'imovies_ca'
+  mysql_db:
+    name: imovies_ca
+    state: import
+    target: /tmp/imovies_ca.sql
+    login_user: "{{ mysql_user }}"
+    login_password: "{{ mysql_password }}"
+
+- name: Remove imovies_ca.sql
+  file:
+    path: /tmp/imovies_ca.sql
+    state: absent
