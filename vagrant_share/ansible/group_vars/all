@@ -6,7 +6,10 @@ CORECA_UNAME: coreca
 # Folders
 VAGRANT_SHARED_FOLDERNAME: vagrant
 
-# regenerate certificates
+# Regenerate certificates
 FORCE_ROOT_CA_CERT_REGEN: false
 FORCE_INTERMEDIATE_CA_CERT_REGEN: "{{FORCE_ROOT_CA_CERT_REGEN}}"
 FORCE_TLS_CERT_REGEN: "{{FORCE_INTERMEDIATE_CA_CERT_REGEN}}"
+
+# Save user secrets ID compiled into certserver release
+CERTSERVER_USER_SECRETS_ID: 876ff026-2bba-44da-b012-7f46a917fe94

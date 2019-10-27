@@ -1,5 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using CertServer.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CertServer
 {
@@ -11,5 +11,12 @@ namespace CertServer
         }
 
         public DbSet<User> Users { get; set; }
+
+		// Fix capitalisation of table name
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+			modelBuilder.Entity<User>()
+				.ToTable(CAConfig.IMoviesUserTableName);
+		}
     }
 }

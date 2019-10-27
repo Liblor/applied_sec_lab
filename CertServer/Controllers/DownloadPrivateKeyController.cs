@@ -10,15 +10,15 @@ namespace CertServer.Controllers
 
     public class DownloadPrivateKeyController : ControllerBase
     {
-		private readonly PrivateKeysDBModifier _privKeysModifier;
+		private readonly CADBModifier _caDBModifier;
 		private readonly UserDBAuthenticator _userDBAuthenticator;
 
 		public DownloadPrivateKeyController(
-			PrivateKeysDBModifier privKeysModifier,
+			CADBModifier caDBModifier,
 			UserDBAuthenticator userDBAuthenticator
 		)
 		{
-			_privKeysModifier = privKeysModifier;
+			_caDBModifier = caDBModifier;
 			_userDBAuthenticator = userDBAuthenticator;
 		}
 
@@ -45,7 +45,7 @@ namespace CertServer.Controllers
 
 			if (user != null)
 			{
-				PrivateKey privKey = _privKeysModifier.GetPrivateKey(user);
+				PrivateKey privKey = _caDBModifier.GetPrivateKey(user);
 
 				if (privKey == null)
 				{
