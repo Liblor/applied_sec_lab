@@ -50,13 +50,11 @@ namespace WebServer.Controllers
                     passwordHash = sb.ToString();
                 }
 
-                var user = _dbContext.Users.SingleOrDefault(u =>
-                    u.Email.Equals(loginDetails.Email, StringComparison.OrdinalIgnoreCase) &&
-                    u.PasswordHash == passwordHash);
+                var user = _dbContext.Users.Find(loginDetails.Id);
 
-                if (user == null)
+                if (user == null || !string.Equals(user.PasswordHash, passwordHash))
                 {
-                    ViewData["ErrorMessage"] = "Email address or password incorrect.";
+                    ViewData["ErrorMessage"] = "User ID or password incorrect.";
                     return View(loginDetails);
                 }
 
@@ -112,13 +110,14 @@ namespace WebServer.Controllers
                     success = true;
                 }
 
+                // TempData persists the message to the next request after RedirectToAction
                 if (success)
                 {
-                    ViewData["SuccessMessage"] = "Account information updated successfully.";
+                    TempData["SuccessMessage"] = "Account information updated successfully.";
                 }
                 else
                 {
-                    ViewData["ErrorMessage"] = "Updating account information failed.";
+                    TempData["ErrorMessage"] = "Updating account information failed.";
                 }
 
                 return RedirectToAction(nameof(Index));
