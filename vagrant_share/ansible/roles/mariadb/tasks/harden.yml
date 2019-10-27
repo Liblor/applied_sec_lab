@@ -2,6 +2,8 @@
 #
 # Perform the steps of mysql_secure_installation
 #
+# XXX: Make reexecutable, check if not already hardnend, otherwise error:
+# Access denied for user 'root'@'localhost'
 - name: Remove anonymous users
   command: 'mysql -NBe "{{ item }}"'
   with_items:

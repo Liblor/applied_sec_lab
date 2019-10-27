@@ -8,15 +8,15 @@ namespace CertServer.Controllers
 	[ApiController, Route("api")]
 	public class RevokeController : ControllerBase
 	{
-		private readonly PublicCertificatesDBModifier _pubCertsDBModifier;
+		private readonly CADBModifier _caDBModifier;
 		private readonly UserDBAuthenticator _userDBAuthenticator;
 
 		public RevokeController(
-			PublicCertificatesDBModifier pubCertsDBModifier,
+			CADBModifier caDBModifier,
 			UserDBAuthenticator userDBAuthenticator
 		)
 		{
-			_pubCertsDBModifier = pubCertsDBModifier;
+			_caDBModifier = caDBModifier;
 			_userDBAuthenticator = userDBAuthenticator;
 		}
 
@@ -48,7 +48,7 @@ namespace CertServer.Controllers
 
 			if (user != null)
 			{
-				if (_pubCertsDBModifier.RevokeCertificate(user, revokeRequest.SerialNumber))
+				if (_caDBModifier.RevokeCertificate(user, revokeRequest.SerialNumber))
 				{
 					return Ok();
 				}

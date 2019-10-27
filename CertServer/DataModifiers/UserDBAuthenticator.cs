@@ -2,6 +2,8 @@ using CertServer.Models;
 using System;
 using System.Security.Cryptography;
 
+using CertServer.Data;
+
 namespace CertServer.DataModifiers
 {
 	public class UserDBAuthenticator
@@ -23,7 +25,7 @@ namespace CertServer.DataModifiers
 			).Replace("-","").ToLower();
 
 			User user = _dbContext.Users.Find(uid);
-			if (user.Uid.Equals(uid) && pwHash.Equals(user.PasswordHash))
+			if (user != null && pwHash.Equals(user.PasswordHash))
 			{
 				return user;
 			}

@@ -1,5 +1,6 @@
-using System;
 using Microsoft.AspNetCore.Mvc;
+using System;
+
 using CertServer.Models;
 
 namespace CertServer.Controllers

@@ -15,18 +15,15 @@ namespace CertServer.Controllers
 
 	public class IssueController : ControllerBase
 	{
-		private readonly PublicCertificatesDBModifier _pubCertsDBModifier;
-		private readonly PrivateKeysDBModifier _privKeysModifier;
+		private readonly CADBModifier _caDBModifier;
 		private readonly UserDBAuthenticator _userDBAuthenticator;
 
 		public IssueController(
-			PublicCertificatesDBModifier pubCertsDBModifier,
-			PrivateKeysDBModifier privKeysModifier,
+			CADBModifier caDBModifier,
 			UserDBAuthenticator userDBAuthenticator
 		)
 		{
-			_pubCertsDBModifier = pubCertsDBModifier;
-			_privKeysModifier = privKeysModifier;
+			_caDBModifier = caDBModifier;
 			_userDBAuthenticator = userDBAuthenticator;
 		}
 
@@ -157,9 +154,11 @@ namespace CertServer.Controllers
 					X509Certificate2 userCert;
 
 					using (
-						IDbContextTransaction scope = _pubCertsDBModifier.GetScope()
+						IDbContextTransaction scope = _caDBModifier.GetScope()
 					)
 					{
+						SerialNumber serialNr = _caDBModifier.GetMaxSerialNr();
+
 						// It is necessary to use this constructor to be able to sign keys
 						// that use different algorithms than the one for the core CA's key
 						userCert = req.Create(
@@ -170,14 +169,15 @@ namespace CertServer.Controllers
 							),
 							DateTimeOffset.UtcNow,
 							DateTimeOffset.UtcNow.AddDays(CAConfig.UserCertValidityPeriod),
-							_pubCertsDBModifier.GetMaxSerialNr()
+							serialNr.SerialNrBytes
 						);
 
 						// XXX: Send privKeyExport to backup server
 
 						// Add certificate to DB
-						_pubCertsDBModifier.AddCertificate(
+						_caDBModifier.AddCertificate(
 							new PublicCertificate {
+								SerialNr = serialNr.SerialNr,
 								Uid = user.Uid,
 								Certificate = Convert.ToBase64String(
 									userCert.Export(X509ContentType.Pkcs12)
@@ -228,7 +228,7 @@ namespace CertServer.Controllers
 					);
 
 					// Add encrypted private key to DB
-					_privKeysModifier.AddPrivateKey(
+					_caDBModifier.AddPrivateKey(
 						new PrivateKey {
 							Uid = user.Uid,
 							KeyPkcs12 = pkcs12ArchiveB64

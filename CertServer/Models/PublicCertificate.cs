@@ -3,19 +3,23 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CertServer.Models
 {
-    public class PublicCertificate
-    {
-		[Key]
-		[Column("serialNr")]
-        public ulong SerialNr { get; set; }
+	public class PublicCertificate
+	{
+		[Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
+		[Column("serial_number")]
+		public ulong SerialNr { get; set; }
 
-        [Column("uid")]
-        public string Uid { get; set; }
+		[Column("uid")]
+		[Required]
+		[StringLength(64, MinimumLength = 1)]
+		public string Uid { get; set; }
 
-		[Column("cert")]
-        public string Certificate { get; set; }
+		[Column("public_cert", TypeName = "ntext")]
+		[Required]
+		public string Certificate { get; set; }
 
-		[Column("isrevoked")]
-        public bool IsRevoked { get; set; }
-    }
+		[Column("revoked", TypeName = "boolean")]
+		[Required]
+		public bool IsRevoked { get; set; }
+	}
 }

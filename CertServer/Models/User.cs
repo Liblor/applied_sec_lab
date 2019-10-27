@@ -5,7 +5,7 @@ namespace CertServer.Models
 {
     public class User
     {
-        [Key]
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Column("uid")]
         public string Uid { get; set; }
 

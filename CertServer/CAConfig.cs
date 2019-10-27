@@ -35,5 +35,9 @@ namespace CertServer
 				KeySize = 521
 			}
 		};
+
+		public static readonly string IMoviesUserTableName = "users";
+		public static readonly string IMoviesCAPublicCertsTableName = "public_certificates";
+		public static readonly string IMoviesCAPrivateCertsTableName = "private_certificates";
 	}
 }
