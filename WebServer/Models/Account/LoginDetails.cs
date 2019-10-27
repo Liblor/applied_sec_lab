@@ -4,9 +4,10 @@ namespace WebServer.Models.Account
 {
     public class LoginDetails
     {
-        [Display(Name = "Email Address")]
-        [Required, EmailAddress]
-        public string Email { get; set; }
+        [Display(Name = "User ID")]
+        [StringLength(64, MinimumLength = 1)]
+        [Required]
+        public string Id { get; set; }
 
         [Display(Name = "Password")]
         [Required, DataType(DataType.Password)]
