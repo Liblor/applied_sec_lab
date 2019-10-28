@@ -78,26 +78,22 @@ print("Test issue ECDSA certificate: ", end="")
 test_response(response_issue_ecdsa, 200)
 
 print("\n" + "-"*80 + "\n")
-payload_ms = {
-    "uid": "ms",
-    "password": "MidbSvlJ",
-    "serialNumber": 0
+payload_valid = {
+    "uid": "lb"
 }
 
-payload_lb = {
-    "uid": "lb",
-    "password": "D15Licz6",
-    "serialNumber": 0
+payload_invalid = {
+    "uid": "nonExistantUID"
 }
 
-payload = json.dumps(payload_lb)
+payload = json.dumps(payload_valid)
 response_revoke = requests.post(url_revoke, headers=headers, data=payload, verify=False)
 print("Test revoke certificate: ", end="")
 test_response(response_revoke, 200)
 
-payload = json.dumps(payload_ms)
+payload = json.dumps(payload_invalid)
 response_revoke = requests.post(url_revoke, headers=headers, data=payload, verify=False)
-print("Test revoke other user's certificate: ", end="")
+print("Test revoke certificate with invalid uid: ", end="")
 test_response(response_revoke, 400)
 
 print("\n" + "-"*80 + "\n")

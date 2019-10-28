@@ -27,48 +27,6 @@ namespace CertServer.DataModifiers
 			_dbContext.SaveChanges();
 		}
 
-		public bool RevokeCertificate(User user, ulong serialNr) 
-		{
-			bool revocationSuccessful;
-
-			using (
-				IDbContextTransaction scope = GetScope()
-			)
-			{
-				PublicCertificate publicCert = _dbContext.PublicCertificates.Find(serialNr);
-
-				if (publicCert == null)
-				{
-					// XXX: Implement logging
-					// logger.LogWarning("Tried to revoke inexistant certificate of user with UID " + user.Uid);
-					revocationSuccessful = false;
-				}
-				else 
-				{
-					if (user.Uid.Equals(publicCert.Uid)) {
-						publicCert.IsRevoked = true;
-						_dbContext.SaveChanges();
-						revocationSuccessful = true;
-					}
-					else {
-						// XXX: Implement logging
-						// logger.LogWarning(
-						// 	String.Format(
-						// 		"Tried to revoke the certificate of user {0} but authenticating for user {1}",
-						// 		publicCert.Uid, 
-						// 		user.Uid
-						// 	)
-						// );
-						revocationSuccessful = false;
-					}
-				}
-
-				scope.Commit();
-			}
-
-			return revocationSuccessful;
-		}
-
 		// Precondition: Called inside a transaction
 		public void RevokeAllCertificatesOfUser(User user)
 		{
