@@ -41,10 +41,10 @@
         path: "/etc/pki/tls/csr/iMovies_{{ansible_hostname}}_tls.csr"
         privatekey_path: "/etc/pki/tls/private/iMovies_{{ansible_hostname}}_tls_key.pem"
 
-        country_name: CH
-        state_or_province_name: Zurich
-        locality_name: Zurich
-        organization_name: iMovies
+        country_name: "{{ COUNTRY_NAME }}"
+        state_or_province_name: "{{ STATE_OR_PROVINCE_NAME }}"
+        locality_name: "{{ LOCALITY_NAME }}"
+        organization_name: "{{ ORGANIZATION_NAME }}"
         common_name: "iMovies {{ansible_hostname}}"
         # Externally reachable servers have the imovies domain as SAN
         subjectAltName: "{{ 'DNS:www.imovies.ch' if ansible_hostname in groups['webservers'] else omit }}"
@@ -79,8 +79,9 @@
         owner: "{{ CORECA_UNAME }}"
         group: "{{ CORECA_UNAME }}"
       with_items:
-        - "/home/{{ CORECA_UNAME }}/tls_certs"
         - "/home/{{ CORECA_UNAME }}/tls_csr"
+        - "/home/{{ CORECA_UNAME }}/tls_certs"
+        - "/home/{{ CORECA_UNAME }}/tls_chains"
 
     - name: Transfer CSR to cert server
       synchronize:
@@ -110,10 +111,19 @@
       with_items:
         - "{{ csr_files_glob.files }}"
 
+    - name: Create certificate chain
+      shell: |
+        cat "/home/{{ CORECA_UNAME }}/tls_certs/{{ item.path | basename | splitext | first }}.crt" \
+        "/home/{{ CORECA_UNAME }}/pki/certs/iMovies_{{ansible_hostname}}_Intermediate_CA.crt" \
+        > "/home/{{ CORECA_UNAME }}/tls_chains/{{ item.path | basename | splitext | first }}.crt"
+      when: FORCE_TLS_CERT_REGEN
+      with_items:
+        - "{{ csr_files_glob.files }}"
+
     - name: Transfer certs to config server
       synchronize:
         mode: pull
-        src: "/home/{{ CORECA_UNAME }}/tls_certs/"
+        src: "/home/{{ CORECA_UNAME }}/tls_chains/"
         dest: "/home/{{ ANSIBLE_UNAME }}/tls_certs/"
         group: false
         owner: false

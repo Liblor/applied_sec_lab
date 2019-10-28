@@ -43,10 +43,10 @@
         path: "/home/{{ CORECA_UNAME }}/pki/csr/iMovies_{{ ansible_hostname }}_Intermediate_CA.csr"
         privatekey_path: "/home/{{ CORECA_UNAME }}/pki/private/iMovies_{{ ansible_hostname }}_Intermediate_CA_key.pem"
 
-        country_name: CH
-        state_or_province_name: Zurich
-        locality_name: Zurich
-        organization_name: iMovies
+        country_name: "{{ COUNTRY_NAME }}"
+        state_or_province_name: "{{ STATE_OR_PROVINCE_NAME }}"
+        locality_name: "{{ LOCALITY_NAME }}"
+        organization_name: "{{ ORGANIZATION_NAME }}"
         common_name: "iMovies {{ ansible_hostname }} intermediate CA"
 
         basic_constraints: "CA:true"

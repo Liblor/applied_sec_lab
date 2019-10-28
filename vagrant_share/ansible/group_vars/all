@@ -3,6 +3,13 @@
 ANSIBLE_UNAME: ansible
 CORECA_UNAME: coreca
 
+# Certificate parameters
+CORE_CA_CN: "iMovies Root CA"
+COUNTRY_NAME: CH
+STATE_OR_PROVINCE_NAME: Zurich
+LOCALITY_NAME: Zurich
+ORGANIZATION_NAME: iMovies
+
 # Folders
 VAGRANT_SHARED_FOLDERNAME: vagrant
 

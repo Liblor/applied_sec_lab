@@ -1,21 +1,21 @@
 ---
-- name: Generate RSA keys for core CA
+- name: Generate RSA keys for root CA
   openssl_privatekey:
     path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA_key.pem"
     type: RSA
     size: 4096
     force: "{{ FORCE_ROOT_CA_CERT_REGEN }}"
 
-- name: Create CSR
+- name: Create CSR for root CA
   openssl_csr:
     path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA.csr"
     privatekey_path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA_key.pem"
 
-    country_name: CH
-    state_or_province_name: Zurich
-    locality_name: Zurich
-    organization_name: iMovies
-    common_name: "iMovies Core CA"
+    country_name: "{{ COUNTRY_NAME }}"
+    state_or_province_name: "{{ STATE_OR_PROVINCE_NAME }}"
+    locality_name: "{{ LOCALITY_NAME }}"
+    organization_name: "{{ ORGANIZATION_NAME }}"
+    common_name: "{{ CORE_CA_CN }}"
 
     basic_constraints: "CA:true"
     key_usage:
@@ -25,7 +25,7 @@
 
     force: "{{ FORCE_ROOT_CA_CERT_REGEN }}"
 
-- name: Create Certificate
+- name: Create Certificate for root CA
   openssl_certificate:
     path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA.crt"
     privatekey_path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA_key.pem"

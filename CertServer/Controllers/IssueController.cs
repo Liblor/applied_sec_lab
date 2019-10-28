@@ -162,10 +162,10 @@ namespace CertServer.Controllers
 						// It is necessary to use this constructor to be able to sign keys
 						// that use different algorithms than the one for the core CA's key
 						userCert = req.Create(
-							coreCACert.IssuerName,
+							coreCACert.SubjectName,
 							X509SignatureGenerator.CreateForRSA( 
 								(RSA) coreCACert.PrivateKey,
-								RSASignaturePadding.Pkcs1
+								RSASignaturePadding.Pss
 							),
 							DateTimeOffset.UtcNow,
 							DateTimeOffset.UtcNow.AddDays(CAConfig.UserCertValidityPeriod),
@@ -194,6 +194,7 @@ namespace CertServer.Controllers
 
 					Pkcs12SafeContents pkcs12Cert = new Pkcs12SafeContents();
 					pkcs12Cert.AddCertificate(userCert);
+					pkcs12Cert.AddCertificate(coreCACert);
 					pkcs12Builder.AddSafeContentsUnencrypted(pkcs12Cert);
 
 					Pkcs12SafeContents pkcs12PrivKey = new Pkcs12SafeContents();
