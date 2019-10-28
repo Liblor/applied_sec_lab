@@ -17,10 +17,12 @@ namespace WebServer.Models
 
                 context.Users.Add(new User
                 {
-                    Id = "test.user@imovies.local",
+                    Id = "test",
                     Email = "test.user@imovies.local",
                     FirstName = "Test",
-                    LastName = "User"
+                    LastName = "User",
+                    // PasswordHash = SHA1("test")
+                    PasswordHash = "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3"
                 });
 
                 context.SaveChanges();

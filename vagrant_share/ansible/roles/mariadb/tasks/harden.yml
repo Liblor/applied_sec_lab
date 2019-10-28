@@ -31,4 +31,5 @@
   command: 'mysql -NBe "{{ item }}"'
   with_items:
     - ALTER USER '{{ mysql_root_username }}'@'localhost' IDENTIFIED BY '{{ mysql_root_password }}'
+  no_log: True
   changed_when: false

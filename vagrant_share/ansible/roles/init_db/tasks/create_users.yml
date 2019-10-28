@@ -6,13 +6,9 @@
     password: "{{ mysql_aslcert01_password }}"
     priv: >-
       imovies.users:SELECT
-      (uid, lastname, firstname, email, pwd)/imovies.users:UPDATE
-      (pwd)/imovies_ca.public_certificates:SELECT
-      (serial_number, uid, public_cert, revoked)/imovies_ca.public_certificates:INSERT
-      (serial_number, uid, public_cert, revoked)/imovies_ca.public_certificates:UPDATE
-      (serial_number, uid, public_cert, revoked)/imovies_ca.private_certificates:SELECT
-      (sk_id, uid, private_cert)/imovies_ca.private_certificates:UPDATE
-      (sk_id, uid, private_cert)/imovies_ca.private_certificates:INSERT
+      (uid, lastname, firstname, email, pwd),UPDATE
+      (pwd)/imovies_ca.public_certificates:SELECT,INSERT,UPDATE
+      (serial_number, uid, public_cert, revoked)/imovies_ca.private_certificates:SELECT,INSERT,UPDATE
       (sk_id, uid, private_cert)
     host: aslcert01
     state: present
@@ -25,13 +21,9 @@
     password: "{{ mysql_aslcert02_password }}"
     priv: >-
       imovies.users:SELECT
-      (uid, lastname, firstname, email, pwd)/imovies.users:UPDATE
-      (pwd)/imovies_ca.public_certificates:SELECT
-      (serial_number, uid, public_cert, revoked)/imovies_ca.public_certificates:INSERT
-      (serial_number, uid, public_cert, revoked)/imovies_ca.public_certificates:UPDATE
-      (serial_number, uid, public_cert, revoked)/imovies_ca.private_certificates:SELECT
-      (sk_id, uid, private_cert)/imovies_ca.private_certificates:UPDATE
-      (sk_id, uid, private_cert)/imovies_ca.private_certificates:INSERT
+      (uid, lastname, firstname, email, pwd),UPDATE
+      (pwd)/imovies_ca.public_certificates:SELECT,INSERT,UPDATE
+      (serial_number, uid, public_cert, revoked)/imovies_ca.private_certificates:SELECT,INSERT,UPDATE
       (sk_id, uid, private_cert)
     host: aslcert02
     state: present
@@ -43,9 +35,8 @@
     name: "{{ mysql_aslweb01_username }}"
     password: "{{ mysql_aslweb01_password }}"
     priv: >-
-      imovies.users:SELECT
-      (uid, lastname, firstname, email, pwd)/imovies.users:UPDATE
-      (lastname, firstname, email)/imovies_ca.public_certificates:SELECT
+      imovies.users:SELECT,UPDATE
+      (uid, lastname, firstname, email, pwd)/imovies_ca.public_certificates:SELECT
       (serial_number, uid, public_cert, revoked)
     host: aslweb01
     state: present
@@ -57,9 +48,8 @@
     name: "{{ mysql_aslweb02_username }}"
     password: "{{ mysql_aslweb02_password }}"
     priv: >-
-      imovies.users:SELECT
-      (uid, lastname, firstname, email, pwd)/imovies.users:UPDATE
-      (lastname, firstname, email)/imovies_ca.public_certificates:SELECT
+      imovies.users:SELECT,UPDATE
+      (uid, lastname, firstname, email, pwd)/imovies_ca.public_certificates:SELECT
       (serial_number, uid, public_cert, revoked)
     host: aslweb02
     state: present
