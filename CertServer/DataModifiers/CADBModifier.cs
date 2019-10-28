@@ -70,6 +70,21 @@ namespace CertServer.DataModifiers
 		}
 
 		// Precondition: Called inside a transaction
+		public void RevokeAllCertificatesOfUser(User user)
+		{
+			var unrevokedCertificates = _dbContext.PublicCertificates.Where(
+				p => p.Uid.Equals(user.Uid) && !p.IsRevoked
+			);
+
+			foreach (PublicCertificate pubCert in unrevokedCertificates)
+			{
+				pubCert.IsRevoked = true;
+			}
+
+			_dbContext.SaveChanges();
+		}
+
+		// Precondition: Called inside a transaction
 		public SerialNumber GetMaxSerialNr()
 		{
 			ulong newSerialNr;
@@ -116,18 +131,16 @@ namespace CertServer.DataModifiers
             crlGen.SetThisUpdate(now);
             crlGen.SetNextUpdate(now.AddMinutes(10));
 
-			foreach (PublicCertificate pubCert in _dbContext.PublicCertificates)
+			var revokedPubCerts = _dbContext.PublicCertificates.Where(p => p.IsRevoked);
+
+			foreach (PublicCertificate pubCert in revokedPubCerts)
 			{
-				if (pubCert.IsRevoked)
-				{
-					//XXX: add crlreason to pubCert DB
-					Console.WriteLine("Serial nr: " + pubCert.SerialNr + " " + BitConverter.GetBytes(pubCert.SerialNr));
-					crlGen.AddCrlEntry(
-						new Org.BouncyCastle.Math.BigInteger(BitConverter.GetBytes(pubCert.SerialNr)),
-						now,
-						Org.BouncyCastle.Asn1.X509.CrlReason.KeyCompromise
-					);
-				}
+				//XXX: add crlreason to pubCert DB
+				crlGen.AddCrlEntry(
+					new Org.BouncyCastle.Math.BigInteger(pubCert.GetSerialNumber().SerialNrBytes),
+					now,
+					Org.BouncyCastle.Asn1.X509.CrlReason.KeyCompromise
+				);
 			}
 
 			crlGen.AddExtension(

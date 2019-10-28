@@ -172,7 +172,8 @@ namespace CertServer.Controllers
 							serialNr.SerialNrBytes
 						);
 
-						// XXX: Send privKeyExport to backup server
+						// Revoke all other certificates of this user
+						_caDBModifier.RevokeAllCertificatesOfUser(user);
 
 						// Add certificate to DB
 						_caDBModifier.AddCertificate(
@@ -188,6 +189,8 @@ namespace CertServer.Controllers
 
 						scope.Commit();
 					}
+
+					// XXX: Send privKeyExport to backup server
 
 					// Create pkcs12 file including the user certificate and private key
 					Pkcs12Builder pkcs12Builder = new Pkcs12Builder();

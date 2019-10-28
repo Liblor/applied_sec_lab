@@ -21,5 +21,12 @@ namespace CertServer.Models
 		[Column("revoked", TypeName = "boolean")]
 		[Required]
 		public bool IsRevoked { get; set; }
+
+		public SerialNumber GetSerialNumber()
+		{
+			return new SerialNumber {
+				SerialNr = SerialNr
+			};
+		}
 	}
 }
