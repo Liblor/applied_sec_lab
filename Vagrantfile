@@ -217,6 +217,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 clientconf.vm.network "private_network",
                     ip: "#{client_info[:extranet_ip]}",
                     virtualbox__intnet: VB_EXTRANET_NAME
+                clientconf.vm.synced_folder "./vagrant_share", "/vagrant", SharedFoldersEnableSymlinksCreate: false
 
                 # Add extranet-connected host names
                 hosts.each do |host_cat_name, host_cat_boxes|
@@ -247,6 +248,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     # Install Firefox
                     sudo apt-get update
                     sudo apt-get install -y firefox-esr
+
+                    # Install root certificate
+                    sudo cp /vagrant/key_store/iMovies_Root_CA.crt /usr/share/ca-certificates/mozilla/
+                    sudo ln -s /usr/share/ca-certificates/mozilla/iMovies_Root_CA.crt /etc/ssl/certs/iMovies_Root_CA.crt
+
+                    # Fix X11 forwarding for mac
+                    sudo sed -i -e 's/#X11UseLocalhost yes/X11UseLocalhost no/g' /etc/ssh/sshd_config
+                    sudo reboot
                 SHELL
             end # clientconf
         end # client_cat_boxes.each
