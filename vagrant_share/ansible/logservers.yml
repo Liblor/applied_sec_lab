@@ -1,5 +1,2 @@
 ---
 - hosts: logservers
-  become: yes
-  roles:
-    - add-user
