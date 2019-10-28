@@ -32,13 +32,14 @@ url_issue = f"{protocol}://{host}/api/issue"
 url_revoke = f"{protocol}://{host}/api/revoke"
 url_crl = f"{protocol}://{host}/api/crl"
 url_dl_priv = f"{protocol}://{host}/api/downloadprivatekey"
+url_change_pw = f"{protocol}://{host}/api/changepassword"
 
-print("\n" + "-"*80)
+print("\n" + "-"*80 + "\n")
 response_swagger = requests.get(url_swagger, verify=False)
 print("Test get swagger json: ", end="")
 test_response(response_swagger, 200)
 
-print("\n" + "-"*80)
+print("\n" + "-"*80 + "\n")
 response_ciphersuites = requests.get(url_ciphersuite, verify=False)
 print("Test get swagger json: ", end="")
 test_response(response_ciphersuites, 200)
@@ -99,10 +100,13 @@ response_revoke = requests.post(url_revoke, headers=headers, data=payload, verif
 print("Test revoke other user's certificate: ", end="")
 test_response(response_revoke, 400)
 
-print("\n" + "-"*80)
+print("\n" + "-"*80 + "\n")
+
 response_crl = requests.get(url_crl, verify=False)
 print("Test get crl: ", end="")
 test_response(response_crl, 200)
+
+print("\n" + "-"*80 + "\n")
 
 payload_lb = {
     "uid": "lb",
@@ -113,3 +117,43 @@ payload = json.dumps(payload_lb)
 response_dl_priv = requests.post(url_dl_priv, headers=headers, data=payload, verify=False)
 print("Test private key download: ", end="")
 test_response(response_dl_priv, 200)
+
+print("\n" + "-"*80 + "\n")
+
+newPw = "NG3xk0zp"
+oldPw = "D15Licz6"
+
+payload_invalid = {
+    "uid": "lb",
+    "oldPassword": "invalidPW",
+    "newPassword": newPw
+}
+
+payload_valid = {
+    "uid": "lb",
+    "oldPassword": oldPw,
+    "newPassword": newPw
+}
+
+payload_restore = {
+    "uid": "lb",
+    "oldPassword": newPw,
+    "newPassword": oldPw
+}
+
+payload = json.dumps(payload_invalid)
+response_change_pw = requests.post(url_change_pw, headers=headers, data=payload, verify=False)
+print("Test invalid password change: ", end="")
+test_response(response_change_pw, 401)
+
+payload = json.dumps(payload_valid)
+response_change_pw = requests.post(url_change_pw, headers=headers, data=payload, verify=False)
+print("Test valid password change: ", end="")
+test_response(response_change_pw, 200)
+
+payload = json.dumps(payload_restore)
+response_change_pw = requests.post(url_change_pw, headers=headers, data=payload, verify=False)
+print("Restore old password: ", end="")
+test_response(response_change_pw, 200)
+
+print("\n" + "-"*80 + "\n")
