@@ -8,7 +8,7 @@ namespace CertServer
 		public static readonly string APIName = "Core CA API";
 		public static readonly string APIVersion = "v1";
 
-		public static readonly string CrlDistributionPoint = CAConfig.APIBasePath + "/cdp";
+		public static readonly string CrlDistributionPoint = "https://www.imovies.ch/crl/revoked.crl";
 
 		public static readonly string CoreCACertPath = "/home/coreca/pki/private/iMovies_"
 			+ System.Environment.MachineName

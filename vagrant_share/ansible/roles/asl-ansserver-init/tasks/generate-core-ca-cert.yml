@@ -16,6 +16,8 @@
     locality_name: "{{ LOCALITY_NAME }}"
     organization_name: "{{ ORGANIZATION_NAME }}"
     common_name: "{{ CORE_CA_CN }}"
+    # Add when upgraded to ansible 2.8
+    # use_common_name_for_san: false
 
     basic_constraints: "CA:true"
     key_usage:

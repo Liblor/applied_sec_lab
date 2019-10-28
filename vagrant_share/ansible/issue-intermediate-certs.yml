@@ -8,11 +8,11 @@
         path: "{{ item }}"
         state: directory
         mode: 0700
-        owner: "{{ ANSIBLE_UNAME }}"
-        group: "{{ ANSIBLE_UNAME }}"
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
       with_items:
-        - "/home/{{ ANSIBLE_UNAME }}/intermediate_certs"
-        - "/home/{{ ANSIBLE_UNAME }}/intermediate_csr"
+        - "/home/{{ UNAME }}/intermediate_certs"
+        - "/home/{{ UNAME }}/intermediate_csr"
 
 - hosts: certservers
   become: yes
@@ -21,33 +21,34 @@
       file:
         path: "{{ item }}"
         state: directory
-        owner: "{{ CORECA_UNAME }}"
-        group: "{{ CORECA_UNAME }}"
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
         mode: 0750
       with_items:
-        - "/home/{{ CORECA_UNAME }}/pki/private"
-        - "/home/{{ CORECA_UNAME }}/pki/certs"
-        - "/home/{{ CORECA_UNAME }}/pki/csr"
+        - "/home/{{ UNAME }}/pki/private"
+        - "/home/{{ UNAME }}/pki/certs"
+        - "/home/{{ UNAME }}/pki/csr"
 
     - name: Generate RSA keys for intermediate cert
       openssl_privatekey:
-        path: "/home/{{ CORECA_UNAME }}/pki/private/iMovies_{{ ansible_hostname }}_Intermediate_CA_key.pem"
+        path: "/home/{{ UNAME }}/pki/private/iMovies_{{ ansible_hostname }}_Intermediate_CA_key.pem"
         type: RSA
         size: 4096
-        owner: "{{ CORECA_UNAME }}"
-        group: "{{ CORECA_UNAME }}"
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
         force: "{{ FORCE_INTERMEDIATE_CA_CERT_REGEN }}"
 
     - name: Create intermediate cert CSR
       openssl_csr:
-        path: "/home/{{ CORECA_UNAME }}/pki/csr/iMovies_{{ ansible_hostname }}_Intermediate_CA.csr"
-        privatekey_path: "/home/{{ CORECA_UNAME }}/pki/private/iMovies_{{ ansible_hostname }}_Intermediate_CA_key.pem"
+        path: "/home/{{ UNAME }}/pki/csr/iMovies_{{ ansible_hostname }}_Intermediate_CA.csr"
+        privatekey_path: "/home/{{ UNAME }}/pki/private/iMovies_{{ ansible_hostname }}_Intermediate_CA_key.pem"
 
         country_name: "{{ COUNTRY_NAME }}"
         state_or_province_name: "{{ STATE_OR_PROVINCE_NAME }}"
         locality_name: "{{ LOCALITY_NAME }}"
         organization_name: "{{ ORGANIZATION_NAME }}"
         common_name: "iMovies {{ ansible_hostname }} intermediate CA"
+        subject_alt_name: "DNS:{{ ansible_hostname }}"
 
         basic_constraints: "CA:true"
         key_usage:
@@ -55,15 +56,15 @@
           - cRLSign
           - digitalSignature
 
-        owner: "{{ ANSIBLE_UNAME }}"
-        group: "{{ ANSIBLE_UNAME }}"
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
         force: "{{ FORCE_INTERMEDIATE_CA_CERT_REGEN }}"
 
     - name: Transfer intermediate CSR to config server
       synchronize:
         mode: pull
-        src: "/home/{{ CORECA_UNAME }}/pki/csr/iMovies_{{ ansible_hostname }}_Intermediate_CA.csr"
-        dest: "/home/{{ ANSIBLE_UNAME }}/intermediate_csr/"
+        src: "/home/{{ UNAME }}/pki/csr/iMovies_{{ ansible_hostname }}_Intermediate_CA.csr"
+        dest: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/intermediate_csr/"
         group: false
         owner: false
       delegate_to: "{{ groups['ansservers'][0] }}"
@@ -74,16 +75,16 @@
   tasks:
     - name: Create intermediate certificate
       openssl_certificate:
-        path: "/home/{{ ANSIBLE_UNAME }}/intermediate_certs/iMovies_{{item}}_Intermediate_CA.crt"
-        csr_path: "/home/{{ ANSIBLE_UNAME }}/intermediate_csr/iMovies_{{item}}_Intermediate_CA.csr"
+        path: "/home/{{ UNAME }}/intermediate_certs/iMovies_{{item}}_Intermediate_CA.crt"
+        csr_path: "/home/{{ UNAME }}/intermediate_csr/iMovies_{{item}}_Intermediate_CA.csr"
         provider: ownca
         ownca_path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA.crt"
         ownca_privatekey_path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA_key.pem"
         # Hack since the "+730d" syntax of this template seems to be broken
         ownca_not_after: "{{ lookup('pipe','date +\"%Y%m%d%H%M%SZ\" -d \"+730 days\"') }}"
 
-        owner: "{{ ANSIBLE_UNAME }}"
-        group: "{{ ANSIBLE_UNAME }}"
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
         force: "{{ FORCE_INTERMEDIATE_CA_CERT_REGEN }}"
       with_inventory_hostnames:
         - certservers
@@ -93,28 +94,28 @@
   tasks:
     - name: Distribute intermediate CA certificates
       synchronize:
-        src: "/home/{{ ANSIBLE_UNAME }}/intermediate_certs/iMovies_{{ansible_hostname}}_Intermediate_CA.crt"
-        dest: /home/{{ CORECA_UNAME }}/pki/certs/
+        src: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/intermediate_certs/iMovies_{{ansible_hostname}}_Intermediate_CA.crt"
+        dest: /home/{{ UNAME }}/pki/certs/
         owner: false
         group: false
         rsync_path: "sudo rsync"
 
     - name: Fix intermediate CA certificates owner
       file:
-        path: "/home/{{ CORECA_UNAME }}/pki/certs/iMovies_{{ansible_hostname}}_Intermediate_CA.crt"
-        owner: "{{ CORECA_UNAME }}"
-        group: "{{ CORECA_UNAME }}"
+        path: "/home/{{ UNAME }}/pki/certs/iMovies_{{ansible_hostname}}_Intermediate_CA.crt"
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
 
     - name: Combine certificate and private key
       openssl_pkcs12:
         action: export
-        path: "/home/{{ CORECA_UNAME }}/pki/private/iMovies_{{ansible_hostname}}_Intermediate_CA_cert_and_priv_key.pfx"
-        privatekey_path: "/home/{{ CORECA_UNAME }}/pki/private/iMovies_{{ansible_hostname}}_Intermediate_CA_key.pem"
-        certificate_path: "/home/{{ CORECA_UNAME }}/pki/certs/iMovies_{{ansible_hostname}}_Intermediate_CA.crt"
+        path: "/home/{{ UNAME }}/pki/private/iMovies_{{ansible_hostname}}_Intermediate_CA_cert_and_priv_key.pfx"
+        privatekey_path: "/home/{{ UNAME }}/pki/private/iMovies_{{ansible_hostname}}_Intermediate_CA_key.pem"
+        certificate_path: "/home/{{ UNAME }}/pki/certs/iMovies_{{ansible_hostname}}_Intermediate_CA.crt"
         friendly_name: "{{ansible_hostname}}"
         state: present
 
-        owner: "{{ CORECA_UNAME }}"
-        group: "{{ CORECA_UNAME }}"
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
         mode: 0600
         force: "{{ FORCE_INTERMEDIATE_CA_CERT_REGEN }}"
