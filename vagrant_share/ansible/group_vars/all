@@ -1,8 +1,4 @@
 ---
-# User names
-ANSIBLE_UNAME: ansible
-CORECA_UNAME: coreca
-
 # Certificate parameters
 CORE_CA_CN: "iMovies Root CA"
 COUNTRY_NAME: CH

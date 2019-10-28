@@ -3,6 +3,7 @@
   connection: local
   become: yes
   roles:
+    - add-user
     - pyopenssl
     - asl-ansserver-init
   tasks:
