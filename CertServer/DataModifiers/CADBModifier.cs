@@ -29,34 +29,47 @@ namespace CertServer.DataModifiers
 
 		public bool RevokeCertificate(User user, ulong serialNr) 
 		{
-			PublicCertificate publicCert = _dbContext.PublicCertificates.Find(serialNr);
+			bool revocationSuccessful;
 
-			if (publicCert == null)
+			using (
+				IDbContextTransaction scope = GetScope()
+			)
 			{
-				// XXX: Implement logging
-				// logger.LogWarning("Tried to revoke inexistant certificate of user with UID " + user.Uid);
-				return false;
+				PublicCertificate publicCert = _dbContext.PublicCertificates.Find(serialNr);
+
+				if (publicCert == null)
+				{
+					// XXX: Implement logging
+					// logger.LogWarning("Tried to revoke inexistant certificate of user with UID " + user.Uid);
+					revocationSuccessful = false;
+				}
+				else 
+				{
+					if (user.Uid.Equals(publicCert.Uid)) {
+						publicCert.IsRevoked = true;
+						_dbContext.SaveChanges();
+						revocationSuccessful = true;
+					}
+					else {
+						// XXX: Implement logging
+						// logger.LogWarning(
+						// 	String.Format(
+						// 		"Tried to revoke the certificate of user {0} but authenticating for user {1}",
+						// 		publicCert.Uid, 
+						// 		user.Uid
+						// 	)
+						// );
+						revocationSuccessful = false;
+					}
+				}
+
+				scope.Commit();
 			}
 
-			if (user.Uid.Equals(publicCert.Uid)) {
-				publicCert.IsRevoked = true;
-				_dbContext.SaveChanges();
-				return true;
-			}
-			else {
-				// XXX: Implement logging
-				// logger.LogWarning(
-				// 	String.Format(
-				// 		"Tried to revoke the certificate of user {0} but authenticating for user {1}",
-				// 		publicCert.Uid, 
-				// 		user.Uid
-				// 	)
-				// );
-				return false;
-			}
-
+			return revocationSuccessful;
 		}
 
+		// Precondition: Called inside a transaction
 		public SerialNumber GetMaxSerialNr()
 		{
 			ulong newSerialNr;
@@ -145,8 +158,23 @@ namespace CertServer.DataModifiers
 		 */
 		public void AddPrivateKey(PrivateKey privKey)
 		{
-			_dbContext.PrivateKeys.Update(privKey);
-			_dbContext.SaveChanges();
+			// Transaction is necessary to prevent read before write race condition
+			// when private keys for the same uids would be added simultaneously.
+			using (
+				IDbContextTransaction scope = GetScope()
+			)
+			{
+				if (_dbContext.PrivateKeys.Any(p => p.Uid.Equals(privKey.Uid)))
+				{
+					_dbContext.PrivateKeys.Update(privKey);
+				}
+				else
+				{
+					_dbContext.PrivateKeys.Add(privKey);
+				}
+				_dbContext.SaveChanges();
+				scope.Commit();
+			}
 		}
 
 		public PrivateKey GetPrivateKey(User user)

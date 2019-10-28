@@ -1,5 +1,2 @@
 ---
 - hosts: bkservers
-  become: yes
-  roles:
-    - add-user

@@ -2,7 +2,6 @@
 - hosts: certservers
   become: yes
   roles:
-    - add-user
     - aspdotnet
     - pyopenssl
     - asl-certserver
