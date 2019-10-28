@@ -40,6 +40,7 @@ namespace CertServer.Controllers
 		/// <response code="401">Unauthorized request</response>
 		[Produces("application/json")]
 		[ProducesResponseType(200)]
+		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
 		[HttpPost("[controller]")]
 		public IActionResult RevokeCertificate(RevokeRequest revokeRequest)

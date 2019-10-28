@@ -1,8 +1,9 @@
-using CertServer.Models;
+using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Security.Cryptography;
 
 using CertServer.Data;
+using CertServer.Models;
 
 namespace CertServer.DataModifiers
 {
@@ -15,17 +16,43 @@ namespace CertServer.DataModifiers
             _dbContext = dbContext;
         }
 
-		public User AuthenticateAndGetUser(string uid, string pw)
+		public IDbContextTransaction GetScope()
+		{
+			return _dbContext.Database.BeginTransaction();
+		}
+
+		private string ComputePasswordHash(string password)
 		{
 			SHA1 sha1Managed = new SHA1Managed();
-			string pwHash = BitConverter.ToString(
+			return BitConverter.ToString(
 				sha1Managed.ComputeHash(
-					System.Text.Encoding.ASCII.GetBytes(pw)
+					System.Text.Encoding.ASCII.GetBytes(password)
 				)
 			).Replace("-","").ToLower();
+		}
 
+		private bool MeetsPasswordPolicy(string password)
+		{
+			// XXX: Check that the new password meets the password policy
+			return true;
+		}
+
+		public bool ChangePassword(User user, string newPassword)
+		{
+			if (MeetsPasswordPolicy(newPassword))
+			{
+				user.PasswordHash = ComputePasswordHash(newPassword);
+				_dbContext.SaveChanges();
+				return true;
+			}
+
+			return false;
+		}
+
+		public User AuthenticateAndGetUser(string uid, string password)
+		{
 			User user = _dbContext.Users.Find(uid);
-			if (user != null && pwHash.Equals(user.PasswordHash))
+			if (user != null && user.PasswordHash.Equals(ComputePasswordHash(password)))
 			{
 				return user;
 			}
