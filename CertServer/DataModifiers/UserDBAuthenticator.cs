@@ -61,5 +61,10 @@ namespace CertServer.DataModifiers
 				return null;
 			}
 		}
+
+		public User GetUser(string uid)
+		{
+			return _dbContext.Users.Find(uid);
+		}
 	}
 }
