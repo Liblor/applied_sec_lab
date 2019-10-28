@@ -5,11 +5,8 @@
   roles:
     - pyopenssl
     - asl-ansserver-init
-
-- hosts: all, !ansservers
-  become: yes
   tasks:
-    - name: Distribute core CA certificate
+    - name: Store CA certificate on ansible host
       synchronize:
         src: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA.crt"
         dest: /usr/share/ca-certificates/mozilla/
@@ -20,7 +17,21 @@
         owner: root
         group: root
 
-    - name: Create symlink to core CA certificate
+- hosts: all, !ansservers
+  become: yes
+  tasks:
+    - name: Distribute root CA certificate
+      synchronize:
+        src: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA.crt"
+        dest: /usr/share/ca-certificates/mozilla/
+
+    - name: Chown root CA certificate
+      file:
+        path: /usr/share/ca-certificates/mozilla/iMovies_Root_CA.crt
+        owner: root
+        group: root
+
+    - name: Create symlink to root CA certificate
       file:
         src: /usr/share/ca-certificates/mozilla/iMovies_Root_CA.crt
         dest: /etc/ssl/certs/iMovies_Root_CA.crt

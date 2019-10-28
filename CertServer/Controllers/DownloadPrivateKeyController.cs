@@ -53,7 +53,11 @@ namespace CertServer.Controllers
 				}
 				else
 				{
-					return Ok(privKey);
+					return Ok(
+						new UserCertificate {
+							Pkcs12Archive = privKey.KeyPkcs12
+						}
+					);
 				}
 			}
 			else {
