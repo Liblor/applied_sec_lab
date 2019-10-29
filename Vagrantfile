@@ -4,7 +4,7 @@
 VAGRANTFILE_API_VERSION = "2"
 VB_INTRANET_NAME = "asl_intranet"
 # Simulate "public internet" clients through a different VirtualBox virtual network
-VB_EXTRANET_NAME = "asl_extranet"
+VB_PUBLIC_NET_NAME = "asl_public_net"
 OS_BOX = "debian/buster64"
 
 ANSIBLE_PASSPHRASE_FILE = "ansible_passphrase.txt"
@@ -48,7 +48,7 @@ hosts = {
   "webservers" => {
       "aslweb01" => {
           :ip => "10.0.0.31",
-          :extranet_ip => "172.16.0.31"
+          :public_net_ip => "172.16.0.31"
       },
       # "aslweb02" => { :ip => "10.0.0.32" },
   },
@@ -65,8 +65,8 @@ hosts = {
 
 # TODO: Create client outside company network for testing
 clients = {
-    "extranetclients" => {
-        "aslclient01" => { :extranet_ip => "172.16.0.11" },
+    "publicnetclients" => {
+        "aslclient01" => { :public_net_ip => "172.16.0.11" },
     },
 }
 
@@ -93,10 +93,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     ip: "#{info[:ip]}",
                     virtualbox__intnet: VB_INTRANET_NAME
 
-                if info.key?(:extranet_ip)
+                if info.key?(:public_net_ip)
                     hostconf.vm.network "private_network",
-                        ip: "#{info[:extranet_ip]}",
-                        virtualbox__intnet: VB_EXTRANET_NAME
+                        ip: "#{info[:public_net_ip]}",
+                        virtualbox__intnet: VB_PUBLIC_NET_NAME
                 end
 
                 hostconf.vm.provision "shell", inline: <<-SHELL
@@ -222,19 +222,19 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 clientconf.vm.box = OS_BOX
                 clientconf.vm.hostname = client_hostname
                 clientconf.vm.network "private_network",
-                    ip: "#{client_info[:extranet_ip]}",
-                    virtualbox__intnet: VB_EXTRANET_NAME
+                    ip: "#{client_info[:public_net_ip]}",
+                    virtualbox__intnet: VB_PUBLIC_NET_NAME
                 clientconf.vm.synced_folder "./vagrant_share", "/vagrant", SharedFoldersEnableSymlinksCreate: false
 
-                # Add extranet-connected host names
+                # Add public-net-connected host names
                 hosts.each do |host_cat_name, host_cat_boxes|
                     host_cat_boxes.each do |host_name, host_info|
-                        if host_info.key?(:extranet_ip)
+                        if host_info.key?(:public_net_ip)
                             clientconf.vm.provision "shell", inline: <<-SHELL
                                 # Add hostname
-                                echo "#{host_info[:extranet_ip]} #{host_name}" | sudo tee -a /etc/hosts
+                                echo "#{host_info[:public_net_ip]} #{host_name}" | sudo tee -a /etc/hosts
                             SHELL
-                        end # if extranet_ip exists
+                        end # if public_net_ip exists
                     end # host_peer_category.each
                 end # hosts.each (peer)
 
