@@ -1,4 +1,5 @@
 ---
+- import_playbook: common.yml
 - import_playbook: certservers.yml
 - import_playbook: ansserver.yml
 - import_playbook: bkservers.yml

@@ -26,8 +26,8 @@ namespace CertServer.Models
 			{
 				CipherSuite cipherSuite = (CipherSuite) obj;
 
-				return cipherSuite.Alg == Alg
-					&& cipherSuite.HashAlg == HashAlg
+				return cipherSuite.Alg.Equals(Alg)
+					&& cipherSuite.HashAlg.Equals(HashAlg)
 					&& cipherSuite.KeySize == KeySize;
 			}
 			return (obj is CipherSuite);
