@@ -1,4 +1,5 @@
 using CertServer.Models;
+using CoreCA.DataModel;
 using Microsoft.EntityFrameworkCore;
 
 namespace CertServer

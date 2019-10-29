@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using WebServer.Models;
+﻿using CoreCA.DataModel;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebServer
 {

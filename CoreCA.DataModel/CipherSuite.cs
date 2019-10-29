@@ -1,18 +1,11 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace CertServer.Models
+namespace CoreCA.DataModel
 {
-	public static class CipherSuiteHelper 
-	{
-		public static bool IsVaildCipherSuite(CipherSuite cipherSuite)
-		{
-			return Array.Exists(CAConfig.CipherSuites, elem => elem.Equals(cipherSuite));
-		}
-	}
-
 	public class CipherSuite
 	{
+        // TODO: consider replacing string Alg/HashAlg fields with enums
 		[Required]
 		public string Alg { get; set; }
 		[Required]
