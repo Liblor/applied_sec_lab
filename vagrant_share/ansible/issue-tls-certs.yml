@@ -102,13 +102,13 @@
 
     # Loop over all files in tls_csr and sign their certificate, the name of which
     # is for <name>.csr --> <name>.crt
-    - name: Gather CSR's to sign
+    - name: Gather CSRs to sign
       find:
         paths: "/home/{{ UNAME }}/tls_csr"
         patterns: "*.csr"
       register: csr_files_glob
 
-    - name: Sign remote server CSR's
+    - name: Sign remote server CSRs
       openssl_certificate:
         path: "/home/{{ UNAME }}/tls_certs/{{ item.path | basename | splitext | first }}.crt"
         csr_path: "{{ item.path }}"
@@ -147,7 +147,7 @@
         src: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/tls_certs/iMovies_{{ ansible_hostname }}_tls.crt"
         dest: /etc/pki/tls/certs/
 
-    - name: Fix certificate permisions
+    - name: Fix certificate permissions
       file:
         path: "/etc/pki/tls/certs/iMovies_{{ ansible_hostname }}_tls.crt"
         owner: root
