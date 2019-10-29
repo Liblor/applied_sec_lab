@@ -3,6 +3,8 @@
 
 VAGRANTFILE_API_VERSION = "2"
 VB_INTRANET_NAME = "asl_intranet"
+# Simulate "public internet" clients through a different VirtualBox virtual network
+VB_PUBLIC_NET_NAME = "asl_public_net"
 OS_BOX = "debian/buster64"
 
 ANSIBLE_PASSPHRASE_FILE = "ansible_passphrase.txt"
@@ -13,6 +15,7 @@ MASTER_MEM = 1024
 REMOTE_MEM = 512
 CPU_CAP_PERCENTAGE = 60
 VRAM = 8
+CLIENT_VRAM = 64
 
 # List of all hosts
 # Naming:
@@ -45,7 +48,10 @@ hosts = {
   #     "asllegDB02" => { :ip => "10.0.0.52" },
   },
   "webservers" => {
-      "aslweb01" => { :ip => "10.0.0.31" },
+      "aslweb01" => {
+          :ip => "10.0.0.31",
+          :public_net_ip => "172.16.0.31"
+      },
       # "aslweb02" => { :ip => "10.0.0.32" },
   },
   # "ldservers" => {
@@ -60,7 +66,11 @@ hosts = {
 }
 
 # TODO: Create client outside company network for testing
-# clients = {}
+clients = {
+    "publicnetclients" => {
+        "aslclient01" => { :public_net_ip => "172.16.0.11" },
+    },
+}
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.provider "virtualbox"
@@ -84,6 +94,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 hostconf.vm.network "private_network",
                     ip: "#{info[:ip]}",
                     virtualbox__intnet: VB_INTRANET_NAME
+
+                if info.key?(:public_net_ip)
+                    hostconf.vm.network "private_network",
+                        ip: "#{info[:public_net_ip]}",
+                        virtualbox__intnet: VB_PUBLIC_NET_NAME
+                end
 
                 hostconf.vm.provision "shell", inline: <<-SHELL
                     # Add ansible user
@@ -202,6 +218,56 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end # master.each
 
     # Create clients with VirtualBox GUI
-    # TODO
+    clients.each do |client_cat_name, client_cat_boxes|
+        client_cat_boxes.each do |client_hostname, client_info|
+            config.vm.define client_hostname do |clientconf|
+                clientconf.vm.box = OS_BOX
+                clientconf.vm.hostname = client_hostname
+                clientconf.vm.network "private_network",
+                    ip: "#{client_info[:public_net_ip]}",
+                    virtualbox__intnet: VB_PUBLIC_NET_NAME
+                clientconf.vm.synced_folder "./vagrant_share", "/vagrant", SharedFoldersEnableSymlinksCreate: false
+
+                # Add public-net-connected host names
+                hosts.each do |host_cat_name, host_cat_boxes|
+                    host_cat_boxes.each do |host_name, host_info|
+                        if host_info.key?(:public_net_ip)
+                            clientconf.vm.provision "shell", inline: <<-SHELL
+                                # Add hostname
+                                echo "#{host_info[:public_net_ip]} #{host_name}" | sudo tee -a /etc/hosts
+                            SHELL
+                        end # if public_net_ip exists
+                    end # host_peer_category.each
+                end # hosts.each (peer)
+
+                # Configure client machine hostname & GUI access
+                clientconf.vm.provider "virtualbox" do |vb, override|
+                    # Uncomment to launch VirtualBox GUI upon `vagrant up` (user:password = vagrant:vagrant)
+                    # vb.gui = true
+
+                    # Alternatively, enable X Forwarding & connect via SSH, e.g. `vagrant ssh aslclient01` or
+                    # `vagrant ssh-config aslclient01` to get the destination details for other SSH clients
+                    override.ssh.forward_x11 = true
+
+                    vb.customize ["modifyvm", :id, "--vram", CLIENT_VRAM]
+                    vb.customize ["modifyvm", :id, "--name", "#{client_hostname}"]
+                end # virtualbox provider
+
+                clientconf.vm.provision "shell", inline: <<-SHELL
+                    # Install Firefox
+                    sudo apt-get update
+                    sudo apt-get install -y firefox-esr
+
+                    # Install root certificate
+                    sudo cp /vagrant/key_store/iMovies_Root_CA.crt /usr/share/ca-certificates/mozilla/
+                    sudo ln -s /usr/share/ca-certificates/mozilla/iMovies_Root_CA.crt /etc/ssl/certs/iMovies_Root_CA.crt
+
+                    # Fix X11 forwarding for mac
+                    sudo sed -i -e 's/#X11UseLocalhost yes/X11UseLocalhost no/g' /etc/ssh/sshd_config
+                    sudo reboot
+                SHELL
+            end # clientconf
+        end # client_cat_boxes.each
+    end # clients.each
 
 end # config
