@@ -9,10 +9,19 @@
 <div class="row justify-content-center">
     <div class="col-md-5">
         <form method="post" asp-controller="Account" asp-action="Login" asp-route-returnurl="@Context.Request.Query["ReturnUrl"]">
+            @if (ViewData.ContainsKey("ErrorMessage"))
+            {
+            <div class="alert alert-danger alert-dismissible show" role="alert">
+                @ViewData["ErrorMessage"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            }
             <div class="form-group">
-                <label asp-for="Email"></label><br />
-                <input type="email" asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+                <label asp-for="Id"></label><br />
+                <input type="text" asp-for="Id" class="form-control" />
+                <span asp-validation-for="Id" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Password"></label><br />

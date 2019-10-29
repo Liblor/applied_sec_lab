@@ -3,7 +3,10 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using WebServer.Models;
 using WebServer.Models.Account;
@@ -12,6 +15,13 @@ namespace WebServer.Controllers
 {
     public class AccountController : Controller
     {
+        private readonly IMoviesUserContext _dbContext;
+
+        public AccountController(IMoviesUserContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
         [HttpGet, Authorize]
         public IActionResult Index()
         {
@@ -29,19 +39,33 @@ namespace WebServer.Controllers
         {
             if (ModelState.IsValid)
             {
-                // TODO: validate credentials against DB
-                // This should be constructed using info from the DB
-                var user = new User
+                string passwordHash;
+                using (var sha1 = SHA1.Create())
                 {
-                    Email = loginDetails.Email,
-                    FirstName = "Test",
-                    LastName = "User",
-                    Id = "testuser"
-                };
+                    byte[] hashBytes = sha1.ComputeHash(Encoding.UTF8.GetBytes(loginDetails.Password));
+                    var sb = new StringBuilder();
+                    foreach (byte b in hashBytes)
+                        sb.AppendFormat("{0:x2}", b);
+
+                    passwordHash = sb.ToString();
+                }
+
+                var user = _dbContext.Users.Find(loginDetails.Id);
+
+                if (user == null || !string.Equals(user.PasswordHash, passwordHash))
+                {
+                    ViewData["ErrorMessage"] = "User ID or password incorrect.";
+                    return View(loginDetails);
+                }
 
                 var authProps = new AuthenticationProperties
                 {
-                    // TODO: configure
+                    AllowRefresh = true,
+                    // TODO: reevaluate arbitrary expiration
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddHours(1),
+                    IsPersistent = true,
+                    IssuedUtc = DateTimeOffset.UtcNow,
+                    RedirectUri = returnUrl
                 };
 
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
@@ -65,25 +89,38 @@ namespace WebServer.Controllers
         }
 
         [HttpPost, Authorize]
-        public IActionResult Update(User user)
+        public IActionResult Update(UserDetails userDetails)
         {
             if (ModelState.IsValid)
             {
-                // TODO Try to write the new account information to the database.
-                // TODO Revoke all certificates not matching the new information.
 
                 bool success = false;
 
+                var user = _dbContext.Users.Find(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                if (user != null)
+                {
+                    user.Email = userDetails.Email;
+                    user.FirstName = userDetails.FirstName;
+                    user.LastName = userDetails.LastName;
+
+                    _dbContext.Users.Update(user);
+                    // TODO Revoke all certificates not matching the new information.
+
+                    _dbContext.SaveChanges();
+                    success = true;
+                }
+
+                // TempData persists the message to the next request after RedirectToAction
                 if (success)
                 {
-                    ViewData["SuccessMessage"] = "Account information updated successfully.";
+                    TempData["SuccessMessage"] = "Account information updated successfully.";
                 }
                 else
                 {
-                    ViewData["ErrorMessage"] = "Updating account information failed.";
+                    TempData["ErrorMessage"] = "Updating account information failed.";
                 }
 
-                return View("Index");
+                return RedirectToAction(nameof(Index));
             }
             else
             {

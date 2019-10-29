@@ -35,7 +35,10 @@ namespace WebServer
             });
 
             services.AddAuthentication()
-                .AddCookie()
+                .AddCookie(opt =>
+                {
+                    opt.EventsType = typeof(CookieAuthenticationDBValidator);
+                })
                 .AddCertificate(opt =>
                 {
                     opt.AllowedCertificateTypes = CertificateTypes.Chained;
@@ -60,15 +63,14 @@ namespace WebServer
                 opt.DefaultPolicy = policyBuilder.Build();
             });
 
-            if (Environment.IsDevelopment())
-            {
-                services.AddDbContext<IMoviesUserContext>(opt => opt.UseInMemoryDatabase("DummyDB"));
-            } else
-            {
-                // TODO: Hook up to the real database
-            }
 
+            if (Environment.IsDevelopment())
+                services.AddDbContext<IMoviesUserContext>(opt => opt.UseInMemoryDatabase("DummyDB"));
+            else
+                services.AddDbContext<IMoviesUserContext>(opt => opt.UseMySql(Configuration.GetConnectionString("IMoviesUserDB")));
+            
             services.AddScoped<CertificateAuthenticationDBValidator>();
+            services.AddScoped<CookieAuthenticationDBValidator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
