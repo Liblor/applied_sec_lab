@@ -1,2 +1,15 @@
 ---
 - hosts: dbservers
+  become: yes
+  vars_files:
+    - /vagrant/mysql_passwords.yml
+  roles:
+    - mariadb
+    - asl-dbserver
+
+- hosts: asldb01
+  become: yes
+  vars_files:
+    - /vagrant/mysql_passwords.yml
+  roles:
+    - init_db

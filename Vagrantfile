@@ -20,6 +20,7 @@ VRAM = 8
 #   two digits suffix, which is increment for multiple machines of the same type
 #   Types:
 #       cert    = Certificate Authority
+#       db      = Database server
 #       certDB  = Database for CA
 #       web     = Web Server
 #       ld      = Load Balancer
@@ -37,11 +38,12 @@ hosts = {
       "aslcert01" => { :ip => "10.0.0.21" },
       # "aslcert02" => { :ip => "10.0.0.22" },
   },
-  # "dbserver" => {
-  #     "aslcertDB01" => { :ip => "10.0.0.23" },
+  "dbservers" => {
+      "asldb01" => { :ip => "10.0.0.23" },
+      "asldb02" => { :ip => "10.0.0.24" },
   #     "asllegDB01" => { :ip => "10.0.0.51" },
   #     "asllegDB02" => { :ip => "10.0.0.52" },
-  # },
+  },
   "webservers" => {
       "aslweb01" => { :ip => "10.0.0.31" },
       # "aslweb02" => { :ip => "10.0.0.32" },

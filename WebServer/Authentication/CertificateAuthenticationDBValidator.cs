@@ -2,6 +2,7 @@
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Certificate;
+using Microsoft.Extensions.Logging;
 using WebServer.Models;
 
 namespace WebServer.Authentication
@@ -9,14 +10,17 @@ namespace WebServer.Authentication
     public class CertificateAuthenticationDBValidator : CertificateAuthenticationEvents
     {
         private readonly IMoviesUserContext _dbContext;
+        private readonly ILogger _logger;
 
-        public CertificateAuthenticationDBValidator(IMoviesUserContext dbContext)
+        public CertificateAuthenticationDBValidator(IMoviesUserContext dbContext, ILogger<CertificateAuthenticationDBValidator> logger)
         {
             _dbContext = dbContext;
+            _logger = logger;
         }
 
         public override Task CertificateValidated(CertificateValidatedContext context)
         {
+            _logger.LogTrace($"Initial cert validation successful, entering {nameof(CertificateValidated)}()");
             X509Certificate2 cert = context.ClientCertificate;
 
             using (var chain = new X509Chain())
@@ -38,11 +42,14 @@ namespace WebServer.Authentication
                 User user = _dbContext.Users.Find(key);
 
                 if (user == null) {
+                    _logger.LogError($"Cert auth failed: could not find a user with UID '{key}'");
                     context.NoResult();
                     return Task.CompletedTask;
                 }
 
                 context.Principal.AddIdentity(user.ToClaimsIdentity(context.Scheme.Name));
+
+                _logger.LogDebug($"Cert auth success (serial no: {cert.SerialNumber})");
 
                 return Task.CompletedTask;
             }
