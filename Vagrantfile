@@ -40,7 +40,7 @@ hosts = {
   },
   "dbservers" => {
       "asldb01" => { :ip => "10.0.0.23" },
-      "asldb02" => { :ip => "10.0.0.24" },
+  #    "asldb02" => { :ip => "10.0.0.24" },
   #     "asllegDB01" => { :ip => "10.0.0.51" },
   #     "asllegDB02" => { :ip => "10.0.0.52" },
   },
@@ -185,7 +185,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 end # category_hosts.each
 
                 hostconf.vm.provision "shell", inline: <<-SHELL
-                    sudo su - #{ANSIBLE_UNAME} -c 'eval "$(ssh-agent -s)" ; sshpass -P "Enter" -p $(cat /vagrant/#{ANSIBLE_PASSPHRASE_FILE}) ssh-add ~/.ssh/id_rsa ; ansible-galaxy install -r requirements.yml ; ansible-playbook -i production site.yml; history -c ; unset HISTFILE ; rm -f ~/.bash_history'
+                    sudo su - #{ANSIBLE_UNAME} -c 'eval "$(ssh-agent -s)" ; sshpass -P "Enter" -p $(cat /vagrant/#{ANSIBLE_PASSPHRASE_FILE}) ssh-add ~/.ssh/id_rsa ; ansible-galaxy install -r requirements.yml ; ansible-playbook -e "FORCE_ROOT_CA_CERT_REGEN=true" -i production site.yml; history -c ; unset HISTFILE ; rm -f ~/.bash_history'
 
                     # Remove sensitive data from history
                     history -c

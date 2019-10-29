@@ -1,0 +1,5 @@
+---
+- hosts: all, !ansservers
+  become: yes
+  roles:
+    - add-user

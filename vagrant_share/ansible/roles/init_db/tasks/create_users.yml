@@ -1,4 +1,5 @@
 ---
+# XXX: Refactor to work for X users
 - name: Create database user 'aslcert01'
   mysql_user:
     name: "{{ mysql_aslcert01_username }}"

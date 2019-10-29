@@ -4,10 +4,14 @@ using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+
+using CertServer.Data;
+using CertServer.DataModifiers;
 
 namespace CertServer
 {
@@ -15,7 +19,13 @@ namespace CertServer
 	{
 		public Startup(IConfiguration configuration)
 		{
-			Configuration = configuration;
+			var builder = new ConfigurationBuilder();
+
+			// XXX: Implement better solution for DB password
+			builder.AddUserSecrets<Startup>();
+			builder.AddConfiguration(configuration);
+
+			Configuration = builder.Build();
 		}
 
 		public IConfiguration Configuration { get; }
@@ -38,6 +48,21 @@ namespace CertServer
 				var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
 				c.IncludeXmlComments(xmlPath);
 			});
+
+			services.AddDbContext<IMoviesUserContext>(
+				opt => opt.UseMySql(
+					Configuration["iMovies:ConnectionString"]
+				)
+			);
+
+			services.AddDbContext<IMoviesCAContext>(
+				opt => opt.UseMySql(
+					Configuration["iMoviesCA:ConnectionString"]
+				)
+			);
+
+			services.AddScoped<UserDBAuthenticator>();
+			services.AddScoped<CADBModifier>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
