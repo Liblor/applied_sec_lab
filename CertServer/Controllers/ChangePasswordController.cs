@@ -4,6 +4,7 @@ using System;
 
 using CertServer.DataModifiers;
 using CertServer.Models;
+using CoreCA.DataModel;
 
 namespace CertServer.Controllers
 {

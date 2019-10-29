@@ -6,6 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 
 using CertServer.Data;
 using CertServer.Models;
+using CoreCA.DataModel;
 
 namespace CertServer.DataModifiers
 {
@@ -31,7 +32,7 @@ namespace CertServer.DataModifiers
 		public void RevokeAllCertificatesOfUser(User user)
 		{
 			var unrevokedCertificates = _dbContext.PublicCertificates.Where(
-				p => p.Uid.Equals(user.Uid) && !p.IsRevoked
+				p => p.Uid.Equals(user.Id) && !p.IsRevoked
 			);
 
 			foreach (PublicCertificate pubCert in unrevokedCertificates)
@@ -150,7 +151,7 @@ namespace CertServer.DataModifiers
 
 		public PrivateKey GetPrivateKey(User user)
 		{
-			return _dbContext.PrivateKeys.Find(user.Uid);
+			return _dbContext.PrivateKeys.Find(user.Id);
 		}
     }
 }

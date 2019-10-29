@@ -2,6 +2,7 @@ using System;
 using Microsoft.AspNetCore.Mvc;
 using CertServer.DataModifiers;
 using CertServer.Models;
+using CoreCA.DataModel;
 
 namespace CertServer.Controllers
 {
@@ -35,10 +36,10 @@ namespace CertServer.Controllers
 		///
 		/// </remarks>
 		/// <param name="revokeRequest"></param>
-		/// <response code="200">Certificate revoked</response>
+		/// <response code="204">Certificate revoked</response>
 		/// <response code="400">Bad request</response>
 		[Produces("application/json")]
-		[ProducesResponseType(200)]
+		[ProducesResponseType(204)]
 		[ProducesResponseType(400)]
 		[HttpPost("[controller]")]
 		public IActionResult RevokeCertificate(RevokeRequest revokeRequest)
@@ -48,7 +49,7 @@ namespace CertServer.Controllers
 			if (user != null)
 			{
 				_caDBModifier.RevokeAllCertificatesOfUser(user);
-				return Ok();
+				return NoContent();
 			}
 			else
 			{
