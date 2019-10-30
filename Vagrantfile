@@ -5,7 +5,7 @@ VAGRANTFILE_API_VERSION = "2"
 VB_INTRANET_NAME = "asl_intranet"
 # Simulate "public internet" clients through a different VirtualBox virtual network
 VB_PUBLIC_NET_NAME = "asl_public_net"
-OS_BOX = "debian/buster64"
+OS_BOX = "generic/debian10"
 
 ANSIBLE_PASSPHRASE_FILE = "ansible_passphrase.txt"
 ANSIBLE_UNAME = "ansible"
@@ -75,7 +75,6 @@ clients = {
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.provider "virtualbox"
     config.vagrant.plugins = "vagrant-vbguest"
-    config.vbguest.auto_update = false
 
     # Set correct locale for guests to prevent annoying errors
     ENV['LC_ALL']="en_US.UTF-8"
