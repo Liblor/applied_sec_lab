@@ -6,16 +6,22 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using WebServer.ViewModels;
 using WebServer.Models;
+using WebServer.Models.Cert;
+using CoreCA.Client;
+using System.Security.Claims;
+using System.Net.Mime;
 
 namespace WebServer.Controllers
 {
     [Authorize]
     public class CertController : Controller
     {
+        private readonly CoreCAClient _client;
         private readonly ILogger<CertController> _logger;
 
-        public CertController(ILogger<CertController> logger)
+        public CertController(CoreCAClient client, ILogger<CertController> logger)
         {
+            _client = client;
             _logger = logger;
         }
 
@@ -54,23 +60,83 @@ namespace WebServer.Controllers
             return View(viewModel);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Download()
+        {
+            string certb64 = null;
+            // Try to see if New() cached a B64-encoded cert in TempData first
+            if (TempData.TryGetValue("CertB64", out object certb64Obj))
+                certb64 = certb64Obj as string;
+
+            if (certb64 == null)
+            {
+                TempData["ErrorMessage"] = "Certificate download failed.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            byte[] certBytes = Convert.FromBase64String(certb64);
+            return File(certBytes, MediaTypeNames.Application.Octet, "certificate.pfx");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Download(DownloadCertDetails details)
+        {
+            if (!ModelState.IsValid)
+            {
+                var viewModel = await FetchCertificatesData();
+                viewModel.DownloadCertDetails = details;
+
+                TempData["ErrorMessage"] = "Certificate download failed.";
+
+                return View(nameof(Index), viewModel);
+            }
+
+            string uid = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            string certb64 = await _client.DownloadPrivateKey(uid, details.Password);
+
+            if (certb64 == null)
+            {
+                TempData["ErrorMessage"] = "New certificate request failed.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            TempData["SuccessMessage"] = "Certificate downloaded.";
+            TempData["CertB64"] = certb64;
+
+            TempData["AutoDownloadNewCert"] = Url.Action(nameof(Download), null, null, Request.Scheme);
+
+            return RedirectToAction(nameof(Index));
+        }
+
         // TODO: Enable XSRF protection for HttpPost endpoints if not present by default
         // TODO: Rate limit
         [HttpPost]
-        public async Task<IActionResult> New()
+        public async Task<IActionResult> New(RequestNewCertDetails details)
         {
-            // TODO Request certificate.
+            // TODO: consider validating credentials here before making the request
 
-            bool success = false;
+            if (!ModelState.IsValid)
+            {
+                var viewModel = await FetchCertificatesData();
+                viewModel.RequestNewCertDetails = details;
 
-            if (success)
-            {
-                TempData["SuccessMessage"] = "Certificate issued successfully.";
+                TempData["ErrorMessage"] = "New certificate request failed.";
+
+                return View(nameof(Index), viewModel);
             }
-            else
+
+            string uid = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            string certb64 = await _client.RequestNewCertificate(uid, details.Password, details.Passphrase);
+
+            if (certb64 == null)
             {
-                TempData["ErrorMessage"] = "Issuing certificate failed.";
+                TempData["ErrorMessage"] = "New certificate request failed.";
+                return RedirectToAction(nameof(Index));
             }
+
+            TempData["SuccessMessage"] = "Certificate issued successfully.";
+            TempData["CertB64"] = certb64;
+            TempData["AutoDownloadNewCert"] = Url.Action(nameof(Download), null, null, Request.Scheme);
 
             return RedirectToAction(nameof(Index));
         }
