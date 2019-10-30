@@ -253,14 +253,19 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 end # virtualbox provider
 
                 clientconf.vm.provision "shell", inline: <<-SHELL
-                    # Install Firefox
+                    # Add a normal user
+                    sudo adduser --disabled-login --gecos "User" user
+                    echo "user:password" | sudo chpasswd
+
+                    # Upgrade packages and install Firefox
                     sudo apt-get update
                     DEBIAN_FRONTEND=noninteractive sudo -E apt-get upgrade -y
                     DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y firefox-esr
 
                     # Install root certificate
-                    sudo cp /vagrant/key_store/iMovies_Root_CA.crt /usr/share/ca-certificates/mozilla/
-                    sudo ln -s /usr/share/ca-certificates/mozilla/iMovies_Root_CA.crt /etc/ssl/certs/iMovies_Root_CA.crt
+                    sudo cp /vagrant/key_store/iMovies_Root_CA.crt /usr/local/share/ca-certificates
+                    sudo chown root: /usr/local/share/ca-certificates/iMovies_Root_CA.crt
+                    sudo update-ca-certificates
 
                     # Fix X11 forwarding for mac
                     sudo sed -i -e 's/#X11UseLocalhost yes/X11UseLocalhost no/g' /etc/ssh/sshd_config
