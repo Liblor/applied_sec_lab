@@ -25,7 +25,7 @@ namespace CoreCA.Client
             if (httpClient == null)
                 throw new ArgumentNullException(nameof(httpClient));
 
-            _httpClient = httpClient;
+            _httpClient= httpClient;
             _logger = logger;
         }
 
@@ -38,18 +38,13 @@ namespace CoreCA.Client
             };
 
             var response = await _httpClient.PostAsync("/api/DownloadPrivateKey", Serialize(request));
-            switch (response.StatusCode)
-            {
-                // TODO: reevaluate the pattern of (a) inferring wrong arguments and (b) throwing exceptions
-                case HttpStatusCode.Unauthorized:
-                    throw new ArgumentException(nameof(userPassword));
+            if (response.IsSuccessStatusCode)
+                return Deserialize<UserCertificate>(await response.Content.ReadAsStringAsync()).Pkcs12Archive;
 
-                case HttpStatusCode.OK:
-                    return Deserialize<UserCertificate>(await response.Content.ReadAsStringAsync()).Pkcs12Archive;
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                _logger.LogWarning("New certificate request failed (unauthorized).");
 
-                default:
-                    return null;
-            }
+            return null;
         }
 
 
@@ -72,22 +67,15 @@ namespace CoreCA.Client
             };
 
             var response = await _httpClient.PostAsync("/api/Issue", Serialize(request));
+            if (response.IsSuccessStatusCode)
+                return Deserialize<UserCertificate>(await response.Content.ReadAsStringAsync()).Pkcs12Archive;
 
-            switch(response.StatusCode)
-            {
-                // TODO: reevaluate the pattern of (a) inferring wrong arguments and (b) throwing exceptions
-                case HttpStatusCode.BadRequest:
-                    throw new ArgumentException(nameof(cipherSuite));
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                _logger.LogWarning("New certificate request failed (unauthorized).");
+            else if (response.StatusCode == HttpStatusCode.BadRequest)
+                _logger.LogWarning("New certificate request failed (bad request).");
 
-                case HttpStatusCode.Unauthorized:
-                    throw new ArgumentException(nameof(userPassword));
-
-                case HttpStatusCode.OK:
-                    return Deserialize<UserCertificate>(await response.Content.ReadAsStringAsync()).Pkcs12Archive;
-
-                default:
-                    return null;
-            }
+            return null;
         }
 
         public async Task<bool> RevokeCertificate(string uid)
