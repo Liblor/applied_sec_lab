@@ -265,6 +265,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     # Fix X11 forwarding for mac
                     sudo sed -i -e 's/#X11UseLocalhost yes/X11UseLocalhost no/g' /etc/ssh/sshd_config
                     sudo reboot
+
+                    # Remove sensitive data from history
+                    history -c
+                    unset HISTFILE
+                    rm -f ~/.bash_history
                 SHELL
             end # clientconf
         end # client_cat_boxes.each
