@@ -152,7 +152,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 hostconf.vm.provision "shell", inline: <<-SHELL
                     # Install Ansible
                     sudo apt-get update
-                    sudo apt-get install -y ansible sshpass
+                    DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y ansible sshpass
 
                     # Add ansible user
                     sudo adduser --disabled-password --gecos "" #{ANSIBLE_UNAME}
@@ -255,7 +255,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 clientconf.vm.provision "shell", inline: <<-SHELL
                     # Install Firefox
                     sudo apt-get update
-                    sudo apt-get install -y firefox-esr
+                    DEBIAN_FRONTEND=noninteractive sudo -E apt-get upgrade -y
+                    DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y firefox-esr
 
                     # Install root certificate
                     sudo cp /vagrant/key_store/iMovies_Root_CA.crt /usr/share/ca-certificates/mozilla/
