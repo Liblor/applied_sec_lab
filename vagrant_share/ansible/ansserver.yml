@@ -1,6 +1,5 @@
 ---
 - hosts: ansservers
-  connection: local
   become: yes
   roles:
     - pyopenssl
