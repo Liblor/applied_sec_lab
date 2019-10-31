@@ -241,12 +241,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
                 # Configure client machine hostname & GUI access
                 clientconf.vm.provider "virtualbox" do |vb, override|
-                    # Uncomment to launch VirtualBox GUI upon `vagrant up` (user:password = vagrant:vagrant)
-                    # vb.gui = true
-
-                    # Alternatively, enable X Forwarding & connect via SSH, e.g. `vagrant ssh aslclient01` or
-                    # `vagrant ssh-config aslclient01` to get the destination details for other SSH clients
-                    override.ssh.forward_x11 = true
+                    # Uncomment to launch VirtualBox GUI upon `vagrant up` (user:password = user:password)
+                    vb.gui = true
 
                     vb.customize ["modifyvm", :id, "--vram", CLIENT_VRAM]
                     vb.customize ["modifyvm", :id, "--name", "#{client_hostname}"]
@@ -257,24 +253,26 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     sudo adduser --disabled-login --gecos "User" user
                     echo "user:password" | sudo chpasswd
 
-                    # Upgrade packages and install Firefox
+                    # Upgrade all packages
                     sudo apt-get update
                     DEBIAN_FRONTEND=noninteractive sudo -E apt-get upgrade -y
-                    DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y firefox-esr
+
+                    # Install user interface and Firefox
+                    DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y x-window-system lightdm xfce4 firefox-esr --no-install-recommends
+                    sudo systemctl set-default graphical.target
 
                     # Install root certificate
                     sudo cp /vagrant/key_store/iMovies_Root_CA.crt /usr/local/share/ca-certificates
                     sudo chown root: /usr/local/share/ca-certificates/iMovies_Root_CA.crt
                     sudo update-ca-certificates
 
-                    # Fix X11 forwarding for mac
-                    sudo sed -i -e 's/#X11UseLocalhost yes/X11UseLocalhost no/g' /etc/ssh/sshd_config
-                    sudo reboot
-
                     # Remove sensitive data from history
                     history -c
                     unset HISTFILE
                     rm -f ~/.bash_history
+
+                    # Reboot to start to user interface
+                    sudo reboot
                 SHELL
             end # clientconf
         end # client_cat_boxes.each
