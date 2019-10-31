@@ -7,9 +7,9 @@ using CertServer.Models;
 namespace CertServer.Controllers
 {
 	[ApiController, Route("api")]
-	public class CRLController : ControllerBase
-	{
-		private readonly CADBModifier _caDBModifier;
+    public class CRLController : ControllerBase
+    {
+        private readonly CADBModifier _caDBModifier;
 
 		public CRLController(CADBModifier caDBModifier)
 		{
@@ -35,5 +35,5 @@ namespace CertServer.Controllers
 		{
 			return Ok(_caDBModifier.GenerateCRL());
 		}
-	}
+    }
 }

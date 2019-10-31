@@ -8,9 +8,9 @@ using CertServer.Models;
 namespace CertServer.Controllers
 {
 	[ApiController, Route("api")]
-	public class ChangePasswordController : ControllerBase
-	{
-		private readonly UserDBAuthenticator _userDBAuthenticator;
+    public class ChangePasswordController : ControllerBase
+    {
+        private readonly UserDBAuthenticator _userDBAuthenticator;
 
 		public ChangePasswordController(UserDBAuthenticator userDBAuthenticator)
 		{
@@ -73,5 +73,5 @@ namespace CertServer.Controllers
 
 			return response;
 		}
-	}
+    }
 }
