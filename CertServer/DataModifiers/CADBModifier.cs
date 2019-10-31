@@ -9,14 +9,14 @@ using CertServer.Models;
 
 namespace CertServer.DataModifiers
 {
-    public class CADBModifier
-    {
-        private readonly IMoviesCAContext _dbContext;
+	public class CADBModifier
+	{
+		private readonly IMoviesCAContext _dbContext;
 
-        public CADBModifier(IMoviesCAContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+		public CADBModifier(IMoviesCAContext dbContext)
+		{
+			_dbContext = dbContext;
+		}
 
 		/*
 		 * Public certificates functionality
@@ -85,9 +85,9 @@ namespace CertServer.DataModifiers
 			Org.BouncyCastle.X509.X509V2CrlGenerator crlGen = new Org.BouncyCastle.X509.X509V2CrlGenerator();
 
 			DateTime now = DateTime.UtcNow;
-            crlGen.SetIssuerDN(coreCaCert.SubjectDN);
-            crlGen.SetThisUpdate(now);
-            crlGen.SetNextUpdate(now.AddMinutes(10));
+			crlGen.SetIssuerDN(coreCaCert.SubjectDN);
+			crlGen.SetThisUpdate(now);
+			crlGen.SetNextUpdate(now.AddMinutes(10));
 
 			var revokedPubCerts = _dbContext.PublicCertificates.Where(p => p.IsRevoked);
 
@@ -104,7 +104,7 @@ namespace CertServer.DataModifiers
 			crlGen.AddExtension(
 				Org.BouncyCastle.Asn1.X509.X509Extensions.AuthorityKeyIdentifier,
 				false,
-                new Org.BouncyCastle.X509.Extension.AuthorityKeyIdentifierStructure(
+				new Org.BouncyCastle.X509.Extension.AuthorityKeyIdentifierStructure(
 					coreCaCert.GetPublicKey()
 				)
 			);
@@ -152,5 +152,5 @@ namespace CertServer.DataModifiers
 		{
 			return _dbContext.PrivateKeys.Find(user.Uid);
 		}
-    }
+	}
 }
