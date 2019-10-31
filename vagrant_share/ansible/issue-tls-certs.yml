@@ -1,6 +1,5 @@
 ---
 - hosts: ansservers
-  connection: local
   tasks:
     - name: Create folder for TLS CSR and certificates
       file:
