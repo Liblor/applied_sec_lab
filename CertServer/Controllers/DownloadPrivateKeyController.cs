@@ -8,8 +8,8 @@ namespace CertServer.Controllers
 {
 	[ApiController, Route("api")]
 
-	public class DownloadPrivateKeyController : ControllerBase
-	{
+    public class DownloadPrivateKeyController : ControllerBase
+    {
 		private readonly CADBModifier _caDBModifier;
 		private readonly UserDBAuthenticator _userDBAuthenticator;
 
@@ -64,5 +64,5 @@ namespace CertServer.Controllers
 				return Unauthorized();
 			}
 		}
-	}
+    }
 }
