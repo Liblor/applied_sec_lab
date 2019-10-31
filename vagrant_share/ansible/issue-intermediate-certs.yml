@@ -1,6 +1,5 @@
 ---
 - hosts: ansservers
-  connection: local
   become: yes
   tasks:
     - name: Create directory for intermediate certificates and CSRs
@@ -70,7 +69,6 @@
       delegate_to: "{{ groups['ansservers'][0] }}"
 
 - hosts: ansservers
-  connection: local
   become: yes
   tasks:
     - name: Create intermediate certificate
