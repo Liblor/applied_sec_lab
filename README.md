@@ -8,8 +8,9 @@ Applied Security Laboratory - AS19
 
 ### Core CA
 #### Ansible Certificate Generation
+
 Rough overview over the certificate generation by ansible:
-- **Root CA keys and certificates** are generated in `/vagrant/key_store/iMovies_Root_CA_key.pem`. This folder is considered to be offline, because we will remove this shared folder, together with all vagrant users, for the final production environment as the last step of ansible. The Root CA certificate is installed on all machines in `/usr/share/ca-certificates/mozilla/iMovies_Root_CA.crt` with a link in `/etc/ssl/certs/iMovies_Root_CA.crt` like all other root certificates.
+- **Root CA keys and certificates** are generated in `/vagrant/key_store/iMovies_Root_CA_key.pem`. This folder is considered to be offline, because we will remove this shared folder, together with all vagrant users, for the final production environment as the last step of ansible. The Root CA certificate is copied to all machines into `/usr/local/share/ca-certificates/iMovies_Root_CA.crt` and installed using `update-ca-certificates`.
 - **Intermediate CA keys** are generated on the certservers in `/home/coreca/pki/private/iMovies_<hostname>_Intermediate_CA_key.pem` then a CSR is sent to the config server and signed with the Root CA key, the resulting certificate is transferred back to the certserver and stored in `/home/coreca/pki/certs/iMovies_<hostname>_Intermediate_CA.crt`.
 - **TLS keys** are generated on each host in `/home/<username>/pki/private/iMovies_aslcert01_tls_key.pem`, then a CSR is sent over the config server to the first certserver (aslcert01), which signs a certificate with the intermediate key. The resulting certificate is sent back over the config server to the respective servers and stored in the public folder `/etc/pki/tls/certs/iMovies_aslcert01_tls.crt`.
 

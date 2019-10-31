@@ -5,7 +5,7 @@ VAGRANTFILE_API_VERSION = "2"
 VB_INTRANET_NAME = "asl_intranet"
 # Simulate "public internet" clients through a different VirtualBox virtual network
 VB_PUBLIC_NET_NAME = "asl_public_net"
-OS_BOX = "debian/buster64"
+OS_BOX = "generic/debian10"
 
 ANSIBLE_PASSPHRASE_FILE = "ansible_passphrase.txt"
 ANSIBLE_UNAME = "ansible"
@@ -75,7 +75,6 @@ clients = {
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.provider "virtualbox"
     config.vagrant.plugins = "vagrant-vbguest"
-    config.vbguest.auto_update = false
 
     # Set correct locale for guests to prevent annoying errors
     ENV['LC_ALL']="en_US.UTF-8"
@@ -153,7 +152,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 hostconf.vm.provision "shell", inline: <<-SHELL
                     # Install Ansible
                     sudo apt-get update
-                    sudo apt-get install -y ansible sshpass
+                    DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y ansible sshpass
 
                     # Add ansible user
                     sudo adduser --disabled-password --gecos "" #{ANSIBLE_UNAME}
@@ -173,7 +172,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     echo '###################################################' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
 
                     # Add Ansible host itself to inventory
-                    echo -e '\n[#{master_category_name}]\nlocalhost' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
+                    echo -e '\n[#{master_category_name}]\nlocalhost ansible_connection=local' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
                 SHELL
 
                 # Add hostnames, install SSH keys
@@ -242,28 +241,37 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
                 # Configure client machine hostname & GUI access
                 clientconf.vm.provider "virtualbox" do |vb, override|
-                    # Uncomment to launch VirtualBox GUI upon `vagrant up` (user:password = vagrant:vagrant)
-                    # vb.gui = true
-
-                    # Alternatively, enable X Forwarding & connect via SSH, e.g. `vagrant ssh aslclient01` or
-                    # `vagrant ssh-config aslclient01` to get the destination details for other SSH clients
-                    override.ssh.forward_x11 = true
+                    # Uncomment to launch VirtualBox GUI upon `vagrant up` (user:password = user:password)
+                    vb.gui = true
 
                     vb.customize ["modifyvm", :id, "--vram", CLIENT_VRAM]
                     vb.customize ["modifyvm", :id, "--name", "#{client_hostname}"]
                 end # virtualbox provider
 
                 clientconf.vm.provision "shell", inline: <<-SHELL
-                    # Install Firefox
+                    # Add a normal user
+                    sudo adduser --disabled-login --gecos "User" user
+                    echo "user:password" | sudo chpasswd
+
+                    # Upgrade all packages
                     sudo apt-get update
-                    sudo apt-get install -y firefox-esr
+                    DEBIAN_FRONTEND=noninteractive sudo -E apt-get upgrade -y
+
+                    # Install user interface and Firefox
+                    DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y x-window-system lightdm xfce4 firefox-esr --no-install-recommends
+                    sudo systemctl set-default graphical.target
 
                     # Install root certificate
-                    sudo cp /vagrant/key_store/iMovies_Root_CA.crt /usr/share/ca-certificates/mozilla/
-                    sudo ln -s /usr/share/ca-certificates/mozilla/iMovies_Root_CA.crt /etc/ssl/certs/iMovies_Root_CA.crt
+                    sudo cp /vagrant/key_store/iMovies_Root_CA.crt /usr/local/share/ca-certificates
+                    sudo chown root: /usr/local/share/ca-certificates/iMovies_Root_CA.crt
+                    sudo update-ca-certificates
 
-                    # Fix X11 forwarding for mac
-                    sudo sed -i -e 's/#X11UseLocalhost yes/X11UseLocalhost no/g' /etc/ssh/sshd_config
+                    # Remove sensitive data from history
+                    history -c
+                    unset HISTFILE
+                    rm -f ~/.bash_history
+
+                    # Reboot to start to user interface
                     sudo reboot
                 SHELL
             end # clientconf
