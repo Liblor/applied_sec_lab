@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -12,10 +14,12 @@ namespace CertServer.DataModifiers
     public class CADBModifier
     {
         private readonly IMoviesCAContext _dbContext;
+		private readonly ILogger _logger;
 
-        public CADBModifier(IMoviesCAContext dbContext)
+        public CADBModifier(IMoviesCAContext dbContext, ILogger<CADBModifier> logger)
         {
             _dbContext = dbContext;
+			_logger = logger;
         }
 
 		/*
@@ -24,6 +28,14 @@ namespace CertServer.DataModifiers
 		public void AddCertificate(PublicCertificate publicCert) 
 		{
 			_dbContext.PublicCertificates.Add(publicCert);
+
+			_logger.LogInformation(
+				string.Format(
+					"Added new certificate of user {0} with serial number {1} to DB",
+					publicCert.Uid,
+					publicCert.SerialNr
+				)
+			);
 			_dbContext.SaveChanges();
 		}
 
@@ -34,12 +46,22 @@ namespace CertServer.DataModifiers
 				p => p.Uid.Equals(user.Uid) && !p.IsRevoked
 			);
 
+			 List<ulong> logRevokedCertificates = new List<ulong>();
 			foreach (PublicCertificate pubCert in unrevokedCertificates)
 			{
 				pubCert.IsRevoked = true;
+				logRevokedCertificates.Add(pubCert.SerialNr);
 			}
 
 			_dbContext.SaveChanges();
+
+			_logger.LogInformation(
+				string.Format(
+					"Revoked all certificates (serial number(s) {0}) of user {1}",
+					string.Join(", ", logRevokedCertificates),
+					user.Uid
+				)
+			);
 		}
 
 		// Precondition: Called inside a transaction
@@ -58,8 +80,15 @@ namespace CertServer.DataModifiers
 				newSerialNr = 0;
 			}
 
-			// XXX: Log error, notify system admin to generate new certificates and make a fresh start?
-			// if (maxSerialNr > threshold * ulong.MaxValue) {}
+			if (newSerialNr > CAConfig.SerialNumberWarningThreshold * ulong.MaxValue) {
+				_logger.LogWarning(
+					string.Format(
+						"More than {0}% of all available serial numbers are used. "
+						+ "This CA service should be restarted from scratch before the numbers run out.",
+						CAConfig.SerialNumberWarningThreshold * 100
+					)
+				);
+			}
 			
 			return new SerialNumber {
 				SerialNr = newSerialNr
@@ -87,7 +116,7 @@ namespace CertServer.DataModifiers
 			DateTime now = DateTime.UtcNow;
             crlGen.SetIssuerDN(coreCaCert.SubjectDN);
             crlGen.SetThisUpdate(now);
-            crlGen.SetNextUpdate(now.AddMinutes(10));
+            crlGen.SetNextUpdate(now.AddMinutes(CAConfig.CRLNextUpdatedIntervalMinutes));
 
 			var revokedPubCerts = _dbContext.PublicCertificates.Where(p => p.IsRevoked);
 
@@ -120,6 +149,15 @@ namespace CertServer.DataModifiers
 			Org.BouncyCastle.OpenSsl.PemWriter pemWriter = new Org.BouncyCastle.OpenSsl.PemWriter(crlPEM);
 			pemWriter.WriteObject(crl);
 			pemWriter.Writer.Close();
+
+			_logger.LogInformation(
+				string.Format(
+					"Generated CRL at {0} valid for {1} minutes",
+					now,
+					CAConfig.CRLNextUpdatedIntervalMinutes
+				)
+			);
+
 			return crlPEM.ToString();
 		}
 
@@ -146,10 +184,21 @@ namespace CertServer.DataModifiers
 				_dbContext.SaveChanges();
 				scope.Commit();
 			}
+
+			_logger.LogInformation(
+				string.Format(
+					"Added encrypted private key of user {0} to DB",
+					privKey.Uid
+				)
+			);
 		}
 
 		public PrivateKey GetPrivateKey(User user)
 		{
+			_logger.LogInformation(
+				"Retrieve encrypted private key of user " + user.Uid
+			);
+
 			return _dbContext.PrivateKeys.Find(user.Uid);
 		}
     }

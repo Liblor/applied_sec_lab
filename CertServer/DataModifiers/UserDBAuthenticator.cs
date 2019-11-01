@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Security.Cryptography;
 
@@ -10,11 +11,16 @@ namespace CertServer.DataModifiers
 	public class UserDBAuthenticator
 	{
 		private readonly IMoviesUserContext _dbContext;
+		private readonly ILogger _logger;
 
-        public UserDBAuthenticator(IMoviesUserContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+		public UserDBAuthenticator(
+			IMoviesUserContext dbContext,
+			ILogger<UserDBAuthenticator> logger
+		)
+		{
+			_dbContext = dbContext;
+			_logger = logger;
+		}
 
 		public IDbContextTransaction GetScope()
 		{
@@ -34,6 +40,8 @@ namespace CertServer.DataModifiers
 		private bool MeetsPasswordPolicy(string password)
 		{
 			// XXX: Check that the new password meets the password policy
+			// Check password list
+			// Enforce min length 8
 			return true;
 		}
 
@@ -43,8 +51,18 @@ namespace CertServer.DataModifiers
 			{
 				user.PasswordHash = ComputePasswordHash(newPassword);
 				_dbContext.SaveChanges();
+
+				_logger.LogInformation("Changed password of user " + user.Uid);
 				return true;
 			}
+
+			_logger.LogInformation(
+				string.Format(
+					"Refused to change password of user {0} because the new password "
+					+ "did not meet the password policy",
+					user.Uid
+				)
+			);
 
 			return false;
 		}
@@ -54,10 +72,23 @@ namespace CertServer.DataModifiers
 			User user = _dbContext.Users.Find(uid);
 			if (user != null && user.PasswordHash.Equals(ComputePasswordHash(password)))
 			{
+				_logger.LogInformation("Successful authentication of user " + uid);
 				return user;
 			}
 			else
 			{
+				string error_msg = string.Format("Failed authentication attempt of user {0}; ", uid);
+
+				if (user == null)
+				{
+					error_msg += "no user with this UID found";
+				}
+				else
+				{
+					error_msg += "wrong password";
+				}
+
+				_logger.LogWarning(error_msg);
 				return null;
 			}
 		}

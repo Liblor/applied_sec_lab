@@ -33,6 +33,14 @@ namespace CertServer.Models
 			return (obj is CipherSuite);
 		}
 
+		public override string ToString()
+		{
+			return string.Format(
+				"{{\n\tEncryption algorithm: {0}\n\tHash algorithm: {1}\n\tKey size: {2}\n}}",
+				Alg, HashAlg, KeySize
+			);
+		}
+
 		public override int GetHashCode()
 		{
 			return (Alg + HashAlg + KeySize).GetHashCode();
