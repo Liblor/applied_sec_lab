@@ -15,6 +15,8 @@ namespace CertServer
 			+ "_Intermediate_CA_cert_and_priv_key.pfx";
 
 		public static readonly int UserCertValidityPeriod = 150;
+		public static readonly int CRLNextUpdatedIntervalMinutes = 10;
+		public static readonly double SerialNumberWarningThreshold = 0.9;
 
 		public static readonly CipherSuite[] CipherSuites = 
 		{
