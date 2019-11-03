@@ -1,5 +1,7 @@
 ---
-- name: Add a user to run the CA
+- name: Add a user
   user:
     name: "{{ UNAME }}"
-    shell: /bin/bash
+    password_lock: yes
+    shell: /sbin/nologin
+    append: yes
