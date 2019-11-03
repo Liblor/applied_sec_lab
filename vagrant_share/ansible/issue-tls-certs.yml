@@ -54,7 +54,7 @@
         organization_name: "{{ ORGANIZATION_NAME }}"
         common_name: "iMovies {{ansible_hostname}}"
         # Externally reachable servers have the imovies domain as SAN
-        subjectAltName: "{{ 'DNS:www.imovies.ch, ' + 'DNS:' + ansible_hostname if ansible_hostname in groups['webservers'] else 'DNS:' + ansible_hostname }}"
+        subjectAltName: "{{ 'DNS:www.imovies.ch, ' + 'DNS:' + ansible_hostname if ('webservers' in groups and ansible_hostname in groups['webservers']) else 'DNS:' + ansible_hostname }}"
 
         key_usage:
           - digitalSignature
@@ -136,6 +136,7 @@
         dest: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/tls_certs/"
         group: false
         owner: false
+      when: FORCE_TLS_CERT_REGEN
       delegate_to: "{{ groups['ansservers'][0] }}"
 
 - hosts: all, !ansservers
@@ -145,6 +146,7 @@
       synchronize:
         src: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/tls_certs/iMovies_{{ ansible_hostname }}_tls.crt"
         dest: /etc/pki/tls/certs/
+      when: FORCE_TLS_CERT_REGEN
 
     - name: Fix certificate permissions
       file:
@@ -152,3 +154,4 @@
         owner: root
         group: root
         mode: 0644
+      when: FORCE_TLS_CERT_REGEN
