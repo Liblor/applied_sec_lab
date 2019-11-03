@@ -3,6 +3,7 @@
   become: yes
   roles:
     - upgrade
+  tags: [setup, update]
 - hosts: all, !ansservers
   become: yes
   roles:
