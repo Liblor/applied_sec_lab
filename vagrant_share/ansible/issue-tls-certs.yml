@@ -152,3 +152,22 @@
         owner: root
         group: root
         mode: 0644
+
+- hosts: dbservers
+  become: yes
+  tasks:
+    - name: Creates directory for mariaDB keys
+      file:
+        path: /etc/mysql/keys
+        state: directory
+        owner: mysql
+        group: mysql
+        mode: 0700
+    - name: Convert private key to pkcs#1
+      command: "openssl rsa -in /home/{{ UNAME }}/pki/private/iMovies_{{ansible_hostname}}_tls_key.pem -out /etc/mysql/keys/iMovies_{{ inventory_hostname }}_tls_key.pem"
+    - name: Fix mysql private key permissions
+      file:
+        path: "/etc/mysql/keys/iMovies_{{ inventory_hostname }}_tls_key.pem"
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
+        mode: 0600
