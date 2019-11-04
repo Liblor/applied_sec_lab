@@ -15,7 +15,7 @@ bind-address=0.0.0.0
 wsrep_cluster_name="imovies_db_cluster"
 wsrep_sst_method=rsync
 wsrep_node_address="{{ inventory_hostname }}"
-wsrep_provider_options="socket.ssl_key=/etc/mysql/keys/iMovies_{{ inventory_hostname }}_tls_key.pem;socket.ssl_cert=/etc/pki/tls/certs/iMovies_{{ inventory_hostname }}_tls.crt;socket.ssl_ca=/usr/local/share/ca-certificates/iMovies_Root_CA.crt"
+#wsrep_provider_options="socket.ssl_key=/etc/mysql/keys/iMovies_{{ inventory_hostname }}_tls_key.pem;socket.ssl_cert=/etc/pki/tls/certs/iMovies_{{ inventory_hostname }}_tls.crt;socket.ssl_ca=/usr/local/share/ca-certificates/iMovies_Root_CA.crt"
 
 [mariadb]
 disable_unix_socket
