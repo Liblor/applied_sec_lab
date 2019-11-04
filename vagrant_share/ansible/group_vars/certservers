@@ -1,2 +1,9 @@
 ---
 UNAME: coreca
+
+DB_SERVER: "{{ groups['dbservers'][ groups['certservers'].index(ansible_hostname) ] }}"
+DB_PORT: 3306
+DB_IMOVIES_NAME: imovies
+DB_IMOVIES_CA_NAME: imovies_ca
+DB_USER: "{{ ansible_hostname }}"
+DB_PASSWORD: "{{ lookup('vars', 'mysql_' + ansible_hostname + '_password') }}"
