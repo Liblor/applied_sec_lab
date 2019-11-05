@@ -3,3 +3,29 @@
   become: yes
   roles:
     - add-user
+  tasks:
+    - name: Create common folders on all hosts except ansservers
+      file:
+        path: "{{ item.path }}"
+        state: directory
+        owner: "{{ item.owner }}"
+        group: "{{ item.owner }}"
+        mode: "{{ item.mode }}"
+      with_items:
+        - {path: "/home/{{ UNAME }}/pki/private", owner: "{{ UNAME }}", mode: "0700"}
+        - {path: "/home/{{ UNAME }}/pki/certs", owner: "{{ UNAME }}", mode: "0700"}
+        - {path: "/home/{{ UNAME }}/pki/csr", owner: "{{ UNAME }}", mode: "0700"}
+
+- hosts: all
+  become: yes
+  tasks:
+    - name: Create common folders on all hosts
+      file:
+        path: "{{ item.path }}"
+        state: directory
+        owner: "{{ item.owner }}"
+        group: "{{ item.owner }}"
+        mode: "{{ item.mode }}"
+      with_items:
+        - {path: /etc/pki/tls/crl, owner: root, mode: "0755"}
+        - {path: /etc/pki/tls/certs, owner: root, mode: "0755"}

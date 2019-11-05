@@ -16,3 +16,9 @@ FORCE_TLS_CERT_REGEN: "{{FORCE_INTERMEDIATE_CA_CERT_REGEN}}"
 
 # Save user secrets ID compiled into certserver release
 CERTSERVER_USER_SECRETS_ID: 876ff026-2bba-44da-b012-7f46a917fe94
+
+# Different intermediate certificates are created for the following purposes.
+# Attention, the code relies on the order of this list!
+INTERMEDIATE_CERT_PURPOSES:
+  - internal
+  - external

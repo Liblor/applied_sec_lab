@@ -10,7 +10,7 @@ namespace CertServer
 
 		public static readonly string CrlDistributionPoint = "https://www.imovies.ch/crl/revoked.crl";
 
-		public static readonly string CoreCACertPath = "/home/coreca/pki/private/iMovies_"
+		public static readonly string CoreCACertPath = "/home/coreca/pki/private/iMovies_external_"
 			+ System.Environment.MachineName
 			+ "_Intermediate_CA_cert_and_priv_key.pfx";
 

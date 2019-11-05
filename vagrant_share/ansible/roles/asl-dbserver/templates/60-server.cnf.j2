@@ -1,8 +1,8 @@
 [mysqld]
 bind-address=0.0.0.0
-ssl-ca="/etc/ssl/certs/iMovies_Root_CA.crt"
+ssl-ca="/etc/ssl/certs/iMovies_Root_CA_crt.pem"
 ssl-key="/home/{{ UNAME }}/pki/private/iMovies_{{ inventory_hostname }}_tls_key.pem"
-ssl-cert="/etc/pki/tls/certs/iMovies_{{ inventory_hostname }}_tls.crt"
+ssl-cert="/etc/pki/tls/certs/iMovies_{{ inventory_hostname }}_tls_crt.pem"
 
 [galera]
 wsrep_on=ON
@@ -15,7 +15,7 @@ bind-address=0.0.0.0
 wsrep_cluster_name="imovies_db_cluster"
 wsrep_sst_method=rsync
 wsrep_node_address="{{ inventory_hostname }}"
-#wsrep_provider_options="socket.ssl_key=/home/{{ UNAME }}/pki/private/iMovies_{{ inventory_hostname }}_tls_key.pem;socket.ssl_cert=/home/{{ UNAME }}/pki/tls/certs/iMovies_{{ inventory_hostname }}_tls.crt;socket.ssl_ca=/etc/ssl/certs/iMovies_Root_CA.crt"
+#wsrep_provider_options="socket.ssl_key=/home/{{ UNAME }}/pki/private/iMovies_{{ inventory_hostname }}_tls_key.pem;socket.ssl_cert=/home/{{ UNAME }}/pki/tls/certs/iMovies_{{ inventory_hostname }}_tls_crt.pem;socket.ssl_ca=/etc/ssl/certs/iMovies_Root_CA_crt.pem"
 
 [mariadb]
 disable_unix_socket
