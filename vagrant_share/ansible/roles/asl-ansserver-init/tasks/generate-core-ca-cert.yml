@@ -8,7 +8,7 @@
 
 - name: Create CSR for root CA
   openssl_csr:
-    path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA.csr"
+    path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA_csr.pem"
     privatekey_path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA_key.pem"
 
     country_name: "{{ COUNTRY_NAME }}"
@@ -29,8 +29,8 @@
 
 - name: Create Certificate for root CA
   openssl_certificate:
-    path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA.crt"
+    path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA_crt.pem"
     privatekey_path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA_key.pem"
-    csr_path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA.csr"
+    csr_path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA_csr.pem"
     provider: selfsigned
     force: "{{ FORCE_ROOT_CA_CERT_REGEN }}"
