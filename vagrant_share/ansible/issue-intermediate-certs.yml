@@ -69,7 +69,6 @@
         - "{{ INTERMEDIATE_CERT_PURPOSES }}"
 
 - hosts: ansservers
-  connection: local
   become: yes
   tasks:
     - name: Create intermediate certificate

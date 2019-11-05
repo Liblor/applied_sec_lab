@@ -8,8 +8,9 @@ Applied Security Laboratory - AS19
 
 ### Core CA
 #### Ansible Certificate Generation
+
 Rough overview over the certificate generation by ansible:
-- **Root CA keys and certificates** are generated in `/vagrant/key_store/iMovies_Root_CA_key.pem`. This folder is considered to be offline, because we will remove this shared folder, together with all vagrant users, for the final production environment as the last step of ansible. The Root CA certificate is installed on all machines in `/usr/share/ca-certificates/mozilla/iMovies_Root_CA.crt` with a link in `/etc/ssl/certs/iMovies_Root_CA.crt` like all other root certificates.
+- **Root CA keys and certificates** are generated in `/vagrant/key_store/iMovies_Root_CA_key.pem`. This folder is considered to be offline, because we will remove this shared folder, together with all vagrant users, for the final production environment as the last step of ansible. The Root CA certificate is copied to all machines into `/usr/local/share/ca-certificates/iMovies_Root_CA.crt` and installed using `update-ca-certificates`.
 - **Intermediate CA keys** are generated on the certservers in `/home/coreca/pki/private/iMovies_<purpose>_<hostname>_Intermediate_CA_key.pem`. Each core CA has two intermediate certificates for the following purposes:
   - **internal**: To sign TLS certificates for the internal infrastructure
   - **external**: To sign client certificates

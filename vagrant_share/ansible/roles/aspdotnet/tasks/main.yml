@@ -1,4 +1,10 @@
 ---
+- name: Install GnuPG to import keys.
+  package:
+    name: gpg
+    state: present
+    update_cache: true
+
 - name: Import Microsoft APT key
   apt_key:
     url: "{{ aspdotnet_apt_repo_gpg_key_url }}"
