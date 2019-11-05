@@ -39,7 +39,6 @@ namespace CertServer.DataModifiers
 			_dbContext.SaveChanges();
 		}
 
-		// Precondition: Called inside a transaction
 		public void RevokeAllCertificatesOfUser(User user)
 		{
 			var unrevokedCertificates = _dbContext.PublicCertificates.Where(
@@ -64,7 +63,6 @@ namespace CertServer.DataModifiers
 			);
 		}
 
-		// Precondition: Called inside a transaction
 		public SerialNumber GetMaxSerialNr()
 		{
 			ulong newSerialNr;

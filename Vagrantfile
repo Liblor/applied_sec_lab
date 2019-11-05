@@ -3,7 +3,9 @@
 
 VAGRANTFILE_API_VERSION = "2"
 VB_INTRANET_NAME = "asl_intranet"
-OS_BOX = "debian/buster64"
+# Simulate "public internet" clients through a different VirtualBox virtual network
+VB_PUBLIC_NET_NAME = "asl_public_net"
+OS_BOX = "generic/debian10"
 
 ANSIBLE_PASSPHRASE_FILE = "ansible_passphrase.txt"
 ANSIBLE_UNAME = "ansible"
@@ -13,6 +15,7 @@ MASTER_MEM = 1024
 REMOTE_MEM = 512
 CPU_CAP_PERCENTAGE = 60
 VRAM = 8
+CLIENT_VRAM = 64
 
 # List of all hosts
 # Naming:
@@ -43,7 +46,10 @@ hosts = {
       "asldb02" => { :ip => "10.0.0.32" },
   },
   "webservers" => {
-      "aslweb01" => { :ip => "10.0.0.41" },
+      "aslweb01" => {
+          :ip => "10.0.0.41",
+          :public_net_ip => "172.16.0.41"
+      },
       # "aslweb02" => { :ip => "10.0.0.42" },
   },
   # "ldservers" => {
@@ -58,12 +64,15 @@ hosts = {
 }
 
 # TODO: Create client outside company network for testing
-# clients = {}
+clients = {
+    "publicnetclients" => {
+        "aslclient01" => { :public_net_ip => "172.16.0.11" },
+    },
+}
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.provider "virtualbox"
     config.vagrant.plugins = "vagrant-vbguest"
-    config.vbguest.auto_update = false
 
     # Set correct locale for guests to prevent annoying errors
     ENV['LC_ALL']="en_US.UTF-8"
@@ -82,6 +91,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 hostconf.vm.network "private_network",
                     ip: "#{info[:ip]}",
                     virtualbox__intnet: VB_INTRANET_NAME
+
+                if info.key?(:public_net_ip)
+                    hostconf.vm.network "private_network",
+                        ip: "#{info[:public_net_ip]}",
+                        virtualbox__intnet: VB_PUBLIC_NET_NAME
+                end
 
                 hostconf.vm.provision "shell", inline: <<-SHELL
                     # Add ansible user
@@ -135,7 +150,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 hostconf.vm.provision "shell", inline: <<-SHELL
                     # Install Ansible
                     sudo apt-get update
-                    sudo apt-get install -y ansible sshpass
+                    DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y ansible sshpass
 
                     # Add ansible user
                     sudo adduser --disabled-password --gecos "" #{ANSIBLE_UNAME}
@@ -155,7 +170,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     echo '###################################################' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
 
                     # Add Ansible host itself to inventory
-                    echo -e '\n[#{master_category_name}]\nlocalhost' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
+                    echo -e '\n[#{master_category_name}]\nlocalhost ansible_connection=local' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
                 SHELL
 
                 # Add hostnames, install SSH keys
@@ -183,7 +198,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 end # category_hosts.each
 
                 hostconf.vm.provision "shell", inline: <<-SHELL
-                    sudo su - #{ANSIBLE_UNAME} -c 'eval "$(ssh-agent -s)" ; sshpass -P "Enter" -p $(cat /vagrant/#{ANSIBLE_PASSPHRASE_FILE}) ssh-add ~/.ssh/id_rsa ; ansible-galaxy install -r requirements.yml ; ansible-playbook -e "FORCE_ROOT_CA_CERT_REGEN=true" -i production site.yml; history -c ; unset HISTFILE ; rm -f ~/.bash_history'
+                    sudo su - #{ANSIBLE_UNAME} -c 'eval "$(ssh-agent -s)" ; sshpass -P "Enter" -p $(cat /vagrant/#{ANSIBLE_PASSPHRASE_FILE}) ssh-add ~/.ssh/id_rsa ; ansible-galaxy install -r requirements.yml ; ansible-playbook -e "FORCE_ROOT_CA_CERT_REGEN=true" -i production site.yml --tags "all,setup" ; history -c ; unset HISTFILE ; rm -f ~/.bash_history'
 
                     # Remove sensitive data from history
                     history -c
@@ -200,6 +215,65 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end # master.each
 
     # Create clients with VirtualBox GUI
-    # TODO
+    clients.each do |client_cat_name, client_cat_boxes|
+        client_cat_boxes.each do |client_hostname, client_info|
+            config.vm.define client_hostname do |clientconf|
+                clientconf.vm.box = OS_BOX
+                clientconf.vm.hostname = client_hostname
+                clientconf.vm.network "private_network",
+                    ip: "#{client_info[:public_net_ip]}",
+                    virtualbox__intnet: VB_PUBLIC_NET_NAME
+                clientconf.vm.synced_folder "./vagrant_share", "/vagrant", SharedFoldersEnableSymlinksCreate: false
+
+                # Add public-net-connected host names
+                hosts.each do |host_cat_name, host_cat_boxes|
+                    host_cat_boxes.each do |host_name, host_info|
+                        if host_info.key?(:public_net_ip)
+                            clientconf.vm.provision "shell", inline: <<-SHELL
+                                # Add hostname
+                                echo "#{host_info[:public_net_ip]} #{host_name}" | sudo tee -a /etc/hosts
+                            SHELL
+                        end # if public_net_ip exists
+                    end # host_peer_category.each
+                end # hosts.each (peer)
+
+                # Configure client machine hostname & GUI access
+                clientconf.vm.provider "virtualbox" do |vb, override|
+                    # Uncomment to launch VirtualBox GUI upon `vagrant up` (user:password = user:password)
+                    vb.gui = true
+
+                    vb.customize ["modifyvm", :id, "--vram", CLIENT_VRAM]
+                    vb.customize ["modifyvm", :id, "--name", "#{client_hostname}"]
+                end # virtualbox provider
+
+                clientconf.vm.provision "shell", inline: <<-SHELL
+                    # Add a normal user
+                    sudo adduser --disabled-login --gecos "User" user
+                    echo "user:password" | sudo chpasswd
+
+                    # Upgrade all packages
+                    sudo apt-get update
+                    DEBIAN_FRONTEND=noninteractive sudo -E apt-get upgrade -y
+
+                    # Install user interface and Firefox
+                    DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y x-window-system lightdm xfce4 firefox-esr --no-install-recommends
+                    sudo systemctl set-default graphical.target
+
+                    # Install root certificate
+                    sudo cp /vagrant/key_store/iMovies_Root_CA.crt /usr/local/share/ca-certificates
+                    sudo chown root: /usr/local/share/ca-certificates/iMovies_Root_CA.crt
+                    sudo update-ca-certificates
+
+                    # Remove sensitive data from history
+                    history -c
+                    unset HISTFILE
+                    rm -f ~/.bash_history
+
+                    # Reboot to start to user interface
+                    sudo reboot
+                SHELL
+            end # clientconf
+        end # client_cat_boxes.each
+    end # clients.each
 
 end # config

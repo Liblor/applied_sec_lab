@@ -6,6 +6,7 @@
   roles:
     - mariadb
     - asl-dbserver
+  tags: [ never, setup ]
 
 - hosts: asldb01
   become: yes
@@ -13,3 +14,4 @@
     - /vagrant/mysql_passwords.yml
   roles:
     - init_db
+  tags: [ never, setup ]

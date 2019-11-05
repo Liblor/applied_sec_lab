@@ -1,6 +1,5 @@
 ---
 - hosts: ansservers
-  connection: local
   become: yes
   roles:
     - pyopenssl
@@ -16,11 +15,11 @@
     - name: Store CA certificate on ansible host
       synchronize:
         src: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA_crt.pem"
-        dest: /usr/share/ca-certificates/mozilla/
+        dest: /usr/local/share/ca-certificates
 
     - name: Chown core CA certificate
       file:
-        path: /usr/share/ca-certificates/mozilla/iMovies_Root_CA_crt.pem
+        path: /usr/local/share/ca-certificates/iMovies_Root_CA.crt
         owner: root
         group: root
 
@@ -30,21 +29,19 @@
     - name: Distribute root CA certificate
       synchronize:
         src: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA_crt.pem"
-        dest: /usr/share/ca-certificates/mozilla/
+        dest: /usr/local/share/ca-certificates
+      when: FORCE_ROOT_CA_CERT_REGEN
 
     - name: Chown root CA certificate
       file:
-        path: /usr/share/ca-certificates/mozilla/iMovies_Root_CA_crt.pem
+        path: /usr/local/share/ca-certificates/iMovies_Root_CA_crt.pem
         owner: root
         group: root
+      when: FORCE_ROOT_CA_CERT_REGEN
 
-    - name: Create symlink to root CA certificate
-      file:
-        src: /usr/share/ca-certificates/mozilla/iMovies_Root_CA_crt.pem
-        dest: /etc/ssl/certs/iMovies_Root_CA_crt.pem
-        owner: root
-        group: root
-        state: link
+    - name: Update certificate store
+      command: update-ca-certificates
+      when: FORCE_ROOT_CA_CERT_REGEN
 
 - import_playbook: issue-intermediate-certs.yml
 - import_playbook: issue-tls-certs.yml

@@ -1,6 +1,5 @@
 ---
 - hosts: ansservers
-  connection: local
   tasks:
     - name: Create folder for TLS CSR and certificates
       file:
@@ -39,7 +38,7 @@
         organization_name: "{{ ORGANIZATION_NAME }}"
         common_name: "{{ ansible_hostname }}"
         # Externally reachable servers have the imovies domain as SAN
-        subjectAltName: "{{ 'DNS:www.imovies.ch, ' + 'DNS:' + ansible_hostname if ansible_hostname in groups['webservers'] else 'DNS:' + ansible_hostname }}"
+        subjectAltName: "{{ 'DNS:www.imovies.ch, ' + 'DNS:' + ansible_hostname if ('webservers' in groups and ansible_hostname in groups['webservers']) else 'DNS:' + ansible_hostname }}"
 
         key_usage:
           - digitalSignature
@@ -177,6 +176,7 @@
         dest: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/tls/certs/"
         group: false
         owner: false
+      when: FORCE_TLS_CERT_REGEN
       delegate_to: "{{ groups['ansservers'][0] }}"
 
 - hosts: all, !ansservers
@@ -186,10 +186,34 @@
       synchronize:
         src: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/tls/certs/iMovies_{{ ansible_hostname }}_tls_crt.pem"
         dest: /etc/pki/tls/certs/
+      when: FORCE_TLS_CERT_REGEN
 
-    - name: Fix certificate permisions
+    - name: Fix certificate permissions
       file:
         path: "/etc/pki/tls/certs/iMovies_{{ ansible_hostname }}_tls_crt.pem"
         owner: root
         group: root
         mode: 0644
+      when: FORCE_TLS_CERT_REGEN
+
+
+- hosts: dbservers
+  become: yes
+  tasks:
+    - name: Creates directory for mariaDB keys
+      file:
+        path: /etc/mysql/keys
+        state: directory
+        owner: mysql
+        group: mysql
+        mode: 0700
+
+    - name: Convert private key to pkcs#1
+      command: "openssl rsa -in /home/{{ UNAME }}/pki/private/iMovies_{{ansible_hostname}}_tls_key.pem -out /etc/mysql/keys/iMovies_{{ inventory_hostname }}_tls_key.pem"
+
+    - name: Fix mysql private key permissions
+      file:
+        path: "/etc/mysql/keys/iMovies_{{ inventory_hostname }}_tls_key.pem"
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
+        mode: 0600
