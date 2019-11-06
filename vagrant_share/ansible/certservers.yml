@@ -2,11 +2,11 @@
 - hosts: certservers
   become: yes
   roles:
+    - add-user
     - aspdotnet
     - pyopenssl
     - asl-certserver
     - nginxinc.nginx
-    - add-user
     - add-to-trusted-user-group
     - prepare-openssl-ca
   vars:

@@ -4,6 +4,7 @@
   vars_files:
     - /vagrant/mysql_passwords.yml
   roles:
+    - add-user
     - mariadb
     - asl-dbserver
     - add-to-trusted-user-group
