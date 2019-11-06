@@ -5,7 +5,10 @@
     - aspdotnet
     - asl-webserver
     - nginxinc.nginx
+    - add-to-trusted-user-group
   vars:
+    trusted_user: nginx
+
     nginx_http_template_enable: true
     nginx_http_template:
       default:

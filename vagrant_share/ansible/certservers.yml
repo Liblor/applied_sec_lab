@@ -6,8 +6,12 @@
     - pyopenssl
     - asl-certserver
     - nginxinc.nginx
+    - add-user
+    - add-to-trusted-user-group
     - prepare-openssl-ca
   vars:
+    trusted_user: nginx
+
     ca_folder: "/home/{{ UNAME }}/intermediate_ca"
     openssl_conf_name: Intermediate-CA-openssl.cnf
     ca_cert_path: "/home/{{ UNAME }}/pki/certs/iMovies_{{ INTERMEDIATE_CERT_PURPOSES[0] }}_{{ ansible_hostname }}_Intermediate_CA.crt"

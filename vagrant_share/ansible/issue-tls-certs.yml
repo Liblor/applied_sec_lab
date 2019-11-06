@@ -19,18 +19,19 @@
   tasks:
     - name: Create HTTPS keys
       openssl_privatekey:
-        path: "/home/{{ UNAME }}/pki/private/iMovies_{{ ansible_hostname }}_tls_key.pem"
+        path: "/etc/ssl/trusted/private/iMovies_{{ ansible_hostname }}_tls_key.pem"
         type: RSA
         size: 4096
         force: "{{ FORCE_TLS_CERT_REGEN }}"
 
-        owner: "{{ UNAME }}"
-        group: "{{ UNAME }}"
+        owner: root
+        group: "{{ TLS_GROUP }}"
+        mode: 0640
 
     - name: Create CSR for HTTPS keys
       openssl_csr:
-        path: "/home/{{ UNAME }}/pki/csr/iMovies_{{ ansible_hostname }}_tls.csr"
-        privatekey_path: "/home/{{ UNAME }}/pki/private/iMovies_{{ ansible_hostname }}_tls_key.pem"
+        path: "/etc/ssl/trusted/csr/iMovies_{{ ansible_hostname }}_tls.csr"
+        privatekey_path: "/etc/ssl/trusted/private/iMovies_{{ ansible_hostname }}_tls_key.pem"
 
         country_name: "{{ COUNTRY_NAME }}"
         state_or_province_name: "{{ STATE_OR_PROVINCE_NAME }}"
@@ -50,13 +51,13 @@
 
         force: "{{ FORCE_TLS_CERT_REGEN }}"
 
-        owner: "{{ UNAME }}"
-        group: "{{ UNAME }}"
+        owner: root
+        group: "{{ TLS_GROUP }}"
 
     - name: Transfer CSR to config server
       synchronize:
         mode: pull
-        src: "/home/{{ UNAME }}/pki/csr/iMovies_{{ ansible_hostname }}_tls.csr"
+        src: "/etc/ssl/trusted/csr/iMovies_{{ ansible_hostname }}_tls.csr"
         dest: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/tls/csr/"
         group: false
         owner: false

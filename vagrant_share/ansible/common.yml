@@ -4,33 +4,37 @@
   roles:
     - upgrade
   tags: [setup, update]
+
 - hosts: all, !ansservers
   become: yes
-  roles:
-    - add-user
   tasks:
-    - name: Create common folders on all hosts except ansservers
+    - name: "Create group {{ TLS_GROUP }} (owns tls key material)"
+      group:
+        name: "{{ TLS_GROUP }}"
+        state: present
+
+    - name: Create common folders for key material on all hosts except ansservers
       file:
-        path: "{{ item.path }}"
+        path: "{{ item }}"
         state: directory
-        owner: "{{ item.owner }}"
-        group: "{{ item.owner }}"
-        mode: "{{ item.mode }}"
+        owner: root
+        group: "{{ TLS_GROUP }}"
+        mode: 0750
       with_items:
-        - {path: "/home/{{ UNAME }}/pki/private", owner: "{{ UNAME }}", mode: "0700"}
-        - {path: "/home/{{ UNAME }}/pki/certs", owner: "{{ UNAME }}", mode: "0700"}
-        - {path: "/home/{{ UNAME }}/pki/csr", owner: "{{ UNAME }}", mode: "0700"}
+        - /etc/ssl/trusted
+        - /etc/ssl/trusted/private
+        - /etc/ssl/trusted/csr
 
 - hosts: all
   become: yes
   tasks:
     - name: Create common folders on all hosts
       file:
-        path: "{{ item.path }}"
+        path: "{{ item }}"
         state: directory
-        owner: "{{ item.owner }}"
-        group: "{{ item.owner }}"
-        mode: "{{ item.mode }}"
+        owner: root
+        group: root
+        mode: 0755
       with_items:
-        - {path: /etc/pki/tls/crl, owner: root, mode: "0755"}
-        - {path: /etc/pki/tls/certs, owner: root, mode: "0755"}
+        - /etc/pki/tls/crl
+        - /etc/pki/tls/certs

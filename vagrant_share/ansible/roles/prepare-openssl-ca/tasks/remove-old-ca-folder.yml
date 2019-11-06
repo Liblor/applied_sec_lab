@@ -1,0 +1,6 @@
+---
+- name: Remove old CA folder for new setup
+  file:
+    path: "{{ ca_folder }}"
+    state: directory
+  tags: [ never, setup ]

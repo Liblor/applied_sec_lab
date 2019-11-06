@@ -1,0 +1,12 @@
+---
+- name: Create pki folders
+  file:
+    path: "/home/{{ UNAME }}/pki/{{ item }}"
+    state: directory
+    owner: "{{ UNAME }}"
+    group: "{{ UNAME }}"
+    mode: 0700
+  with_items:
+    - private
+    - certs
+    - csr
