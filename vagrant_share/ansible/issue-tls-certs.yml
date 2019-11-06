@@ -210,7 +210,7 @@
         mode: 0700
 
     - name: Convert private key to pkcs#1
-      command: "openssl rsa -in /home/{{ UNAME }}/pki/private/iMovies_{{ansible_hostname}}_tls_key.pem -out /etc/mysql/keys/iMovies_{{ inventory_hostname }}_tls_key.pem"
+      command: "openssl rsa -in /etc/ssl/trusted/private/iMovies_{{ansible_hostname}}_tls_key.pem -out /etc/mysql/keys/iMovies_{{ inventory_hostname }}_tls_key.pem"
 
     - name: Fix mysql private key permissions
       file:
