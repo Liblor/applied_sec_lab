@@ -2,3 +2,4 @@
 - import_tasks: download-server.yml
 - import_tasks: create-user-secrets.yml
 - import_tasks: create-service.yml
+- import_tasks: create-pki-folders.yml

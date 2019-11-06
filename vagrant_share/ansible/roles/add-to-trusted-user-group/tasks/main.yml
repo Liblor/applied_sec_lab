@@ -1,0 +1,2 @@
+---
+- import_tasks: add-to-trusted-user-group.yml

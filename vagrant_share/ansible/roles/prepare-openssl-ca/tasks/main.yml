@@ -1,2 +1,3 @@
 ---
+- import_tasks: remove-old-ca-folder.yml
 - import_tasks: install-openssl-config.yml
