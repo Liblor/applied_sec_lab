@@ -64,7 +64,7 @@ namespace WebServer.Controllers
         public async Task<IActionResult> Download()
         {
             string certb64 = null;
-            // Try to see if New() cached a B64-encoded cert in TempData first
+            // Try to see if a prior POST to Download or New cached a B64-encoded cert in TempData
             if (TempData.TryGetValue("CertB64", out object certb64Obj))
                 certb64 = certb64Obj as string;
 
@@ -141,13 +141,12 @@ namespace WebServer.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // TODO: consider replacing string argument with a model object
         [HttpPost]
-        public async Task<IActionResult> Revoke(int id)
+        public async Task<IActionResult> Revoke()
         {
-            // TODO Revoke certificate.
+            string uid = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            bool success = false;
+            bool success = await _client.RevokeCertificate(uid);
 
             if (success)
             {
