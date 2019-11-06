@@ -3,7 +3,7 @@
 - name: Gather certificates to revoke
   find:
     paths: "{{ ca_folder }}/certs"
-    patterns: "*_crt.pem"
+    patterns: "*.crt"
   register: crt_files_glob
 
 - name: "Revoke all certificates in {{ ca_folder }}/certs"

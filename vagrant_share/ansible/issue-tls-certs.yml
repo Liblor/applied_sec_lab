@@ -29,7 +29,7 @@
 
     - name: Create CSR for HTTPS keys
       openssl_csr:
-        path: "/home/{{ UNAME }}/pki/csr/iMovies_{{ ansible_hostname }}_tls_csr.pem"
+        path: "/home/{{ UNAME }}/pki/csr/iMovies_{{ ansible_hostname }}_tls.csr"
         privatekey_path: "/home/{{ UNAME }}/pki/private/iMovies_{{ ansible_hostname }}_tls_key.pem"
 
         country_name: "{{ COUNTRY_NAME }}"
@@ -56,7 +56,7 @@
     - name: Transfer CSR to config server
       synchronize:
         mode: pull
-        src: "/home/{{ UNAME }}/pki/csr/iMovies_{{ ansible_hostname }}_tls_csr.pem"
+        src: "/home/{{ UNAME }}/pki/csr/iMovies_{{ ansible_hostname }}_tls.csr"
         dest: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/tls/csr/"
         group: false
         owner: false
@@ -70,12 +70,12 @@
   vars:
     ca_folder: "/home/{{ UNAME }}/intermediate_ca"
     openssl_conf_name: Intermediate-CA-openssl.cnf
-    crl_name: Intermediate_CA_crl.pem
+    crl_name: Intermediate_CA.crl
   tasks:
     - name: Transfer CRL to config server
       synchronize:
         mode: pull
-        src: "/home/{{ UNAME }}/intermediate_ca/Intermediate_CA_crl.pem"
+        src: "/home/{{ UNAME }}/intermediate_ca/Intermediate_CA.crl"
         dest: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/tls/crl"
         group: false
         owner: false
@@ -100,7 +100,7 @@
 
     - name: Combine Root CA and intermediate CA CRL
       shell: |
-        cat /etc/pki/tls/crl/Root_CA_crl.pem /etc/pki/tls/crl/Intermediate_CA_crl.pem \
+        cat /etc/pki/tls/crl/Root_CA.crl /etc/pki/tls/crl/Intermediate_CA.crl \
         > /etc/pki/tls/crl/tls_crl_chain.pem
 
 # The first core ca signs all internal tls certificates
@@ -122,11 +122,11 @@
         owner: false
 
     # Loop over all files in tls/csr and sign their certificate, the name of which
-    # is for <name>_csr.pem --> <name>_crt.pem
+    # is for <name>.csr --> <name>.crt
     - name: Gather CSRs to sign
       find:
         paths: "/home/{{ UNAME }}/intermediate_ca/csr/tls"
-        patterns: "*_csr.pem"
+        patterns: "*.csr"
       register: csr_files_glob
 
     - name: Sign remote server CSRs to create TLS certificates
@@ -134,7 +134,7 @@
         openssl ca -batch -config Intermediate-CA-openssl.cnf \
         -extensions server_cert -notext \
         -in {{ item.path }} \
-        -out certs/{{ (item.path | basename).split('_csr')[0] }}_crt.pem
+        -out certs/{{ item.path | basename | splitext | first }}.crt
       args:
         chdir: "/home/{{ UNAME }}/intermediate_ca/"
       with_items:
@@ -143,7 +143,7 @@
 
     - name: Fix certificate permissions
       file:
-        path: "/home/{{ UNAME }}/intermediate_ca/certs/{{ (item.path | basename).split('_csr')[0] }}_crt.pem"
+        path: "/home/{{ UNAME }}/intermediate_ca/certs/{{ item.path | basename | splitext | first }}.crt"
         owner: "{{ UNAME }}"
         group: "{{ UNAME }}"
       with_items:
@@ -162,9 +162,9 @@
 
     - name: Create certificate chain
       shell: |
-        cat "/home/{{ UNAME }}/intermediate_ca/certs/{{ (item.path | basename).split('_csr')[0] }}_crt.pem" \
-        "/home/{{ UNAME }}/pki/certs/iMovies_{{ INTERMEDIATE_CERT_PURPOSES[0] }}_{{ ansible_hostname }}_Intermediate_CA_crt.pem" \
-        > "/home/{{ UNAME }}/intermediate_ca/chains/{{ (item.path | basename).split('_csr')[0] }}_crt.pem"
+        cat "/home/{{ UNAME }}/intermediate_ca/certs/{{ item.path | basename | splitext | first }}.crt" \
+        "/home/{{ UNAME }}/pki/certs/iMovies_{{ INTERMEDIATE_CERT_PURPOSES[0] }}_{{ ansible_hostname }}_Intermediate_CA.crt" \
+        > "/home/{{ UNAME }}/intermediate_ca/chains/{{ item.path | basename | splitext | first }}.crt"
       when: FORCE_TLS_CERT_REGEN
       with_items:
         - "{{ csr_files_glob.files }}"
@@ -184,13 +184,13 @@
   tasks:
     - name: Transfer certificates to corresponding hosts
       synchronize:
-        src: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/tls/certs/iMovies_{{ ansible_hostname }}_tls_crt.pem"
+        src: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/tls/certs/iMovies_{{ ansible_hostname }}_tls.crt"
         dest: /etc/pki/tls/certs/
       when: FORCE_TLS_CERT_REGEN
 
     - name: Fix certificate permissions
       file:
-        path: "/etc/pki/tls/certs/iMovies_{{ ansible_hostname }}_tls_crt.pem"
+        path: "/etc/pki/tls/certs/iMovies_{{ ansible_hostname }}_tls.crt"
         owner: root
         group: root
         mode: 0644

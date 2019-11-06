@@ -7,7 +7,7 @@
   vars:
     ca_folder: "/home/{{ UNAME }}/root_ca"
     openssl_conf_name: Root-CA-openssl.cnf
-    crl_name: Root_CA_crl.pem
+    crl_name: Root_CA.crl
 
 # Distribute CRL
 - hosts: all, !ansservers
@@ -15,7 +15,7 @@
   tasks:
     - name: Distribute new intermediate CA CRL
       synchronize:
-        src: root_ca/Root_CA_crl.pem
+        src: root_ca/Root_CA.crl
         dest: /etc/pki/tls/crl/
         rsync_path: "sudo rsync"
 
@@ -35,7 +35,7 @@
 
     - name: Create intermediate cert CSR
       openssl_csr:
-        path: "/home/{{ UNAME }}/pki/csr/iMovies_{{ item }}_{{ ansible_hostname }}_Intermediate_CA_csr.pem"
+        path: "/home/{{ UNAME }}/pki/csr/iMovies_{{ item }}_{{ ansible_hostname }}_Intermediate_CA.csr"
         privatekey_path: "/home/{{ UNAME }}/pki/private/iMovies_{{ item }}_{{ ansible_hostname }}_Intermediate_CA_key.pem"
 
         country_name: "{{ COUNTRY_NAME }}"
@@ -60,7 +60,7 @@
     - name: Transfer intermediate CSR to config server
       synchronize:
         mode: pull
-        src: "/home/{{ UNAME }}/pki/csr/iMovies_{{ item }}_{{ ansible_hostname }}_Intermediate_CA_csr.pem"
+        src: "/home/{{ UNAME }}/pki/csr/iMovies_{{ item }}_{{ ansible_hostname }}_Intermediate_CA.csr"
         dest: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/root_ca/csr"
         group: false
         owner: false
@@ -75,8 +75,8 @@
       command: |
         openssl ca -batch -config Root-CA-openssl.cnf \
         -extensions v3_intermediate_ca -notext \
-        -in csr/iMovies_{{ item[0] }}_{{ item[1] }}_Intermediate_CA_csr.pem \
-        -out certs/iMovies_{{ item[0] }}_{{ item[1] }}_Intermediate_CA_crt.pem
+        -in csr/iMovies_{{ item[0] }}_{{ item[1] }}_Intermediate_CA.csr \
+        -out certs/iMovies_{{ item[0] }}_{{ item[1] }}_Intermediate_CA.crt
       args:
         chdir: root_ca/
       with_nested:
@@ -86,7 +86,7 @@
 
     - name: Fix certificate owner and group
       file:
-        path: "root_ca/certs/iMovies_{{ item[0] }}_{{ item[1] }}_Intermediate_CA_crt.pem"
+        path: "root_ca/certs/iMovies_{{ item[0] }}_{{ item[1] }}_Intermediate_CA.crt"
         owner: "{{ UNAME }}"
         group: "{{ UNAME }}"
       with_nested:
@@ -99,7 +99,7 @@
   tasks:
     - name: Distribute intermediate CA certificates
       synchronize:
-        src: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/root_ca/certs/iMovies_{{ item }}_{{ ansible_hostname }}_Intermediate_CA_crt.pem"
+        src: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/root_ca/certs/iMovies_{{ item }}_{{ ansible_hostname }}_Intermediate_CA.crt"
         dest: /home/{{ UNAME }}/pki/certs/
         owner: false
         group: false
@@ -109,7 +109,7 @@
 
     - name: Fix intermediate CA certificates owner and group
       file:
-        path: "/home/{{ UNAME }}/pki/certs/iMovies_{{ item }}_{{ ansible_hostname }}_Intermediate_CA_crt.pem"
+        path: "/home/{{ UNAME }}/pki/certs/iMovies_{{ item }}_{{ ansible_hostname }}_Intermediate_CA.crt"
         owner: "{{ UNAME }}"
         group: "{{ UNAME }}"
       with_items:
@@ -120,7 +120,7 @@
         action: export
         path: "/home/{{ UNAME }}/pki/private/iMovies_{{ INTERMEDIATE_CERT_PURPOSES[1] }}_{{ ansible_hostname }}_Intermediate_CA_cert_and_priv_key.pfx"
         privatekey_path: "/home/{{ UNAME }}/pki/private/iMovies_{{ INTERMEDIATE_CERT_PURPOSES[1] }}_{{ ansible_hostname }}_Intermediate_CA_key.pem"
-        certificate_path: "/home/{{ UNAME }}/pki/certs/iMovies_{{ INTERMEDIATE_CERT_PURPOSES[1] }}_{{ ansible_hostname }}_Intermediate_CA_crt.pem"
+        certificate_path: "/home/{{ UNAME }}/pki/certs/iMovies_{{ INTERMEDIATE_CERT_PURPOSES[1] }}_{{ ansible_hostname }}_Intermediate_CA.crt"
         friendly_name: "{{ansible_hostname}}"
         state: present
 
