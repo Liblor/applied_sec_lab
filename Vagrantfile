@@ -260,8 +260,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     sudo systemctl set-default graphical.target
 
                     # Install root certificate
-                    sudo cp /vagrant/key_store/iMovies_Root_CA_crt.pem /usr/local/share/ca-certificates
-                    sudo chown root: /usr/local/share/ca-certificates/iMovies_Root_CA_crt.pem
+                    sudo cp /vagrant/key_store/iMovies_Root_CA.crt /usr/local/share/ca-certificates
+                    sudo chown root: /usr/local/share/ca-certificates/iMovies_Root_CA.crt
                     sudo update-ca-certificates
 
                     # Remove sensitive data from history

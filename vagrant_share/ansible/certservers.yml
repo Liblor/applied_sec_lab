@@ -10,9 +10,9 @@
   vars:
     ca_folder: "/home/{{ UNAME }}/intermediate_ca"
     openssl_conf_name: Intermediate-CA-openssl.cnf
-    ca_cert_path: "/home/{{ UNAME }}/pki/certs/iMovies_{{ INTERMEDIATE_CERT_PURPOSES[0] }}_{{ ansible_hostname }}_Intermediate_CA_crt.pem"
+    ca_cert_path: "/home/{{ UNAME }}/pki/certs/iMovies_{{ INTERMEDIATE_CERT_PURPOSES[0] }}_{{ ansible_hostname }}_Intermediate_CA.crt"
     ca_priv_key_path: "/home/{{ UNAME }}/pki/private/iMovies_{{ INTERMEDIATE_CERT_PURPOSES[0] }}_{{ ansible_hostname }}_Intermediate_CA_key.pem"
-    crl_file_name: Intermediate_CA_crl.pem
+    crl_file_name: Intermediate_CA.crl
 
     # XXX: Verify this configuration, currently just copied from web server
     nginx_http_template_enable: true
