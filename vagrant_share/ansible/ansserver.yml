@@ -19,7 +19,7 @@
 
     - name: Chown core CA certificate
       file:
-        path: /usr/local/share/ca-certificates/iMovies_Root_CA.crt
+        path: /usr/local/share/ca-certificates/iMovies_Root_CA_crt.pem
         owner: root
         group: root
 
