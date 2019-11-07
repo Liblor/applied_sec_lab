@@ -11,9 +11,9 @@ vnetwork:
 	vagrant up aslcert01 asldb01 aslweb01 aslans01
 
 .PHONY: client
-network:
+client:
 	vagrant up aslclient01
 
 .PHONY: purge
-network:
+purge:
 	vagrant destroy -f
