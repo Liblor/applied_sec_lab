@@ -18,6 +18,7 @@
         src: root_ca/Root_CA.crl
         dest: /etc/pki/tls/crl/
         rsync_path: "sudo rsync"
+      when: FORCE_INTERMEDIATE_CA_CERT_REGEN
 
 - hosts: certservers
   become: yes

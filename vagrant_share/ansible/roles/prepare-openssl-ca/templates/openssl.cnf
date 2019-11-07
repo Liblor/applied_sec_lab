@@ -52,3 +52,4 @@ subjectKeyIdentifier = hash
 authorityKeyIdentifier = issuer:always
 keyUsage = critical, digitalSignature, keyEncipherment
 extendedKeyUsage = serverAuth, clientAuth
+nsCertType = client, server
