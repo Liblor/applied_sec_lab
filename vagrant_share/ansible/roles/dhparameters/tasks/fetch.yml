@@ -1,0 +1,14 @@
+---
+- name: Fetch a pre-generated DH parameters file
+  synchronize:
+    mode: push
+    src: "/vagrant/dhparams_store/{{ ansible_hostname }}.pem"
+    dest: "/etc/ssl/private/dh_param.pem"
+    group: false
+    owner: false
+  delegate_to: "{{ groups['ansservers'][0] }}"
+
+- name: Set permissions for DH parameters file
+  file:
+    path: "/etc/ssl/private/dh_param.pem"
+    mode: 0440
