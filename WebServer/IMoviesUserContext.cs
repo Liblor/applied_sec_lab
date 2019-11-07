@@ -11,5 +11,12 @@ namespace WebServer
         }
 
         public DbSet<User> Users { get; set; }
+
+        // Fix capitalisation of table name
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>()
+                .ToTable(Constants.IMoviesUserTableName);
+        }
     }
 }

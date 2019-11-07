@@ -10,6 +10,8 @@ using WebServer.Models.Cert;
 using CoreCA.Client;
 using System.Security.Claims;
 using System.Net.Mime;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 
 namespace WebServer.Controllers
 {
@@ -18,29 +20,33 @@ namespace WebServer.Controllers
     {
         private readonly CoreCAClient _client;
         private readonly ILogger<CertController> _logger;
+        private readonly IMoviesCertContext _certContext;
 
-        public CertController(CoreCAClient client, ILogger<CertController> logger)
+        public CertController(CoreCAClient client, ILogger<CertController> logger, IMoviesCertContext certContext)
         {
             _client = client;
             _logger = logger;
+            _certContext = certContext;
         }
 
-        private static async Task<CertificatesData> FetchCertificatesData()
+        private CertificatesData FetchCertificatesData()
         {
-            // TODO Query certificates from the database.
+            var valid = _certContext.PublicCertificates.AsEnumerable()
+                .Where(c =>
+                c.Parse().NotBefore <= DateTime.Now &&
+                DateTime.Now <= c.Parse().NotAfter &&
+                !c.IsRevoked)
+                .Select(c => new Certificate(c));
 
-            var valid = new HashSet<Certificate>();
-            var revoked = new HashSet<Certificate>();
-            var expired = new HashSet<Certificate>();
+            var revoked = _certContext.PublicCertificates.AsEnumerable()
+                .Where(c => c.IsRevoked)
+                .Select(c => new Certificate(c));
 
-            var c = new Certificate
-            {
-            	Id = 0,
-                Fingerprint = "test",
-                CreateDate = DateTime.Now,
-                ExpireDate = DateTime.Now.Subtract(new TimeSpan(365, 0, 0, 0, 0)),
-            };
-            valid.Add(c);
+            var expired = _certContext.PublicCertificates.AsEnumerable()
+                .Where(c =>
+                DateTime.Now > c.Parse().NotAfter &&
+                !c.IsRevoked)
+                .Select(c => new Certificate(c));
 
             var data = new CertificatesData()
             {
@@ -55,7 +61,7 @@ namespace WebServer.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-			var viewModel = await FetchCertificatesData();
+			var viewModel = FetchCertificatesData();
 
             return View(viewModel);
         }
@@ -83,7 +89,7 @@ namespace WebServer.Controllers
         {
             if (!ModelState.IsValid)
             {
-                var viewModel = await FetchCertificatesData();
+                var viewModel = FetchCertificatesData();
                 viewModel.DownloadCertDetails = details;
 
                 TempData["ErrorMessage"] = "Certificate download failed.";
@@ -117,7 +123,7 @@ namespace WebServer.Controllers
 
             if (!ModelState.IsValid)
             {
-                var viewModel = await FetchCertificatesData();
+                var viewModel = FetchCertificatesData();
                 viewModel.RequestNewCertDetails = details;
 
                 TempData["ErrorMessage"] = "New certificate request failed.";

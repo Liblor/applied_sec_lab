@@ -1,26 +1,22 @@
 using Microsoft.EntityFrameworkCore;
-using CertServer.Models;
 using CoreCA.DataModel;
 
-namespace CertServer.Data
+namespace WebServer
 {
-    public class IMoviesCAContext : DbContext
+    public class IMoviesCertContext : DbContext
     {
-        public IMoviesCAContext (DbContextOptions<IMoviesCAContext> options)
+        public IMoviesCertContext(DbContextOptions<IMoviesCertContext> options)
             : base(options)
         {
         }
 
         public DbSet<PublicCertificate> PublicCertificates { get; set; }
-		public DbSet<PrivateKey> PrivateKeys { get; set; }
 
 		// Fix capitalisation of table name
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<PublicCertificate>()
 				.ToTable(Constants.IMoviesCAPublicCertsTableName);
-			modelBuilder.Entity<PrivateKey>()
-				.ToTable(Constants.IMoviesCAPrivateCertsTableName);
 		}
     }
 }

@@ -17,7 +17,7 @@ namespace CertServer
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<User>()
-				.ToTable(CAConfig.IMoviesUserTableName);
+				.ToTable(Constants.IMoviesUserTableName);
 		}
     }
 }
