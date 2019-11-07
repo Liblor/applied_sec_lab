@@ -73,10 +73,8 @@ namespace WebServer
                 opt.DefaultPolicy = policyBuilder.Build();
             });
 
-            if (Environment.IsDevelopment())
-                services.AddDbContext<IMoviesUserContext>(opt => opt.UseInMemoryDatabase("DummyDB"));
-            else
-                services.AddDbContext<IMoviesUserContext>(opt => opt.UseMySql(Configuration.GetConnectionString("IMoviesUserDB")));
+            services.AddDbContext<IMoviesUserContext>(opt => opt.UseMySql(Configuration.GetConnectionString("IMoviesUserDB")));
+            services.AddDbContext<IMoviesCertContext>(opt => opt.UseMySql(Configuration.GetConnectionString("IMoviesCertDB")));
             
             services.AddScoped<CertificateAuthenticationDBValidator>();
             services.AddScoped<CookieAuthenticationDBValidator>();

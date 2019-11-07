@@ -27,18 +27,18 @@
         <tbody>
             <tr>
                 <th scope="row">Fingerprint</th>
-                <th scope="row">Create Date</th>
-                <th scope="row">Expire Date</th>
+                <th scope="row">Valid from</th>
+                <th scope="row">Valid until</th>
                 <th scope="row">Actions</th>
             </tr>
             @foreach (Certificate c in Model.Valid)
             {
                 <tr>
                     <td>@c.Fingerprint</td>
-                    <td>@c.CreateDate</td>
+                    <td>@c.ValidFrom</td>
                     <td>@c.ExpireDate</td>
                     <td>
-                        <form method="post" asp-action="Revoke" asp-route-id="@c.Id" style="display: inline-block">
+                        <form method="post" asp-action="Revoke" style="display: inline-block">
                             <button class="btn btn-inline" type="submit" title="Revoke">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
@@ -57,15 +57,15 @@
         <tbody>
             <tr>
                 <th scope="row">Fingerprint</th>
-                <th scope="row">Create Date</th>
-                <th scope="row">Expire Date</th>
+                <th scope="row">Valid from</th>
+                <th scope="row">Valid until</th>
                 <th scope="row">Actions</th>
             </tr>
             @foreach (Certificate c in Model.Revoked)
             {
                 <tr>
                     <td>@c.Fingerprint</td>
-                    <td>@c.CreateDate</td>
+                    <td>@c.ValidFrom</td>
                     <td>@c.ExpireDate</td>
                     <td>-</td>
                 </tr>
@@ -78,7 +78,7 @@
         <tbody>
             <tr>
                 <th scope="row">Fingerprint</th>
-                <th scope="row">Create Date</th>
+                <th scope="row">Valid from</th>
                 <th scope="row">Expire Date</th>
                 <th scope="row">Actions</th>
             </tr>
@@ -86,7 +86,7 @@
             {
                 <tr>
                     <td>@c.Fingerprint</td>
-                    <td>@c.CreateDate</td>
+                    <td>@c.ValidFrom</td>
                     <td>@c.ExpireDate</td>
                     <td>-</td>
                 </tr>

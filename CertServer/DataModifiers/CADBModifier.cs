@@ -37,6 +37,8 @@ namespace CertServer.DataModifiers
 
 			foreach (PublicCertificate pubCert in unrevokedCertificates)
 			{
+                if (DateTime.Now > pubCert.Parse().NotAfter)
+                    continue;
 				pubCert.IsRevoked = true;
 			}
 

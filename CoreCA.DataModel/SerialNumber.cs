@@ -1,6 +1,6 @@
 using System;
 
-namespace CertServer.Models
+namespace CoreCA.DataModel
 {
 	public class SerialNumber
 	{

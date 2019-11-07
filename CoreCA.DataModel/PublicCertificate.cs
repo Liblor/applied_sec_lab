@@ -1,7 +1,9 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Security.Cryptography.X509Certificates;
 
-namespace CertServer.Models
+namespace CoreCA.DataModel
 {
 	public class PublicCertificate
 	{
@@ -28,5 +30,7 @@ namespace CertServer.Models
 				SerialNr = SerialNr
 			};
 		}
-	}
+
+        public X509Certificate2 Parse() => new X509Certificate2(Convert.FromBase64String(Certificate));
+    }
 }
