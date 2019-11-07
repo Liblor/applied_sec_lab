@@ -1,4 +1,21 @@
 ---
+- name: Install GnuPG to import keys.
+  package:
+    name: gpg
+    state: present
+    update_cache: true
+
+- name: Import MariaDB APT key
+  apt_key:
+    url: "{{ mariadb_apt_repo_gpg_key_url }}"
+    state: present
+
+- name: Add repository for Debian Buster
+  apt_repository:
+    repo: deb [arch=amd64] http://mirror.mva-n.net/mariadb/repo/10.4/debian buster main
+    state: present
+    update_cache: yes
+
 - name: Install MariaDB
   package:
     name: "{{ item }}"
@@ -7,6 +24,6 @@
   with_items:
     - "mariadb-server"
     - "mariadb-client"
-    - "galera-3"
+    - "galera-4"
     - "python-mysqldb"
     - "rsync"
