@@ -8,9 +8,10 @@
     mode: 0700
   with_items:
     - "{{ ca_folder }}/csr"
+    - "{{ ca_folder }}/private"
     - "{{ ca_folder }}/certs"
     - "{{ ca_folder }}/newcerts"
-    - "{{ ca_folder }}/private"
+    - "{{ ca_folder }}/revokedcerts"
 
 - name: Create empty default index file
   copy:
