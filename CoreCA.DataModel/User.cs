@@ -16,6 +16,7 @@ namespace CoreCA.DataModel
 
         [Column("lastname")]
         [Required, StringLength(64, MinimumLength = 1)]
+        [Display(Name = "Last name")]
         public string LastName { get; set; }
 
         [Column("email")]
