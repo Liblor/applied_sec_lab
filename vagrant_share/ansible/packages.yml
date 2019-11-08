@@ -9,10 +9,8 @@
   roles:
     - pyopenssl
     - aspdotnet
-    - nginxinc.nginx
 
 - hosts: webservers
   become: yes
   roles:
     - aspdotnet
-    - nginxinc.nginx
