@@ -11,4 +11,6 @@
 - name: Set permissions for DH parameters file
   file:
     path: "/etc/ssl/private/dh_param.pem"
+    owner: root
+    group: root
     mode: 0440

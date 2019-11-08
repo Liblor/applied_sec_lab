@@ -1,0 +1,18 @@
+---
+- hosts: ansservers
+  become: yes
+  roles:
+    - pyopenssl
+
+- hosts: certservers
+  become: yes
+  roles:
+    - pyopenssl
+    - aspdotnet
+    - nginxinc.nginx
+
+- hosts: webservers
+  become: yes
+  roles:
+    - aspdotnet
+    - nginxinc.nginx

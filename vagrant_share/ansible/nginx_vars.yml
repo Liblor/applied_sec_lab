@@ -1,0 +1,66 @@
+---
+nginx_start: false
+nginx_http_template_enable: true
+nginx_http_template:
+  default:
+    template_file: http/default.conf.j2
+    conf_file_name: default.conf
+    conf_file_location: /etc/nginx/conf.d/
+    port: 443
+    server_name: localhost
+    error_page: /usr/share/nginx/html
+    autoindex: false
+    add_headers:
+      x_frame_options:
+        name: X-Frame-Options
+        value: "SAMEORIGIN"
+        always: true
+      strict-transport-security:
+        name: Strict-Transport-Security
+        value: "max-age=63072000"
+        always: true
+    ssl:
+      cert: "/etc/pki/tls/certs/iMovies_{{ ansible_hostname }}_tls.crt"
+      key: "/etc/ssl/trusted/private/iMovies_{{ ansible_hostname }}_tls_key.pem"
+      dhparam: /etc/ssl/private/dh_param.pem
+      session_cache: shared:MozSSL:10m
+      session_timeout: 1d
+      disable_session_tickets: true
+      protocols: TLSv1.3
+      prefer_server_ciphers: false
+      stapling: true
+      stapling_verify: true
+      trusted_cert: "/usr/local/share/ca-certificates/iMovies_Root_CA.crt"
+    reverse_proxy:
+      locations:
+        aspnet:
+          location: /
+          proxy_pass: http://aspnet
+          proxy_http_version: 1.1
+          proxy_set_header:
+            header_upgrade:
+              name: Upgrade
+              value: $http_upgrade
+            header_connection:
+              name: Connection
+              value: "keep-alive"
+            header_host:
+              name: Host
+              value: $host
+            header_x_forwarded_for:
+              name: X-Forwarded-For
+              value: $proxy_add_x_forwarded_for
+            header_x_forwarded_proto:
+              name: X-Forwarded-Proto
+              value: $scheme
+    upstreams:
+      upstream:
+        name: aspnet
+        lb_method: least_conn
+        zone_name: aspnet
+        zone_size: 64k
+        sticky_cookie: false
+        servers:
+          aspnet_1:
+            address: localhost
+            port: 5000

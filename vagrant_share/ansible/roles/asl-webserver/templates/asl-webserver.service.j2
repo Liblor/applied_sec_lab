@@ -2,11 +2,11 @@
 Description=Applied Security Lab WebServer
 
 [Service]
-WorkingDirectory=/app
-ExecStart=/usr/bin/dotnet /app/WebServer.dll
+WorkingDirectory=/home/{{ UNAME }}/app
+ExecStart=/usr/bin/dotnet /home/{{ UNAME }}/app/WebServer.dll
 Restart=always
 RestartSec=10
 KillSignal=SIGINT
-User=abc
+User={{ UNAME }}
 Environment=ASPNETCORE_ENVIRONMENT=Production
 Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
