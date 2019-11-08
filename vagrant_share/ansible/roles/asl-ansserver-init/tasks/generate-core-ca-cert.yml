@@ -24,7 +24,6 @@
       - keyCertSign
       - cRLSign
       - digitalSignature
-
     force: "{{ FORCE_ROOT_CA_CERT_REGEN }}"
 
 - name: Create Certificate for root CA
