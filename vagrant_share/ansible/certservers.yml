@@ -3,9 +3,11 @@
   become: yes
   roles:
     - asl-certserver
+    - nginx-ssl-client
     - nginxinc.nginx
     - add-to-trusted-user-group
   vars:
     trusted_user: nginx
+    ssl_client_required: true
   vars_files:
     - nginx_vars.yml
