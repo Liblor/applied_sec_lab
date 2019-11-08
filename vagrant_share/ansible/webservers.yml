@@ -4,8 +4,10 @@
   roles:
     - asl-webserver
     - nginxinc.nginx
+    - nginx-ssl-client
     - add-to-trusted-user-group
   vars:
     trusted_user: nginx
+    ssl_client_required: false
   vars_files:
     - nginx_vars.yml

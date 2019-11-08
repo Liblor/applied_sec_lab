@@ -1,12 +1,21 @@
 ---
+nginx_cleanup_config: true
+nginx_cleanup_config_path:
+  - /etc/nginx/conf.d
 nginx_http_template_enable: true
 nginx_http_template:
   default:
     template_file: http/default.conf.j2
     conf_file_name: default.conf
     conf_file_location: /etc/nginx/conf.d/
-    port: 443
+    listen:
+      listen_localhost:
+        ip: localhost
+        port: 443
+        opts: [http2]
     server_name: localhost
+    include_files:
+      - /etc/nginx/include.d/ssl_client.conf
     error_page: /usr/share/nginx/html
     autoindex: false
     add_headers:
