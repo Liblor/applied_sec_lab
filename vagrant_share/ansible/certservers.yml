@@ -3,6 +3,7 @@
   become: yes
   roles:
     - asl-certserver
+    - nginxinc.nginx
     - add-to-trusted-user-group
   vars:
     trusted_user: nginx

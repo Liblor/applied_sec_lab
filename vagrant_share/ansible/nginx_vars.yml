@@ -1,5 +1,4 @@
 ---
-nginx_start: false
 nginx_http_template_enable: true
 nginx_http_template:
   default:
