@@ -1,6 +1,8 @@
 ---
 - hosts: certservers
   become: yes
+  vars_files:
+    - /vagrant/mysql_passwords.yml
   roles:
     - aspdotnet
     - pyopenssl
