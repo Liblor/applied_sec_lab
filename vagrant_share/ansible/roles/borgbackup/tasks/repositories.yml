@@ -1,0 +1,15 @@
+---
+- name: Add a user
+  user:
+    name: borgbackup
+    password_lock: yes
+    shell: /sbin/nologin
+    append: yes
+
+- name: Create directory for repositories
+  file:
+    path: /backup/
+    state: directory
+    owner: borgbackup
+    group: borgbackup
+    mode: 0755

@@ -1,0 +1,3 @@
+---
+install_service: false
+setup_repositories: false

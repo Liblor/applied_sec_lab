@@ -1,2 +1,7 @@
 ---
 - hosts: bkservers
+  become: yes
+  roles:
+    - borgbackup
+  vars:
+    setup_repositories: true
