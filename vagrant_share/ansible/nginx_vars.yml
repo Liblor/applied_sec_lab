@@ -9,8 +9,8 @@ nginx_http_template:
     conf_file_name: default.conf
     conf_file_location: /etc/nginx/conf.d/
     listen:
-      listen_localhost:
-        ip: 127.0.0.1
+      listen_all:
+        ip: 0.0.0.0
         port: 443
         opts: [http2]
     server_name: localhost
