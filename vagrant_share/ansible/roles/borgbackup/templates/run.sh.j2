@@ -7,6 +7,7 @@ FILE_PHRASE="$SCRIPT_PATH/borg.phrase"
 
 BORG_HOST='aslbk01'
 BORG_PATH="/backup/$HOSTNAME/"
+BORG_RSH="sudo -u {{ UNAME }} ssh"
 
 BORG_REPO="ssh://borgbackup@$BORG_HOST:22/$BORG_PATH"
 export BORG_REPO
