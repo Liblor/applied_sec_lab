@@ -1,0 +1,18 @@
+---
+- openssh_keypair:
+    path: "/home/{{ UNAME }}/.ssh/id_ssh_{{ inventory_hostname }}"
+    size: 4096
+
+- name: Set permission for borg ssh private key
+  file:
+    path: "/home/{{ UNAME }}/.ssh/id_ssh_{{ inventory_hostname }}"
+    owner: "{{ UNAME }}"
+    group: "{{ UNAME }}"
+    mode: '0600'
+
+- name: Set permission for borg ssh public key
+  file:
+    path: "/home/{{ UNAME }}/.ssh/id_ssh_{{ inventory_hostname }}.pub"
+    owner: "{{ UNAME }}"
+    group: "{{ UNAME }}"
+    mode: '0644'
