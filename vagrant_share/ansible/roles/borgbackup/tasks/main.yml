@@ -1,6 +1,6 @@
 ---
-- import_tasks: package.yml
-- import_tasks: service.yml
-    when: install_service
-- import_tasks: repositories.yml
-    when: setup_repositories
+- name: Install the package
+  package:
+    name: borgbackup
+    state: present
+    update_cache: true
