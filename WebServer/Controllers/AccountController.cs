@@ -96,7 +96,6 @@ namespace WebServer.Controllers
         {
             if (ModelState.IsValid)
             {
-
                 bool success = false;
 
                 var user = _dbContext.Users.Find(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);

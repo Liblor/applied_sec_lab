@@ -7,6 +7,14 @@
     group: "{{ UNAME }}"
     mode: 0644
 
+- name: Install systemd environment file
+  template:
+    src: asl-webserver.env.j2
+    dest: /etc/systemd/system/asl-webserver.env
+    owner: root
+    group: root
+    mode: '0600'
+
 - name: Reload the systemd daemon
   systemd:
     daemon_reload: yes

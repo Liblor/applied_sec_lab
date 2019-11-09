@@ -51,13 +51,13 @@ namespace CertServer
 
             services.AddDbContext<IMoviesUserContext>(
                 opt => opt.UseMySql(
-                    Configuration["iMovies:ConnectionString"]
+                    Configuration.GetConnectionString("IMoviesUserDB")
                 )
             );
 
             services.AddDbContext<IMoviesCAContext>(
                 opt => opt.UseMySql(
-                    Configuration["iMoviesCA:ConnectionString"]
+                    Configuration.GetConnectionString("IMoviesCertDB")
                 )
             );
 
