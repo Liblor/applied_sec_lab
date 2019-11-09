@@ -1,4 +1,4 @@
-﻿using CoreCA.DataModel;
+using CoreCA.DataModel;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;

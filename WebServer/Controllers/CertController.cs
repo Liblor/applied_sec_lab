@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -55,13 +55,13 @@ namespace WebServer.Controllers
                 Expired = expired,
             };
 
-			return data;
-		}
+            return data;
+        }
 
         [HttpGet]
         public IActionResult Index()
         {
-			var viewModel = FetchCertificatesData();
+            var viewModel = FetchCertificatesData();
 
             return View(viewModel);
         }

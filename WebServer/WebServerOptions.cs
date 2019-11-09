@@ -1,4 +1,3 @@
-﻿
 namespace WebServer
 {
     public class WebServerOptions
