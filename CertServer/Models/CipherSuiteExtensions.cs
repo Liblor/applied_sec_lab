@@ -5,7 +5,7 @@ namespace CertServer.Models
 {
     public static class CipherSuiteExtensions
     {
-        public static bool IsVaildCipherSuite(this CipherSuite cipherSuite) =>
+        public static bool IsValidCipherSuite(this CipherSuite cipherSuite) =>
             CAConfig.CipherSuites.Any(elem => elem.Equals(cipherSuite));
     }
 }
