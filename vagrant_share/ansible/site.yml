@@ -2,7 +2,7 @@
 - import_playbook: common.yml
 - import_playbook: packages.yml
 - import_playbook: users.yml
-- import_playbook: ssh-keys.yml
+- import_playbook: backup-client-user.yml
 - import_playbook: files.yml
 - import_playbook: distribute-root-cert.yml
 - import_playbook: issue-intermediate-certs.yml
