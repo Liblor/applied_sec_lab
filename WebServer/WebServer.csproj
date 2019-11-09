@@ -12,4 +12,9 @@
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="3.0.0-rc1.final" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\CoreCA.Client\CoreCA.Client.csproj" />
+    <ProjectReference Include="..\CoreCA.DataModel\CoreCA.DataModel.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -7,82 +7,106 @@
 <h1 class="text-center">@ViewData["Title"]</h1>
 
 <div class="viewport d-flex flex-column mx-auto">
-	@{
-		if (TempData.ContainsKey("SuccessMessage")) {
-			<div class="alert alert-success" role="alert">
-				@TempData["SuccessMessage"]
-			</div>
-		}
-		if (TempData.ContainsKey("ErrorMessage")) {
-			<div class="alert alert-danger" role="alert">
-				@TempData["ErrorMessage"]
-			</div>
-		}
-	}
+    @{
+        if (TempData.ContainsKey("SuccessMessage"))
+        {
+            <div class="alert alert-success" role="alert">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+        if (TempData.ContainsKey("ErrorMessage"))
+        {
+            <div class="alert alert-danger" role="alert">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+    }
 
-	<h2>Valid Certificates</h2>
-	<table class="table table-striped">
-		<tbody>
-			<tr>
-				<th scope="row">Fingerprint</th>
-				<th scope="row">Create Date</th>
-				<th scope="row">Expire Date</th>
-				<th scope="row">Actions</th>
-			</tr>
-			@foreach (Certificate c in Model.Valid) {
-				<tr>
-					<td>@c.Fingerprint</td>
-					<td>@c.CreateDate</td>
-					<td>@c.ExpireDate</td>
-					<td><form method="post" asp-action="Revoke" asp-route-id="@c.Id"><button class="btn btn-inline" type="submit" title="Revoke"><i class="fas fa-trash-alt"></i></button></form></td>
-				</tr>
-			}
-		</tbody>
-	</table>
+    <h2>Valid Certificates</h2>
+    <table class="table table-striped">
+        <tbody>
+            <tr>
+                <th scope="row">Fingerprint</th>
+                <th scope="row">Valid from</th>
+                <th scope="row">Valid until</th>
+                <th scope="row">Actions</th>
+            </tr>
+            @foreach (Certificate c in Model.Valid)
+            {
+                <tr>
+                    <td>@c.Fingerprint</td>
+                    <td>@c.ValidFrom</td>
+                    <td>@c.ExpireDate</td>
+                    <td>
+                        <form method="post" asp-action="Revoke" style="display: inline-block">
+                            <button class="btn btn-inline" type="submit" title="Revoke">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                        <button class="btn btn-inline" type="button" title="Download" data-toggle="modal" data-target="#downloadCertModal">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 
-	<h2>Revoked Certificates</h2>
-	<table class="table table-striped">
-		<tbody>
-			<tr>
-				<th scope="row">Fingerprint</th>
-				<th scope="row">Create Date</th>
-				<th scope="row">Expire Date</th>
-				<th scope="row">Actions</th>
-			</tr>
-			@foreach (Certificate c in Model.Revoked) {
-				<tr>
-					<td>@c.Fingerprint</td>
-					<td>@c.CreateDate</td>
-					<td>@c.ExpireDate</td>
-					<td>-</td>
-				</tr>
-			}
-		</tbody>
-	</table>
+    <h2>Revoked Certificates</h2>
+    <table class="table table-striped">
+        <tbody>
+            <tr>
+                <th scope="row">Fingerprint</th>
+                <th scope="row">Valid from</th>
+                <th scope="row">Valid until</th>
+                <th scope="row">Actions</th>
+            </tr>
+            @foreach (Certificate c in Model.Revoked)
+            {
+                <tr>
+                    <td>@c.Fingerprint</td>
+                    <td>@c.ValidFrom</td>
+                    <td>@c.ExpireDate</td>
+                    <td>-</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 
-	<h2>Expired Certificates</h2>
-	<table class="table table-striped">
-		<tbody>
-			<tr>
-				<th scope="row">Fingerprint</th>
-				<th scope="row">Create Date</th>
-				<th scope="row">Expire Date</th>
-				<th scope="row">Actions</th>
-			</tr>
-			@foreach (Certificate c in Model.Expired) {
-				<tr>
-					<td>@c.Fingerprint</td>
-					<td>@c.CreateDate</td>
-					<td>@c.ExpireDate</td>
-					<td>-</td>
-				</tr>
-			}
-		</tbody>
-	</table>
+    <h2>Expired Certificates</h2>
+    <table class="table table-striped">
+        <tbody>
+            <tr>
+                <th scope="row">Fingerprint</th>
+                <th scope="row">Valid from</th>
+                <th scope="row">Expire Date</th>
+                <th scope="row">Actions</th>
+            </tr>
+            @foreach (Certificate c in Model.Expired)
+            {
+                <tr>
+                    <td>@c.Fingerprint</td>
+                    <td>@c.ValidFrom</td>
+                    <td>@c.ExpireDate</td>
+                    <td>-</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 
-	<div class="d-flex justify-content-center">
-		<div class="btn-group-vertical">
-			<form method="post" asp-action="New"><button class="btn btn-primary" type="submit">Issue new certificate</button></form>
-		</div>
-	</div>
+    <div class="d-flex justify-content-center">
+        <partial name="RequestNewCertPartial" model="Model.RequestNewCertDetails" />
+    </div>
+
+    <div class="d-flex justify-content-center">
+        <partial name="DownloadCertPartial" model="Model.DownloadCertDetails" />
+    </div>
+
+    @* Post-redirect-get pattern for new certs: POST to /New -> Redirect to /Index -> trigger GET /Download if new cert successfully issued *@
+    @if (TempData.ContainsKey("AutoDownloadNewCert"))
+    {
+        <script>
+            window.location = '@TempData["AutoDownloadNewCert"]';
+        </script>
+    }
 </div>

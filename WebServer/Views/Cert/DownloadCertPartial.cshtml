@@ -1,0 +1,27 @@
+﻿@model WebServer.Models.Cert.DownloadCertDetails
+
+<div class="modal fade" id="downloadCertModal" tabindex="-1" role="dialog" aria-labelledby="downloadCertModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="downloadCertModalCenterTitle">Download certificate</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="post" asp-controller="Cert" asp-action="Download">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label asp-for="Password"></label><br />
+                        <input id="dlPasswordField" type="password" asp-for="Password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Download certificate</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

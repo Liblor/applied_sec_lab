@@ -1,4 +1,4 @@
-using CertServer.Models;
+using CoreCA.DataModel;
 using Microsoft.EntityFrameworkCore;
 
 namespace CertServer
@@ -16,7 +16,7 @@ namespace CertServer
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<User>()
-				.ToTable(CAConfig.IMoviesUserTableName);
+				.ToTable(Constants.IMoviesUserTableName);
 		}
     }
 }

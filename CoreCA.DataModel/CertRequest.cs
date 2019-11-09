@@ -1,10 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace CertServer.Models
+namespace CoreCA.DataModel
 {
 	public class CertRequest
 	{
-		[Required]
+		[Required, StringLength(64, MinimumLength = 1)]
 		public string Uid { get; set; } 
 
 		[Required]

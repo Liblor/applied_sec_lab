@@ -6,12 +6,14 @@
     <NoWarn>$(NoWarn);1591</NoWarn>
     <UserSecretsId>876ff026-2bba-44da-b012-7f46a917fe94</UserSecretsId>
   </PropertyGroup>
-  <ItemGroup></ItemGroup>
   <ItemGroup>
-    <PackageReference Include="BouncyCastle" Version="1.8.5" />
+    <PackageReference Include="Portable.BouncyCastle" Version="1.8.5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0-rc4" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="4.6.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.0.0" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="3.0.0-rc1.final" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CoreCA.DataModel\CoreCA.DataModel.csproj" />
   </ItemGroup>
 </Project>

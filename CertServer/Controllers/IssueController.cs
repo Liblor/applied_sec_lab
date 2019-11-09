@@ -8,6 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 
 using CertServer.Models;
 using CertServer.DataModifiers;
+using CoreCA.DataModel;
 
 namespace CertServer.Controllers
 {
@@ -63,7 +64,7 @@ namespace CertServer.Controllers
 		{
 			CipherSuite cipherSuite = certRequest.RequestedCipherSuite;
 
-			if (CipherSuiteHelper.IsVaildCipherSuite(cipherSuite))
+			if (cipherSuite.IsValidCipherSuite())
 			{
 				User user = _userDBAuthenticator.AuthenticateAndGetUser(certRequest.Uid, certRequest.Password);
 
@@ -88,7 +89,7 @@ namespace CertServer.Controllers
 						privKey = RSA.Create(cipherSuite.KeySize);
 
 						req = new CertificateRequest(
-							"CN=" + user.Uid,
+							"CN=" + user.Id,
 							(RSA) privKey,
 							hashAlg,
 							RSASignaturePadding.Pss
@@ -99,7 +100,7 @@ namespace CertServer.Controllers
 						privKey = ECDsa.Create();
 
 						req = new CertificateRequest(
-							"CN=" + user.Uid,
+							"CN=" + user.Id,
 							(ECDsa) privKey,
 							hashAlg
 						);
@@ -179,7 +180,7 @@ namespace CertServer.Controllers
 						_caDBModifier.AddCertificate(
 							new PublicCertificate {
 								SerialNr = serialNr.SerialNr,
-								Uid = user.Uid,
+								Uid = user.Id,
 								Certificate = Convert.ToBase64String(
 									userCert.Export(X509ContentType.Pkcs12)
 								),
@@ -234,7 +235,7 @@ namespace CertServer.Controllers
 					// Add encrypted private key to DB
 					_caDBModifier.AddPrivateKey(
 						new PrivateKey {
-							Uid = user.Uid,
+							Uid = user.Id,
 							KeyPkcs12 = pkcs12ArchiveB64
 						}
 					);

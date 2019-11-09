@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CoreCA.DataModel;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace WebServer.Models
                 context.Users.Add(new User
                 {
                     Id = "test",
-                    Email = "test.user@imovies.local",
+                    Email = "test.user@imovies.ch",
                     FirstName = "Test",
                     LastName = "User",
                     // PasswordHash = SHA1("test")

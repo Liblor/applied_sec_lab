@@ -1,4 +1,4 @@
-namespace CertServer.Models
+namespace CoreCA.DataModel
 {
 	public class UserCertificate
 	{
