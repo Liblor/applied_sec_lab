@@ -25,3 +25,6 @@ TLS_GROUP: tls-trusted
 INTERMEDIATE_CERT_PURPOSES:
   - internal
   - external
+
+
+backup_client_username: "backup_client"
