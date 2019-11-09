@@ -1,21 +1,8 @@
 [mysqld]
 bind-address=0.0.0.0
 ssl-ca="/usr/local/share/ca-certificates/iMovies_Root_CA.crt"
-ssl-key="/etc/mysql/keys/iMovies_{{ inventory_hostname }}_tls_key.pem"
+ssl-key="/etc/ssl/trusted/private/iMovies_{{ inventory_hostname }}_tls_key.pem"
 ssl-cert="/etc/pki/tls/certs/iMovies_{{ inventory_hostname }}_tls.crt"
-
-[galera]
-wsrep_on=ON
-wsrep_provider=/usr/lib/galera/libgalera_smm.so
-wsrep_cluster_address="gcomm://{{ groups['dbservers']|join(',') }}"
-binlog_format=row
-default_storage_engine=InnoDB
-innodb_autoinc_lock_mode=2
-bind-address=0.0.0.0
-wsrep_cluster_name="imovies_db_cluster"
-wsrep_sst_method=rsync
-wsrep_node_address="{{ inventory_hostname }}"
-#wsrep_provider_options="socket.ssl_key=/etc/mysql/keys/iMovies_{{ inventory_hostname }}_tls_key.pem;socket.ssl_cert=/etc/pki/tls/certs/iMovies_{{ inventory_hostname }}_tls.crt;socket.ssl_ca=/usr/local/share/ca-certificates/iMovies_Root_CA.crt"
 
 [mariadb]
 disable_unix_socket
