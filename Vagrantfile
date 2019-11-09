@@ -43,7 +43,8 @@ hosts = {
   },
   "dbservers" => {
       "asldb01" => { :ip => "10.0.0.31" },
-      "asldb02" => { :ip => "10.0.0.32" },
+      # Currently not working
+      # "asldb02" => { :ip => "10.0.0.32" },
   },
   "webservers" => {
       "aslweb01" => {
