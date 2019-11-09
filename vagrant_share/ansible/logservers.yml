@@ -1,2 +1,5 @@
 ---
 - hosts: logservers
+  become: yes
+    - borgbackup
+    - backup-client
