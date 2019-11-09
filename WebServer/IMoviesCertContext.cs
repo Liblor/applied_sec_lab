@@ -12,11 +12,11 @@ namespace WebServer
 
         public DbSet<PublicCertificate> PublicCertificates { get; set; }
 
-		// Fix capitalisation of table name
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
-		{
-			modelBuilder.Entity<PublicCertificate>()
-				.ToTable(Constants.IMoviesCAPublicCertsTableName);
-		}
+        // Fix capitalisation of table name
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<PublicCertificate>()
+                .ToTable(Constants.IMoviesCAPublicCertsTableName);
+        }
     }
 }

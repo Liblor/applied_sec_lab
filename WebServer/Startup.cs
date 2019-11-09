@@ -75,7 +75,7 @@ namespace WebServer
 
             services.AddDbContext<IMoviesUserContext>(opt => opt.UseMySql(Configuration.GetConnectionString("IMoviesUserDB")));
             services.AddDbContext<IMoviesCertContext>(opt => opt.UseMySql(Configuration.GetConnectionString("IMoviesCertDB")));
-            
+
             services.AddScoped<CertificateAuthenticationDBValidator>();
             services.AddScoped<CookieAuthenticationDBValidator>();
 
@@ -114,5 +114,4 @@ namespace WebServer
             });
         }
     }
-
 }

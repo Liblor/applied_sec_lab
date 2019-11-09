@@ -12,11 +12,11 @@ namespace CertServer
 
         public DbSet<User> Users { get; set; }
 
-		// Fix capitalisation of table name
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
-		{
-			modelBuilder.Entity<User>()
-				.ToTable(Constants.IMoviesUserTableName);
-		}
+        // Fix capitalisation of table name
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>()
+                .ToTable(Constants.IMoviesUserTableName);
+        }
     }
 }

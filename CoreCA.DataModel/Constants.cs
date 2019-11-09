@@ -1,4 +1,4 @@
-﻿namespace CoreCA.DataModel
+namespace CoreCA.DataModel
 {
     public static class Constants
     {
