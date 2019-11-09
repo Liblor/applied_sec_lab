@@ -8,7 +8,4 @@ Restart=always
 RestartSec=10
 KillSignal=SIGINT
 User=abc
-Environment=ASPNETCORE_ENVIRONMENT=Production
-Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
-Environment=ConnectionStrings__IMoviesUserDB="server={{ groups['dbservers'][0] }};port=3306;database=imovies;user={{ ansible_hostname }};password={{ lookup('vars', 'mysql_' + ansible_hostname + '_password') }}"
-Environment=ConnectionStrings__IMoviesCertDB="server={{ groups['dbservers'][0] }};port=3306;database=imovies_ca;user={{ ansible_hostname }};password={{ lookup('vars', 'mysql_' + ansible_hostname + '_password') }}"
+EnvironmentFile=/etc/systemd/system/asl-webserver.env
