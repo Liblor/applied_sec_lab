@@ -36,8 +36,6 @@ nginx_http_template:
       disable_session_tickets: true
       protocols: TLSv1.3
       prefer_server_ciphers: false
-      stapling: true
-      stapling_verify: true
       trusted_cert: "/usr/local/share/ca-certificates/iMovies_Root_CA.crt"
     reverse_proxy:
       locations:
