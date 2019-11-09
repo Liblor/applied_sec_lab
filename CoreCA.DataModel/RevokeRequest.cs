@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace CertServer.Models
+namespace CoreCA.DataModel
 {
 	public class RevokeRequest
 	{

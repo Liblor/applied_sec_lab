@@ -1,4 +1,4 @@
-using CertServer.Models;
+using CoreCA.DataModel;
 
 namespace CertServer
 {
