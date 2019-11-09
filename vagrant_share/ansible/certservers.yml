@@ -3,6 +3,7 @@
   become: yes
   roles:
     - borgbackup
+    - backup-client
   vars:
     install_service: true
     files:
