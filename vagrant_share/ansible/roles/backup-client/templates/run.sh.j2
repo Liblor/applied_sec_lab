@@ -9,7 +9,7 @@ BORG_HOST='aslbk01'
 BORG_PATH="/backup/$HOSTNAME/"
 BORG_RSH="sudo -u {{ UNAME }} ssh"
 
-BORG_REPO="ssh://borgbackup@$BORG_HOST:22/$BORG_PATH"
+BORG_REPO="ssh://{{ hostvars[groups['bkpservers'][0]]['UNAME'] }}@$BORG_HOST:22/$BORG_PATH"
 export BORG_REPO
 BORG_PASSPHRASE=$(head -n 1 $FILE_PHRASE)
 export BORG_PASSPHRASE
