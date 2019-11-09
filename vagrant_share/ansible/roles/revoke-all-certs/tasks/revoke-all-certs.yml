@@ -1,0 +1,26 @@
+---
+# Loop over all certificates in {{ ca_folder }}/certs and revoke them
+- name: Gather certificates to revoke
+  find:
+    paths: "{{ ca_folder }}/certs"
+    patterns: "*.crt"
+  register: crt_files_glob
+
+- name: "Revoke all certificates in {{ ca_folder }}/certs"
+  command: |
+    openssl ca -config {{ ca_folder }}/{{ openssl_conf_name }} \
+    -revoke {{ item.path }}
+  with_items:
+    - "{{ crt_files_glob.files }}"
+
+- name: "Move revoked certificates"
+  command: mv {{ item.path }} {{ ca_folder }}/revokedcerts/
+  with_items:
+    - "{{ crt_files_glob.files }}"
+
+- name: Generate new CRL
+  command: |
+    openssl ca -config {{ openssl_conf_name }} \
+    -gencrl -out {{ crl_name }}
+  args:
+    chdir: "{{ ca_folder }}/"

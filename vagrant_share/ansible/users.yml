@@ -1,0 +1,5 @@
+---
+- hosts: certservers, dbservers, webservers
+  become: yes
+  roles:
+    - add-user

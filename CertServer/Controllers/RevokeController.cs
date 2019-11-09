@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+
 using CertServer.DataModifiers;
 using CoreCA.DataModel;
 
@@ -9,14 +11,17 @@ namespace CertServer.Controllers
 	{
 		private readonly CADBModifier _caDBModifier;
 		private readonly UserDBAuthenticator _userDBAuthenticator;
+		private readonly ILogger _logger;
 
 		public RevokeController(
 			CADBModifier caDBModifier,
-			UserDBAuthenticator userDBAuthenticator
+			UserDBAuthenticator userDBAuthenticator,
+			ILogger<RevokeController> logger
 		)
 		{
 			_caDBModifier = caDBModifier;
 			_userDBAuthenticator = userDBAuthenticator;
+			_logger = logger;
 		}
 
 		/// <summary>
@@ -51,6 +56,13 @@ namespace CertServer.Controllers
 			}
 			else
 			{
+				_logger.LogWarning(
+					string.Format(
+						"Failed to revoke certificates of user {0}; No such user found.",
+						revokeRequest.Uid
+					)
+				);
+
 				return BadRequest();
 			}
 		}

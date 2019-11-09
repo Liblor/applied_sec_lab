@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
 using System;
 
 using CertServer.DataModifiers;
@@ -12,10 +13,15 @@ namespace CertServer.Controllers
     public class ChangePasswordController : ControllerBase
     {
         private readonly UserDBAuthenticator _userDBAuthenticator;
+		private readonly ILogger _logger;
 
-		public ChangePasswordController(UserDBAuthenticator userDBAuthenticator)
+		public ChangePasswordController(
+			UserDBAuthenticator userDBAuthenticator,
+			ILogger<ChangePasswordController> logger
+		)
 		{
 			_userDBAuthenticator = userDBAuthenticator;
+			_logger = logger;
 		}
 
 		/// <summary>
@@ -66,6 +72,10 @@ namespace CertServer.Controllers
 					}
 				}
 				else {
+					_logger.LogWarning(
+						"Unauthorized attempt to change the password of user "
+						+ passwordChangeRequest.Uid
+					);
 					response = Unauthorized();
 				}
 

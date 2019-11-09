@@ -1,0 +1,16 @@
+---
+- hosts: ansservers
+  become: yes
+  roles:
+    - pyopenssl
+
+- hosts: certservers
+  become: yes
+  roles:
+    - pyopenssl
+    - aspdotnet
+
+- hosts: webservers
+  become: yes
+  roles:
+    - aspdotnet

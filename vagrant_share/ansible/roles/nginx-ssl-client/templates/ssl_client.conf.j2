@@ -1,0 +1,10 @@
+ssl_client_certificate /usr/local/share/ca-certificates/iMovies_Root_CA.crt;
+ssl_verify_depth 2;
+ssl_verify_client on;
+ssl_crl /etc/pki/tls/crl/tls_crl_chain.pem;
+
+{% if ssl_client_required is defined and ssl_client_required %}
+ssl_verify_client on;
+{% else %}
+ssl_verify_client optional;
+{% endif %}

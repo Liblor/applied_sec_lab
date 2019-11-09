@@ -1,6 +1,7 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Pkcs;
@@ -18,14 +19,17 @@ namespace CertServer.Controllers
 	{
 		private readonly CADBModifier _caDBModifier;
 		private readonly UserDBAuthenticator _userDBAuthenticator;
+		private readonly ILogger _logger;
 
 		public IssueController(
 			CADBModifier caDBModifier,
-			UserDBAuthenticator userDBAuthenticator
+			UserDBAuthenticator userDBAuthenticator,
+			ILogger<IssueController> logger
 		)
 		{
 			_caDBModifier = caDBModifier;
 			_userDBAuthenticator = userDBAuthenticator;
+			_logger = logger;
 		}
 
 		/// <summary>
@@ -240,6 +244,8 @@ namespace CertServer.Controllers
 						}
 					);
 
+					_logger.LogInformation("Successfully issued new certificate for user " + user.Id);
+
 					return Ok(
 						new UserCertificate {
 							Pkcs12Archive = pkcs12ArchiveB64
@@ -247,13 +253,16 @@ namespace CertServer.Controllers
 					);
 				}
 				else {
-					// XXX: Log unauthorized access attempt
+					_logger.LogWarning(
+						"Unauthorized attempt to issue certificate for user "
+						+ certRequest.Uid
+					);
 					return Unauthorized();
 				}
 			}
 			else
 			{
-				// XXX: Log requested invalid cipher suite
+				_logger.LogWarning("Invalid cipher suite:\n" + cipherSuite);
 				return BadRequest("Invalid cipher suite.");
 			}
 		}

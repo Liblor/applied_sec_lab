@@ -1,0 +1,6 @@
+---
+- name: Add user {{ trusted_user }} to {{ TLS_GROUP }} group
+  user:
+    name: '{{ trusted_user }}'
+    groups: "{{ TLS_GROUP }}"
+    append: yes
