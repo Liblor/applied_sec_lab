@@ -1,7 +1,7 @@
 [mysqld]
 bind-address=0.0.0.0
 ssl-ca="/usr/local/share/ca-certificates/iMovies_Root_CA.crt"
-ssl-key="/etc/ssl/trusted/private/iMovies_{{ inventory_hostname }}_tls_key.pem"
+ssl-key="/etc/mysql/keys/iMovies_{{ inventory_hostname }}_tls_key.pem"
 ssl-cert="/etc/pki/tls/certs/iMovies_{{ inventory_hostname }}_tls.crt"
 
 [mariadb]
