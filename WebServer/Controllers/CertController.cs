@@ -81,7 +81,7 @@ namespace WebServer.Controllers
             }
 
             byte[] certBytes = Convert.FromBase64String(certb64);
-            return File(certBytes, MediaTypeNames.Application.Octet, "certificate.pfx");
+            return File(certBytes, MediaTypeNames.Application.Octet, "certificate_with_private_key.pfx");
         }
 
         [HttpPost]

@@ -1,7 +1,5 @@
-using System;
 using Microsoft.AspNetCore.Mvc;
 using CertServer.DataModifiers;
-using CertServer.Models;
 using CoreCA.DataModel;
 
 namespace CertServer.Controllers

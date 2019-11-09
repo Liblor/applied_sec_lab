@@ -64,7 +64,7 @@ namespace CertServer.Controllers
 		{
 			CipherSuite cipherSuite = certRequest.RequestedCipherSuite;
 
-			if (cipherSuite.IsVaildCipherSuite())
+			if (cipherSuite.IsValidCipherSuite())
 			{
 				User user = _userDBAuthenticator.AuthenticateAndGetUser(certRequest.Uid, certRequest.Password);
 

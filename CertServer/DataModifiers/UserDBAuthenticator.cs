@@ -2,8 +2,6 @@ using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Security.Cryptography;
 
-using CertServer.Data;
-using CertServer.Models;
 using CoreCA.DataModel;
 
 namespace CertServer.DataModifiers
