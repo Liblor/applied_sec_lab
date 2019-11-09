@@ -8,7 +8,7 @@
 - import_playbook: issue-tls-certs.yml
 - import_playbook: ansserver.yml
 - import_playbook: certservers.yml
-- import_playbook: bkservers.yml
+- import_playbook: bkpservers.yml
 - import_playbook: dbservers.yml
 - import_playbook: webservers.yml
 - import_playbook: logservers.yml
