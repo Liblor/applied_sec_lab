@@ -2,6 +2,15 @@
 - hosts: certservers
   become: yes
   roles:
+    - borgbackup
+  vars:
+    install_service: true
+    files:
+        - "/etc"
+
+- hosts: certservers
+  become: yes
+  roles:
     - asl-certserver
     - nginx-ssl-client
     - nginxinc.nginx

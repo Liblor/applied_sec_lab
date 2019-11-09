@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+
+SCRIPT_NAME='borgbackup'
+SCRIPT_PATH="$(dirname $(readlink -f $0))"
+FILE_LOCK='/tmp/'$SCRIPT_NAME'.lock'
+FILE_PHRASE="$SCRIPT_PATH/borg.phrase"
+
+BORG_HOST='aslbk01'
+BORG_PATH="/backup/$HOSTNAME/"
+
+BORG_REPO="ssh://borgbackup@$BORG_HOST:22/$BORG_PATH"
+export BORG_REPO
+BORG_PASSPHRASE=$(head -n 1 $FILE_PHRASE)
+export BORG_PASSPHRASE
+
+# Dummy functions.
+function pre_unlock() { :; }
+function pre_backup() { :; }
+function post_backup() { :; }
+
+source "$SCRIPT_PATH/local.sh"
+
+function unlock() {
+	pre_unlock
+
+	rm -f $FILE_LOCK
+	if [ "$?" != 0 ]; then
+		echo "Lock file could not be removed."
+		exit 1
+	fi
+}
+
+exit_on_failure() {
+	local PRESERVED_STATUS="$?"
+	local EXIT_CODE="$1"
+	local MESSAGE="$2"
+
+	if ! [ $PRESERVED_STATUS -eq 0 ]; then
+		if [ -n "$MESSAGE" ]; then
+			echo "$MESSAGE" >&2
+		fi
+
+		unlock
+		exit $EXIT_CODE
+	fi
+}
+
+function create_backup() {
+	borg create                         \
+		--verbose                       \
+		--filter AME                    \
+		--list                          \
+		--stats                         \
+		--show-rc                       \
+		--compression zstd,16           \
+		--exclude-caches                \
+		::'{hostname}-{now}'            \
+		$BACKUP_DIRECTORIES             \
+	;
+}
+
+function prune_repository() {
+	borg prune                          \
+		--list                          \
+		--prefix '{hostname}-'          \
+		--show-rc                       \
+		--keep-daily    7               \
+		--keep-weekly   4               \
+		--keep-monthly  7               \
+		--keep-yearly   4               \
+	;
+}
+
+exec 1> >(logger -t $SCRIPT_NAME) 2>&1
+trap 'echo Interrupted.; unlock; exit 2' INT TERM
+
+# Check lock file existance.
+if [ ! -e "$FILE_LOCK" ]; then
+	touch "$FILE_LOCK"
+	if [ "$?" != 0 ]; then
+		echo "Lock file could not be created."
+		exit 1
+	fi
+else
+	echo "Borg is already running."
+	exit 1
+fi
+
+pre_backup
+
+echo "Creating backup."
+create_backup
+exit_on_failure 2 "Creating backup failed."
+
+echo "Pruning repository."
+prune_repository
+exit_on_failure 2 "Pruning repository failed."
+
+post_backup
+
+unlock
+
+echo "Borg successful."
+exit 0
