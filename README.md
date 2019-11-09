@@ -11,10 +11,19 @@ Applied Security Laboratory - AS19
 
 Rough overview over the certificate generation by ansible:
 - **Root CA keys and certificates** are generated in `/vagrant/key_store/iMovies_Root_CA_key.pem`. This folder is considered to be offline, because we will remove this shared folder, together with all vagrant users, for the final production environment as the last step of ansible. The Root CA certificate is copied to all machines into `/usr/local/share/ca-certificates/iMovies_Root_CA.crt` and installed using `update-ca-certificates`.
-- **Intermediate CA keys** are generated on the certservers in `/home/coreca/pki/private/iMovies_<hostname>_Intermediate_CA_key.pem` then a CSR is sent to the config server and signed with the Root CA key, the resulting certificate is transferred back to the certserver and stored in `/home/coreca/pki/certs/iMovies_<hostname>_Intermediate_CA.crt`.
-- **TLS keys** are generated on each host in `/home/<username>/pki/private/iMovies_aslcert01_tls_key.pem`, then a CSR is sent over the config server to the first certserver (aslcert01), which signs a certificate with the intermediate key. The resulting certificate is sent back over the config server to the respective servers and stored in the public folder `/etc/pki/tls/certs/iMovies_aslcert01_tls.crt`.
+- **Intermediate CA keys** are generated on the certservers in `/home/coreca/pki/private/iMovies_<purpose>_<hostname>_Intermediate_CA_key.pem`. Each core CA has two intermediate certificates for the following purposes:
+  - **internal**: To sign TLS certificates for the internal infrastructure
+  - **external**: To sign client certificates
 
-The ansible script will not regenerate those keys every time it is run. Instead it can be constructed to regenerate the keys as follows:
+  The reason for this is that the serial numbers of those certificates do not collide, as internal certificates are not in the DB. The CSR of those intermediate certificates is sent to the config server and signed with the Root CA key, the resulting certificate is transferred back to the certserver and stored in `/home/coreca/pki/certs/iMovies_<purpose>_<hostname>_Intermediate_CA.crt`.
+- **TLS keys** are generated on each host in `/etc/ssl/trusted/private/iMovies_aslcert01_tls_key.pem`. All members of the group `tls-trusted` have access to this key. A CSR is created and sent over the config server to the first certserver (aslcert01), which signs a certificate with the intermediate key. The resulting certificate is sent back over the config server to the respective servers and stored in the public folder `/etc/pki/tls/certs/iMovies_aslcert01_tls.crt`.
+
+Short summary of paths for normal servers (neither cert nor config servers):
+- `/usr/local/share/ca-certificates/iMovies_Root_CA.crt` trusted root CA certificate
+- `/etc/ssl/trusted/` private key material accessible to `tls-trusted` group
+- `/etc/pki/tls/` publicly readable certificates and CRLs
+
+The ansible script will not regenerate those keys every time it is run. Instead it can be instructed to regenerate the keys as follows:
 - Regenerate only TLS keys:
 ```bash
 ansible-playbook -e "FORCE_TLS_CERT_REGEN=true" -i production site.yml
@@ -28,8 +37,8 @@ ansible-playbook -e "FORCE_INTERMEDIATE_CA_CERT_REGEN=true" -i production site.y
 ansible-playbook -e "FORCE_ROOT_CA_CERT_REGEN=true" -i production site.yml
 ```
 
-**Important note:
-The old keys are not automatically revoked! This would have to be done manually in a case of key compromise.**
+#### Key revocation
+Intermediate and/or TLS certificates are revoked automatically. A new CRL is generated with openssl every time new certificates are generated with ansible. One CRL for the intermediate certificates is signed by the Root CA, the CRL for the TLS certificates is signed by the intermediate certificate. Both are valid for 30 days and stored in `/etc/pki/tls/crl/`. **The concatenated CRL `/etc/pki/tls/crl/tls_crl_chain.pem` has to be checked everywhere TLS certificates are used.**
 
 ## Install environment
 ### Vagrant
