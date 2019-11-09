@@ -59,7 +59,7 @@ namespace WebServer.Controllers
 		}
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
 			var viewModel = FetchCertificatesData();
 
@@ -67,7 +67,7 @@ namespace WebServer.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Download()
+        public IActionResult Download()
         {
             string certb64 = null;
             // Try to see if a prior POST to Download or New cached a B64-encoded cert in TempData

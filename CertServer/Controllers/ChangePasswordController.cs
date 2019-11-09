@@ -58,7 +58,7 @@ namespace CertServer.Controllers
 				{
 					if (_userDBAuthenticator.ChangePassword(user, passwordChangeRequest.NewPassword))
 					{
-						response = Ok();
+						response = NoContent();
 					}
 					else
 					{

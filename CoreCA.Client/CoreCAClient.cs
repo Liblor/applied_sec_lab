@@ -86,5 +86,19 @@ namespace CoreCA.Client
             // No response content applicable - simply return whether the status code indicates successful revocation.
             return response.IsSuccessStatusCode;
         }
+
+        public async Task<bool> ChangePassword(string uid, string oldPassword, string newPassword)
+        {
+            var request = new PasswordChangeRequest
+            {
+                Uid = uid,
+                OldPassword = oldPassword,
+                NewPassword = newPassword
+            };
+
+            var response = await _httpClient.PostAsync("/api/ChangePassword", Serialize(request));
+
+            return response.IsSuccessStatusCode;
+        }
     }
 }
