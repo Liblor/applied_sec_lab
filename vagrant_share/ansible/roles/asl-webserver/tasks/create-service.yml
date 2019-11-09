@@ -15,24 +15,6 @@
     group: root
     mode: '0600'
 
-- name: Adjust asldb host in environment
-  replace:
-    path: /etc/systemd/system/asl-webserver.env
-    after: 'IMoviesUserDB='
-    before: 'port='
-    regexp: 'aslweb(\d+)'
-    replace: 'asldb\1'
-    mode: preserve
-
-- name: Adjust aslcert host in environment
-  replace:
-    path: /etc/systemd/system/asl-webserver.env
-    after: 'IMoviesCertDB='
-    before: 'port='
-    regexp: 'aslweb(\d+)'
-    replace: 'aslcert\1'
-    mode: preserve
-
 - name: Reload the systemd daemon
   systemd:
     daemon_reload: yes
