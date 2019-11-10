@@ -4,5 +4,3 @@
   roles:
     - borgbackup
     - backup-server
-  vars:
-    setup_repositories: true
