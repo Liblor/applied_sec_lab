@@ -101,7 +101,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
                 hostconf.vm.provider "virtualbox" do |vb|
                     vb.customize ["modifyvm", :id, "--name", "#{hostname}"]
-        			vb.customize ["modifyvm", :id, "--vram", VRAM_CAP]
+                    vb.customize ["modifyvm", :id, "--vram", VRAM_CAP]
                     vb.memory = MEM_CAP
                 end # provider
 
@@ -150,7 +150,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
                 hostconf.vm.provider "virtualbox" do |vb|
                     vb.customize ["modifyvm", :id, "--name", "#{master_hostname}"]
-        			vb.customize ["modifyvm", :id, "--vram", VRAM_CAP]
+                    vb.customize ["modifyvm", :id, "--vram", VRAM_CAP]
                     vb.memory = MEM_CAP
                 end # provider
 
