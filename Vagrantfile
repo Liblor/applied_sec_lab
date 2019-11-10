@@ -273,7 +273,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     # Initialize firefox so that its certificate DB is initialized
                     sudo su - #{CLIENT_UNAME} -c "timeout 3 firefox-esr -migration -no-remote -headless 2> /dev/null"
                     # Add our root CA to firefox root of trust
-                    sudo bash /vagrant/scripts/mozilla-import-certificates.sh "/home/#{CLIENT_UNAME}"
+                    sudo /vagrant/scripts/mozilla-import-certificates.sh "/home/#{CLIENT_UNAME}"
 
                     # Remove sensitive data from history
                     history -c
