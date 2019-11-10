@@ -56,9 +56,9 @@ hosts = {
   # "ldservers" => {
   #     "aslld01" => { :ip => "10.0.0.51" },
   # },
-  # "logservers" => {
+  "logservers" => {
   #     "asllog01" => { :ip => "10.0.0.61" },
-  # },
+  },
   # "bkpservers" => {
   #     "aslbkp01" => { :ip => "10.0.0.71" },
   # }
@@ -70,6 +70,8 @@ clients = {
         "aslclient01" => { :public_net_ip => "172.16.0.11" },
     },
 }
+
+backupclients = [hosts["ansservers"], hosts["certservers"], hosts["dbservers"], hosts["logservers"]]
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.provider "virtualbox"
@@ -197,6 +199,19 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                         SHELL
                     end # hosts
                 end # category_hosts.each
+
+                # Add backupclients
+                hostconf.vm.provision "shell", inline: <<-SHELL
+                    echo -e "\n[backupclients]" | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
+                SHELL
+                backupclients.each do |category|
+                    category.each do |hostname, info|
+                        hostconf.vm.provision "shell", inline: <<-SHELL
+                            # Add hostname
+                            echo "#{hostname}" | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
+                        SHELL
+                    end # hosts
+                end # backupclients.each
 
                 hostconf.vm.provision "shell", inline: <<-SHELL
                     sudo su - #{ANSIBLE_UNAME} -c 'eval "$(ssh-agent -s)" ; sshpass -P "Enter" -p $(cat /vagrant/#{ANSIBLE_PASSPHRASE_FILE}) ssh-add ~/.ssh/id_rsa ; ansible-galaxy install --force -r requirements.yml ; ansible-playbook -e "FORCE_ROOT_CA_CERT_REGEN=true" -i production site.yml --tags "all,setup" ; history -c ; unset HISTFILE ; rm -f ~/.bash_history'
