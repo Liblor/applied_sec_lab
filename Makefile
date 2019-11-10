@@ -5,3 +5,23 @@ init_submodules:
 .PHONY: update_submodules
 update_submodules:
 	git submodule update --remote
+
+.PHONY: update_box
+update_box:
+	vagrant box update --force
+
+.PHONY: vnetwork
+vnetwork:
+	vagrant up aslcert01 asldb01 asldb02 aslweb01 aslans01
+
+.PHONY: client
+client:
+	vagrant up aslclient01
+
+.PHONY: purge
+purge:
+	vagrant destroy -f
+
+.PHONY: build
+build: purge update_box
+	vagrant up

@@ -1,3 +1,4 @@
+using CoreCA.Client;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -9,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 using System.Security.Cryptography.X509Certificates;
 using WebServer.Authentication;
 
@@ -29,6 +31,14 @@ namespace WebServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var webServerOptionsSection = Configuration.GetSection("WebServer");
+
+            services.AddOptions<WebServerOptions>()
+                .Bind(webServerOptionsSection)
+                .ValidateDataAnnotations();
+
+            var webServerOptions = webServerOptionsSection.Get<WebServerOptions>();
+
             services.AddControllersWithViews(opt =>
             {
                 opt.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
@@ -63,14 +73,16 @@ namespace WebServer
                 opt.DefaultPolicy = policyBuilder.Build();
             });
 
+            services.AddDbContext<IMoviesUserContext>(opt => opt.UseMySql(Configuration.GetConnectionString("IMoviesUserDB")));
+            services.AddDbContext<IMoviesCertContext>(opt => opt.UseMySql(Configuration.GetConnectionString("IMoviesCertDB")));
 
-            if (Environment.IsDevelopment())
-                services.AddDbContext<IMoviesUserContext>(opt => opt.UseInMemoryDatabase("DummyDB"));
-            else
-                services.AddDbContext<IMoviesUserContext>(opt => opt.UseMySql(Configuration.GetConnectionString("IMoviesUserDB")));
-            
             services.AddScoped<CertificateAuthenticationDBValidator>();
             services.AddScoped<CookieAuthenticationDBValidator>();
+
+            services.AddHttpClient<CoreCAClient>(client =>
+            {
+                client.BaseAddress = new Uri(webServerOptions.CoreCAURL);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -102,5 +114,4 @@ namespace WebServer
             });
         }
     }
-
 }

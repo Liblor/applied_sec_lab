@@ -1,10 +1,11 @@
+[![Build Status](https://travis-ci.com/Liblor/applied_sec_lab.svg?token=v2htoQjxNh7zAtUbzeQt&branch=master)](https://travis-ci.com/Liblor/applied_sec_lab)
+
 # applied_sec_lab
 Applied Security Laboratory - AS19
 
-## Build status
+## Details
 
 ### Web server
-[![Build Status](https://travis-ci.com/Liblor/applied_sec_lab.svg?token=v2htoQjxNh7zAtUbzeQt&branch=master)](https://travis-ci.com/Liblor/applied_sec_lab)
 
 ### Core CA
 #### Ansible Certificate Generation

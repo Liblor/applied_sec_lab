@@ -1,5 +1,5 @@
 ---
-- name: Create galera config 60-server.cnf
+- name: Create 60-server.cnf config
   template:
     src: 60-server.cnf.j2
     dest: /etc/mysql/mariadb.conf.d/60-server.cnf
@@ -12,13 +12,8 @@
     name: mysql
     state: stopped
 
-- name: Bootstrap Galera
-  shell: galera_new_cluster
-  when: ansible_hostname == 'asldb01'
-
 - name: Restart mariaDB
   systemd:
     state: restarted
     daemon_reload: yes
     name: mariadb
-  when: ansible_hostname != 'asldb01'
