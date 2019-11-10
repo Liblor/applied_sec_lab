@@ -12,7 +12,7 @@ update_box:
 
 .PHONY: vnetwork
 vnetwork:
-	vagrant up aslcert01 asldb01 asldb02 aslweb01 aslans01
+	vagrant up asllog01 asldb01 aslcert01 aslweb01 aslans01
 
 .PHONY: client
 client:
