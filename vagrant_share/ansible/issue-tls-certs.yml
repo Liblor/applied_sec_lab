@@ -218,3 +218,20 @@
         owner: "{{ UNAME }}"
         group: "{{ UNAME }}"
         mode: 0600
+
+- hosts: webservers
+  become: yes
+  tasks:
+    - name: Combine client certificate and private key to import in dotnet
+      openssl_pkcs12:
+        action: export
+        path: "/etc/ssl/trusted/private/iMovies_{{ ansible_hostname }}_tls_cert_and_priv_key.pfx"
+        privatekey_path: "/etc/ssl/trusted/private/iMovies_{{ ansible_hostname }}_tls_key.pem"
+        certificate_path: "/etc/pki/tls/certs/iMovies_{{ ansible_hostname }}_tls.crt"
+        friendly_name: "{{ ansible_hostname }}"
+        state: present
+
+        owner: root
+        group: "{{ TLS_GROUP }}"
+        mode: 0640
+        force: "{{ FORCE_TLS_CERT_REGEN }}"
