@@ -3,6 +3,12 @@
   become: yes
   roles:
     - asl-webserver
+  vars_files:
+    - /vagrant/mysql_passwords.yml
+
+- hosts: webservers
+  become: yes
+  roles:
     - nginxinc.nginx
     - nginx-ssl-client
     - add-to-trusted-user-group

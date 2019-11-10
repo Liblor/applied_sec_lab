@@ -1,2 +1,2 @@
 ---
-- import_tasks: galera.yml
+- import_tasks: mariadb_config.yml

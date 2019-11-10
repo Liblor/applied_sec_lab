@@ -3,6 +3,12 @@
   become: yes
   roles:
     - asl-certserver
+  vars_files:
+    - /vagrant/mysql_passwords.yml
+
+- hosts: certservers
+  become: yes
+  roles:
     - nginx-ssl-client
     - nginxinc.nginx
     - add-to-trusted-user-group

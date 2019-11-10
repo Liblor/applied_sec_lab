@@ -1,0 +1,2 @@
+---
+mariadb_apt_repo_gpg_key_url: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x177f4010fe56ca3336300305f1656f24c74cd1d8"
