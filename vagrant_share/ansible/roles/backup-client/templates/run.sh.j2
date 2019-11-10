@@ -6,7 +6,7 @@ FILE_LOCK='/tmp/'$SCRIPT_NAME'.lock'
 FILE_PHRASE="$SCRIPT_PATH/borg.phrase"
 
 BORG_HOST='aslbk01'
-BORG_PATH="/backup/$HOSTNAME/"
+BORG_PATH="{{ BACKUP_PATH_ROOT }}/{{ inventory_hostname }}"
 BORG_RSH="sudo -u {{ UNAME }} ssh"
 
 BORG_REPO="ssh://{{ backup_client_username }}@$BORG_HOST:22/$BORG_PATH"

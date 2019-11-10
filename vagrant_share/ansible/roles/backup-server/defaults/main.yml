@@ -1,2 +1,2 @@
 ---
-backup_path: "/backups"
+backup_path: "{{ BACKUP_PATH_ROOT }}"

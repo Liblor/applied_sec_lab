@@ -28,4 +28,5 @@ INTERMEDIATE_CERT_PURPOSES:
 
 
 BACKUP_SSH_PUBK_LOCAL_PATH_PREFIX: "/tmp/id_rsa_"
+BACKUP_PATH_ROOT: "/backups"
 backup_client_username: "backup_client"
