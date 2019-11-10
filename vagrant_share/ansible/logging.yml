@@ -1,0 +1,14 @@
+---
+- hosts: logservers
+  become: yes
+  roles:
+    - rsyslog-conf
+  vars:
+    rsyslog_conf_receive: true
+
+- hosts: all, !logservers
+  become: yes
+  roles:
+    - rsyslog-conf
+  vars:
+    rsyslog_conf_send: true
