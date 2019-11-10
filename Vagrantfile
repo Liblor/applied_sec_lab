@@ -56,9 +56,9 @@ hosts = {
   # "ldservers" => {
   #     "aslld01" => { :ip => "10.0.0.51" },
   # },
-  # "logservers" => {
-  #     "asllog01" => { :ip => "10.0.0.61" },
-  # },
+  "logservers" => {
+      "asllog01" => { :ip => "10.0.0.61" },
+  },
   # "bkpservers" => {
   #     "aslbkp01" => { :ip => "10.0.0.71" },
   # }
