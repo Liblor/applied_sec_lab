@@ -13,11 +13,11 @@ ANSIBLE_REMOTE_TMP_PW = "ygqD-jh3LII1oNhurzQwAhoYe"
 CLIENT_UNAME = "user"
 CLIENT_PASSWORD = "password"
 
-MASTER_MEM = 1024
-REMOTE_MEM = 512
 CPU_CAP_PERCENTAGE = 60
-VRAM = 8
-CLIENT_VRAM = 64
+MEM_CAP = 512
+CLIENT_MEM_CAP = 1024
+VRAM_CAP = 8
+CLIENT_VRAM_CAP = 64
 
 # List of all hosts
 # Naming:
@@ -82,7 +82,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # Limit resource usage
     config.vm.provider "virtualbox" do |vb|
-        vb.customize ["modifyvm", :id, "--vram", VRAM]
+        vb.customize ["modifyvm", :id, "--cpuexecutioncap", CPU_CAP_PERCENTAGE]
     end # provider
 
     # Create hosts
@@ -100,6 +100,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                         ip: "#{info[:public_net_ip]}",
                         virtualbox__intnet: VB_PUBLIC_NET_NAME
                 end
+
+                hostconf.vm.provider "virtualbox" do |vb|
+                    vb.customize ["modifyvm", :id, "--name", "#{hostname}"]
+                    vb.customize ["modifyvm", :id, "--vram", VRAM_CAP]
+                    vb.memory = MEM_CAP
+                end # provider
 
                 hostconf.vm.provision "shell", inline: <<-SHELL
                     # Add ansible user
@@ -128,12 +134,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                         SHELL
                     end # host_peer_category.each
                 end # hosts.each (peer)
-
-                hostconf.vm.provider "virtualbox" do |vb|
-                    vb.customize ["modifyvm", :id, "--cpuexecutioncap", CPU_CAP_PERCENTAGE]
-                    vb.customize ["modifyvm", :id, "--name", "#{hostname}"]
-                    vb.memory = REMOTE_MEM
-                end # provider
             end # hostconf
         end # category_hosts.each
     end # hosts.each
@@ -149,6 +149,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     ip: "#{master_info[:ip]}",
                     virtualbox__intnet: VB_INTRANET_NAME
                 hostconf.vm.synced_folder "./vagrant_share", "/vagrant", SharedFoldersEnableSymlinksCreate: false
+
+                hostconf.vm.provider "virtualbox" do |vb|
+                    vb.customize ["modifyvm", :id, "--name", "#{master_hostname}"]
+                    vb.customize ["modifyvm", :id, "--vram", VRAM_CAP]
+                    vb.memory = MEM_CAP
+                end # provider
 
                 hostconf.vm.provision "shell", inline: <<-SHELL
                     # Install Ansible
@@ -208,11 +214,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     unset HISTFILE
                     rm -f ~/.bash_history
                 SHELL
-
-                hostconf.vm.provider "virtualbox" do |vb|
-                    vb.customize ["modifyvm", :id, "--name", "#{master_hostname}"]
-                    vb.memory = MASTER_MEM
-                end # provider
             end # hostconf
         end # master_category_hosts.each
     end # master.each
@@ -245,8 +246,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     # Uncomment to launch VirtualBox GUI upon `vagrant up` (user:password = user:password)
                     vb.gui = true
 
-                    vb.customize ["modifyvm", :id, "--vram", CLIENT_VRAM]
+                    vb.customize ["modifyvm", :id, "--vram", CLIENT_VRAM_CAP]
                     vb.customize ["modifyvm", :id, "--name", "#{client_hostname}"]
+                    vb.memory = CLIENT_MEM_CAP
                 end # virtualbox provider
 
                 clientconf.vm.provision "shell", inline: <<-SHELL
