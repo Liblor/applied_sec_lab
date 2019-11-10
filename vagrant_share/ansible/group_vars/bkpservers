@@ -1,2 +1,3 @@
 ---
 UNAME: borg_backup
+USER_SHELL: /bin/bash

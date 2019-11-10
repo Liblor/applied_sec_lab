@@ -1,2 +1,3 @@
 ---
 UNAME: mysql
+USER_SHELL: /sbin/nologin

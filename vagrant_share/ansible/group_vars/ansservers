@@ -1,2 +1,3 @@
 ---
 UNAME: ansible
+USER_SHELL: /bin/bash
