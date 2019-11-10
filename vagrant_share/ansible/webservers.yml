@@ -2,7 +2,10 @@
 - hosts: webservers
   become: yes
   roles:
+    - add-to-trusted-user-group
     - asl-webserver
+  vars:
+    trusted_user: "{{ UNAME }}"
   vars_files:
     - /vagrant/mysql_passwords.yml
 
