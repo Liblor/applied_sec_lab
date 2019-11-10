@@ -1,0 +1,2 @@
+---
+- import_tasks: remove-vagrant-user.yml
