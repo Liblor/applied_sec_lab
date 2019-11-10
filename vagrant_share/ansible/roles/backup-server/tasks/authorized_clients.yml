@@ -3,7 +3,7 @@
   authorized_key:
     user: "{{ UNAME }}"
     key: "{{ lookup('file', BACKUP_SSH_PUBK_LOCAL_PATH_PREFIX + item) }}"
-    key_options: 'command="cd {{ backup_path }}/{{ item }};borg serve --restrict-to-path {{ backup_path }}/{{ item }}",restrict'
+    key_options: 'command="cd {{ backup_path }}/{{ item }};borg serve --append-only --restrict-to-path {{ backup_path }}/{{ item }}",restrict'
   loop: "{{ groups['backupclients'] }}"
 
 - name: Enforce strict permissions on authorized_keys
