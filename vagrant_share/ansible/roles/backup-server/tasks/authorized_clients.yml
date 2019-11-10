@@ -2,14 +2,14 @@
 - name: Authorize backup clients for borg backup
   authorized_key:
     user: "{{ UNAME }}"
-    key: "{{ lookup('file', BACKUP_SSH_PUBK_LOCAL_PATH_PREFIX + item) }}"
+    key: "{{ lookup('file', BACKUP_SSH_PUBK_LOCAL_PATH_PREFIX + item + '.pub') }}"
     key_options: 'command="cd {{ backup_path }}/{{ item }};borg serve --append-only --restrict-to-path {{ backup_path }}/{{ item }}",restrict'
   loop: "{{ groups['backupclients'] }}"
 
 - name: Enforce strict permissions on authorized_keys
   file:
-	path: "{{ home }}/.ssh/authorized_keys"
- 	owner: "{{ UNAME }}"
-	group: "{{ UNAME }}"
-	mode: 0600
-	state: file
+    path: "/home/{{ UNAME }}/.ssh/authorized_keys"
+    owner: "{{ UNAME }}"
+    group: "{{ UNAME }}"
+    mode: 0600
+    state: file

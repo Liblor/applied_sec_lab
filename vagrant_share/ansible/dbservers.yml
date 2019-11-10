@@ -7,11 +7,17 @@
     - mariadb
     - asl-dbserver
     - add-to-trusted-user-group
-    - borgbackup
-    - backup-client
   vars:
     trusted_user: mysql
   tags: [ never, setup ]
+
+- hosts: dbservers
+  become: yes
+    - borgbackup
+    - backup-client
+  vars:
+    backup_files:
+      - "/etc/mysql"
 
 - hosts: asldb01
   become: yes
