@@ -15,92 +15,92 @@ using CertServer.DataModifiers;
 
 namespace CertServer
 {
-	public class Startup
-	{
-		public Startup(IConfiguration configuration)
-		{
-			var builder = new ConfigurationBuilder();
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            var builder = new ConfigurationBuilder();
 
-			// XXX: Implement better solution for DB password
-			builder.AddUserSecrets<Startup>();
-			builder.AddConfiguration(configuration);
+            // XXX: Implement better solution for DB password
+            builder.AddUserSecrets<Startup>();
+            builder.AddConfiguration(configuration);
 
-			Configuration = builder.Build();
-		}
+            Configuration = builder.Build();
+        }
 
-		public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; }
 
-		// This method gets called by the runtime. Use this method to add services to the container.
-		public void ConfigureServices(IServiceCollection services)
-		{
-			services.AddControllers();
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddControllers();
 
-			// Use lowercase routing although controller names are uppercase
-			services.AddRouting(options => options.LowercaseUrls = true);
+            // Use lowercase routing although controller names are uppercase
+            services.AddRouting(options => options.LowercaseUrls = true);
 
-			// Register the Swagger generator, defining one Swagger document
-			services.AddSwaggerGen(c =>
-			{
-				c.SwaggerDoc("v1", new OpenApiInfo { Title = CAConfig.APIName, Version = CAConfig.APIVersion });
-				
-				// Set the comments path for the Swagger JSON and UI.
-				var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-				var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-				c.IncludeXmlComments(xmlPath);
-			});
+            // Register the Swagger generator, defining one Swagger document
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = CAConfig.APIName, Version = CAConfig.APIVersion });
 
-			services.AddDbContext<IMoviesUserContext>(
-				opt => opt.UseMySql(
-					Configuration["iMovies:ConnectionString"]
-				)
-			);
+                // Set the comments path for the Swagger JSON and UI.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+            });
 
-			services.AddDbContext<IMoviesCAContext>(
-				opt => opt.UseMySql(
-					Configuration["iMoviesCA:ConnectionString"]
-				)
-			);
+            services.AddDbContext<IMoviesUserContext>(
+                opt => opt.UseMySql(
+                    Configuration.GetConnectionString("IMoviesUserDB")
+                )
+            );
 
-			services.AddScoped<UserDBAuthenticator>();
-			services.AddScoped<CADBModifier>();
-		}
+            services.AddDbContext<IMoviesCAContext>(
+                opt => opt.UseMySql(
+                    Configuration.GetConnectionString("IMoviesCertDB")
+                )
+            );
 
-		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-		{
-			if (env.IsDevelopment())
-			{
-				app.UseDeveloperExceptionPage();
-			}
+            services.AddScoped<UserDBAuthenticator>();
+            services.AddScoped<CADBModifier>();
+        }
 
-			// XXX: Only run https server
-			// app.UseHttpsRedirection();
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
 
-			// Enable middleware to serve generated Swagger as a JSON endpoint.
-			app.UseSwagger(c =>
-			{
-				c.RouteTemplate = "api/swagger/{documentname}/swagger.json";
-			});
+            // XXX: Only run https server
+            // app.UseHttpsRedirection();
 
-			// Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
-			// specifying the Swagger JSON endpoint.
-			app.UseSwaggerUI(c =>
-			{
-				c.SwaggerEndpoint(
-					string.Format("/{0}/swagger/{1}/swagger.json", CAConfig.APIBasePath, CAConfig.APIVersion),
-					string.Format("{0} {1}", CAConfig.APIName, CAConfig.APIVersion)
-				);
-				c.RoutePrefix = CAConfig.APIBasePath + "/swagger";
-			});
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger(c =>
+            {
+                c.RouteTemplate = "api/swagger/{documentname}/swagger.json";
+            });
 
-			app.UseRouting();
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+            // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint(
+                    string.Format("/{0}/swagger/{1}/swagger.json", CAConfig.APIBasePath, CAConfig.APIVersion),
+                    string.Format("{0} {1}", CAConfig.APIName, CAConfig.APIVersion)
+                );
+                c.RoutePrefix = CAConfig.APIBasePath + "/swagger";
+            });
 
-			app.UseAuthorization();
+            app.UseRouting();
 
-			app.UseEndpoints(endpoints =>
-			{
-				endpoints.MapControllers();
-			});
-		}
-	}
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+        }
+    }
 }

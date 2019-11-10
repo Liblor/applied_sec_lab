@@ -42,20 +42,19 @@ hosts = {
       # "aslcert02" => { :ip => "10.0.0.22" },
   },
   "dbservers" => {
-      "asldb01" => { :ip => "10.0.0.23" },
-  #     "asldb02" => { :ip => "10.0.0.24" },
-  #     "asllegDB01" => { :ip => "10.0.0.51" },
-  #     "asllegDB02" => { :ip => "10.0.0.52" },
+      "asldb01" => { :ip => "10.0.0.31" },
+      # Currently not working
+      # "asldb02" => { :ip => "10.0.0.32" },
   },
   "webservers" => {
       "aslweb01" => {
-          :ip => "10.0.0.31",
-          :public_net_ip => "172.16.0.31"
+          :ip => "10.0.0.41",
+          :public_net_ip => "172.16.0.41"
       },
-      # "aslweb02" => { :ip => "10.0.0.32" },
+      # "aslweb02" => { :ip => "10.0.0.42" },
   },
   # "ldservers" => {
-  #     "aslld01" => { :ip => "10.0.0.41" },
+  #     "aslld01" => { :ip => "10.0.0.51" },
   # },
   # "logservers" => {
   #     "asllog01" => { :ip => "10.0.0.61" },
@@ -200,7 +199,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 end # category_hosts.each
 
                 hostconf.vm.provision "shell", inline: <<-SHELL
-                    sudo su - #{ANSIBLE_UNAME} -c 'eval "$(ssh-agent -s)" ; sshpass -P "Enter" -p $(cat /vagrant/#{ANSIBLE_PASSPHRASE_FILE}) ssh-add ~/.ssh/id_rsa ; ansible-galaxy install -r requirements.yml ; ansible-playbook -e "FORCE_ROOT_CA_CERT_REGEN=true" -i production site.yml --tags "all,setup" ; history -c ; unset HISTFILE ; rm -f ~/.bash_history'
+                    sudo su - #{ANSIBLE_UNAME} -c 'eval "$(ssh-agent -s)" ; sshpass -P "Enter" -p $(cat /vagrant/#{ANSIBLE_PASSPHRASE_FILE}) ssh-add ~/.ssh/id_rsa ; ansible-galaxy install --force -r requirements.yml ; ansible-playbook -e "FORCE_ROOT_CA_CERT_REGEN=true" -i production site.yml --tags "all,setup" ; history -c ; unset HISTFILE ; rm -f ~/.bash_history'
 
                     # Remove sensitive data from history
                     history -c

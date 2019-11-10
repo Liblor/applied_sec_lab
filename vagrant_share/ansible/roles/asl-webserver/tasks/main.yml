@@ -1,4 +1,3 @@
 ---
-- import_tasks: create-user.yml
-- import_tasks: create-service.yml
 - import_tasks: download-server.yml
+- import_tasks: create-service.yml

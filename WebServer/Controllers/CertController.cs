@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -12,6 +12,7 @@ using System.Security.Claims;
 using System.Net.Mime;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace WebServer.Controllers
 {
@@ -21,12 +22,14 @@ namespace WebServer.Controllers
         private readonly CoreCAClient _client;
         private readonly ILogger<CertController> _logger;
         private readonly IMoviesCertContext _certContext;
+        private readonly IMemoryCache _memoryCache;
 
-        public CertController(CoreCAClient client, ILogger<CertController> logger, IMoviesCertContext certContext)
+        public CertController(CoreCAClient client, ILogger<CertController> logger, IMoviesCertContext certContext, IMemoryCache memoryCache)
         {
             _client = client;
             _logger = logger;
             _certContext = certContext;
+            _memoryCache = memoryCache;
         }
 
         private CertificatesData FetchCertificatesData()
@@ -55,13 +58,13 @@ namespace WebServer.Controllers
                 Expired = expired,
             };
 
-			return data;
-		}
+            return data;
+        }
 
         [HttpGet]
         public IActionResult Index()
         {
-			var viewModel = FetchCertificatesData();
+            var viewModel = FetchCertificatesData();
 
             return View(viewModel);
         }
@@ -69,9 +72,10 @@ namespace WebServer.Controllers
         [HttpGet]
         public IActionResult Download()
         {
+            string uid = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
             string certb64 = null;
             // Try to see if a prior POST to Download or New cached a B64-encoded cert in TempData
-            if (TempData.TryGetValue("CertB64", out object certb64Obj))
+            if (_memoryCache.TryGetValue($"{uid}.CertB64", out object certb64Obj))
                 certb64 = certb64Obj as string;
 
             if (certb64 == null)
@@ -107,7 +111,7 @@ namespace WebServer.Controllers
             }
 
             TempData["SuccessMessage"] = "Certificate downloaded.";
-            TempData["CertB64"] = certb64;
+            _memoryCache.Set($"{uid}.CertB64", certb64, DateTimeOffset.UtcNow.AddMinutes(1));
 
             TempData["AutoDownloadNewCert"] = Url.Action(nameof(Download), null, null, Request.Scheme);
 
@@ -141,8 +145,8 @@ namespace WebServer.Controllers
             }
 
             TempData["SuccessMessage"] = "Certificate issued successfully.";
-            TempData["CertB64"] = certb64;
             TempData["AutoDownloadNewCert"] = Url.Action(nameof(Download), null, null, Request.Scheme);
+            _memoryCache.Set($"{uid}.CertB64", certb64, DateTimeOffset.UtcNow.AddMinutes(1));
 
             return RedirectToAction(nameof(Index));
         }

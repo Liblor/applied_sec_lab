@@ -1,4 +1,4 @@
-﻿using CoreCA.Client;
+using CoreCA.Client;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -96,7 +96,6 @@ namespace WebServer.Controllers
         {
             if (ModelState.IsValid)
             {
-
                 bool success = false;
 
                 var user = _dbContext.Users.Find(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
@@ -142,7 +141,7 @@ namespace WebServer.Controllers
         {
             if (!ModelState.IsValid)
                 return View(details);
-            
+
             string uid = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
             if (await _caClient.ChangePassword(uid, details.OldPassword, details.NewPassword))

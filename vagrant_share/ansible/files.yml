@@ -1,0 +1,41 @@
+---
+- hosts: ansservers
+  become: yes
+  roles:
+    - prepare-openssl-ca
+    - asl-ansserver-init
+  vars:
+    ca_folder: "/home/{{ UNAME }}/root_ca"
+    openssl_conf_name: Root-CA-openssl.cnf
+    ca_cert_path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA.crt"
+    ca_priv_key_path: "/{{ VAGRANT_SHARED_FOLDERNAME }}/key_store/iMovies_Root_CA_key.pem"
+    crl_file_name: Root_CA.crl
+
+- hosts: certservers
+  become: yes
+  roles:
+    - dhparameters
+    - prepare-openssl-ca
+  vars:
+    ca_folder: "/home/{{ UNAME }}/intermediate_ca"
+    openssl_conf_name: Intermediate-CA-openssl.cnf
+    ca_cert_path: "/home/{{ UNAME }}/pki/certs/iMovies_{{ INTERMEDIATE_CERT_PURPOSES[0] }}_{{ ansible_hostname }}_Intermediate_CA.crt"
+    ca_priv_key_path: "/home/{{ UNAME }}/pki/private/iMovies_{{ INTERMEDIATE_CERT_PURPOSES[0] }}_{{ ansible_hostname }}_Intermediate_CA_key.pem"
+    crl_file_name: Intermediate_CA.crl
+  tasks:
+    - name: Create PKI folders
+      file:
+        path: "/home/{{ UNAME }}/pki/{{ item }}"
+        state: directory
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
+        mode: 0700
+      with_items:
+        - private
+        - certs
+        - csr
+
+- hosts: webservers
+  become: yes
+  roles:
+    - dhparameters
