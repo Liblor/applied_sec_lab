@@ -1,2 +1,3 @@
 ---
 UNAME: abc
+USER_SHELL: /sbin/nologin
