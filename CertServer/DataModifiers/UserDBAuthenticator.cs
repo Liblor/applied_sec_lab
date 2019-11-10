@@ -11,6 +11,7 @@ namespace CertServer.DataModifiers
     {
         private readonly IMoviesUserContext _dbContext;
         private readonly ILogger _logger;
+        private readonly string _passwordList;
 
         public UserDBAuthenticator(
             IMoviesUserContext dbContext,
@@ -19,6 +20,7 @@ namespace CertServer.DataModifiers
         {
             _dbContext = dbContext;
             _logger = logger;
+            _passwordList = System.IO.File.ReadAllText(CAConfig.PasswordListPath);
         }
 
         public IDbContextTransaction GetScope()
@@ -38,10 +40,8 @@ namespace CertServer.DataModifiers
 
         private bool MeetsPasswordPolicy(string password)
         {
-            // XXX: Check that the new password meets the password policy
-            // Check password list
-            // Enforce min length 8
-            return true;
+            return !_passwordList.Contains(password)
+                && password.Length >= CAConfig.MinPasswordLength;
         }
 
         public bool ChangePassword(User user, string newPassword)

@@ -18,6 +18,9 @@ namespace CertServer
         public static readonly int CRLNextUpdatedIntervalMinutes = 10;
         public static readonly double SerialNumberWarningThreshold = 0.9;
 
+        public static readonly string PasswordListPath = "/usr/share/wordlists/rockyou.txt";
+        public static readonly int MinPasswordLength = 12;
+
         public static readonly CipherSuite[] CipherSuites =
         {
             new CipherSuite {
