@@ -10,12 +10,12 @@
     generate_ssh_key: yes
     ssh_key_type: "rsa"
     ssh_key_bits: 4096
-    ssh_key_file: ".ssh/id_rsa"
+    ssh_key_file: ".ssh/id_rsa_backup"
     create_home: yes
     append: yes
 
 - name: Fetch public key
   fetch:
     flat: yes
-    src: "/home/{{ backup_client_username }}/.ssh/id_rsa.pub"
+    src: "/home/{{ backup_client_username }}/.ssh/id_rsa_backup.pub"
     dest: "{{ BACKUP_SSH_PUBK_LOCAL_PATH_PREFIX + inventory_hostname }}.pub"
