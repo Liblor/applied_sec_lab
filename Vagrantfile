@@ -10,6 +10,8 @@ OS_BOX = "generic/debian10"
 ANSIBLE_PASSPHRASE_FILE = "ansible_passphrase.txt"
 ANSIBLE_UNAME = "ansible"
 ANSIBLE_REMOTE_TMP_PW = "ygqD-jh3LII1oNhurzQwAhoYe"
+CLIENT_UNAME = "user"
+CLIENT_PASSWORD = "password"
 
 MASTER_MEM = 1024
 REMOTE_MEM = 512
@@ -249,8 +251,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
                 clientconf.vm.provision "shell", inline: <<-SHELL
                     # Add a normal user
-                    sudo adduser --disabled-login --gecos "User" user
-                    echo "user:password" | sudo chpasswd
+                    sudo adduser --disabled-login --gecos "User" #{CLIENT_UNAME}
+                    echo "#{CLIENT_UNAME}:#{CLIENT_PASSWORD}" | sudo chpasswd
 
                     # Upgrade all packages
                     sudo apt-get update
@@ -260,10 +262,19 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y x-window-system lightdm xfce4 firefox-esr --no-install-recommends
                     sudo systemctl set-default graphical.target
 
-                    # Install root certificate
-                    sudo cp /vagrant/key_store/iMovies_Root_CA.crt /usr/local/share/ca-certificates
-                    sudo chown root: /usr/local/share/ca-certificates/iMovies_Root_CA.crt
-                    sudo update-ca-certificates
+                    # Install root certificate in the browser's root of trust
+                    DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y libnss3-tools
+
+                    # Use default xfce panel without user prompt
+                    sudo cp /etc/xdg/xfce4/panel/default.xml /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
+                    # Activate autologin
+                    sudo mkdir /etc/lightdm/lightdm.conf.d
+                    sudo bash -c "echo -e '[SeatDefaults]\nautologin-user=#{CLIENT_UNAME}' > /etc/lightdm/lightdm.conf.d/12-autologin.conf"
+
+                    # Initialize firefox so that its certificate DB is initialized
+                    sudo su - #{CLIENT_UNAME} -c "timeout 3 firefox-esr -migration -no-remote -headless 2> /dev/null"
+                    # Add our root CA to firefox root of trust
+                    sudo /vagrant/scripts/mozilla-import-certificates.sh "/home/#{CLIENT_UNAME}"
 
                     # Remove sensitive data from history
                     history -c
