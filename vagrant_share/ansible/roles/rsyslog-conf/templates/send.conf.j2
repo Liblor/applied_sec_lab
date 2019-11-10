@@ -1,0 +1,11 @@
+$DefaultNetstreamDriver gtls
+
+$DefaultNetstreamDriverCAFile /usr/local/share/ca-certificates/iMovies_Root_CA.crt
+$DefaultNetstreamDriverCertFile /etc/pki/tls/certs/iMovies_{{ ansible_hostname }}_tls.crt
+$DefaultNetstreamDriverKeyFile /etc/ssl/trusted/private/iMovies_{{ ansible_hostname }}_tls_key.pem
+
+$ActionSendStreamDriverAuthMode x509/name
+$ActionSendStreamDriverPermittedPeer *.internal.imovies.ch
+$ActionSendStreamDriverMode 1
+
+*.*  @@asllog01:10514
