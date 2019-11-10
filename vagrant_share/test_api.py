@@ -2,6 +2,7 @@
 
 import requests
 import json
+import copy
 
 def print_response(r):
     print(r)
@@ -56,6 +57,12 @@ payload_rsa = {
     }
 }
 
+payload_rsa_invalid_cipher_suite = copy.deepcopy(payload_rsa)
+payload_rsa_invalid_cipher_suite["requestedCipherSuite"]["KeySize"] = 1024
+
+payload_rsa_invalid_uname = copy.deepcopy(payload_rsa)
+payload_rsa_invalid_uname["uid"] = "nonExistantUID"
+
 payload_ecdsa = {
     "uid": "lb",
     "password": "D15Licz6",
@@ -71,6 +78,16 @@ payload = json.dumps(payload_rsa)
 response_issue_rsa = requests.post(url_issue, headers=headers, data=payload, verify=False)
 print("Test issue RSA certificate: ", end="")
 test_response(response_issue_rsa, 200)
+
+payload = json.dumps(payload_rsa_invalid_cipher_suite)
+response_rsa_invalid_cipher_suite = requests.post(url_issue, headers=headers, data=payload, verify=False)
+print("Test issue RSA certificate with invalid cipher suite: ", end="")
+test_response(response_rsa_invalid_cipher_suite, 400)
+
+payload = json.dumps(payload_rsa_invalid_uname)
+response_rsa_invalid_uname = requests.post(url_issue, headers=headers, data=payload, verify=False)
+print("Test issue RSA certificate with invalid user: ", end="")
+test_response(response_rsa_invalid_uname, 401)
 
 payload = json.dumps(payload_ecdsa)
 response_issue_ecdsa = requests.post(url_issue, headers=headers, data=payload, verify=False)

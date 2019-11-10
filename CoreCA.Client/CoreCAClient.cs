@@ -1,7 +1,8 @@
-﻿using CoreCA.DataModel;
+using CoreCA.DataModel;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Mime;
@@ -50,13 +51,16 @@ namespace CoreCA.Client
 
         public async Task<string> RequestNewCertificate(string uid, string userPassword, string certPassphrase, CipherSuite cipherSuite = null)
         {
-            // TODO: consider sharing predefined ciphersuites
-            cipherSuite = cipherSuite ?? new CipherSuite
+            if (cipherSuite == null)
             {
-                Alg = "RSA",
-                HashAlg = "SHA512",
-                KeySize = 4096
-            };
+                var cipherSuitesResponse = await _httpClient.GetAsync("/api/CipherSuites");
+                if (!cipherSuitesResponse.IsSuccessStatusCode)
+                    return null;
+
+                cipherSuite = JsonConvert.DeserializeObject<CipherSuite[]>(await cipherSuitesResponse.Content.ReadAsStringAsync()).FirstOrDefault();
+                if (cipherSuite == null)
+                    return null;
+            }
 
             var request = new CertRequest
             {

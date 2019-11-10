@@ -1,4 +1,4 @@
-﻿using CoreCA.DataModel;
+using CoreCA.DataModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;

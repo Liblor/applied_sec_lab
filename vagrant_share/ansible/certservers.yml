@@ -1,59 +1,15 @@
 ---
 - hosts: certservers
   become: yes
+  vars_files:
+    - /vagrant/mysql_passwords.yml
   roles:
-    - aspdotnet
-    - pyopenssl
     - asl-certserver
+    - nginx-ssl-client
     - nginxinc.nginx
-# XXX: Verify this configuration, currently just copied from web server
+    - add-to-trusted-user-group
   vars:
-    nginx_http_template_enable: true
-    nginx_http_template:
-      default:
-        template_file: http/default.conf.j2
-        conf_file_name: default.conf
-        conf_file_location: /etc/nginx/conf.d/
-        # XXX: Change to 443 once certificates for https are setup
-        port: 80
-        server_name: localhost
-        error_page: /usr/share/nginx/html
-        autoindex: false
-        add_headers:
-          x_frame_options:
-            name: X-Frame-Options
-            value: "SAMEORIGIN"
-            always: true
-        reverse_proxy:
-          locations:
-            aspnet:
-              location: /
-              proxy_pass: http://aspnet
-              proxy_http_version: 1.1
-              proxy_set_header:
-                header_upgrade:
-                  name: Upgrade
-                  value: $http_upgrade
-                header_connection:
-                  name: Connection
-                  value: "keep-alive"
-                header_host:
-                  name: Host
-                  value: $host
-                header_x_forwarded_for:
-                  name: X-Forwarded-For
-                  value: $proxy_add_x_forwarded_for
-                header_x_forwarded_proto:
-                  name: X-Forwarded-Proto
-                  value: $scheme
-        upstreams:
-          upstream:
-            name: aspnet
-            lb_method: least_conn
-            zone_name: aspnet
-            zone_size: 64k
-            sticky_cookie: false
-            servers:
-              aspnet_1:
-                address: localhost
-                port: 5000
+    trusted_user: nginx
+    ssl_client_required: true
+  vars_files:
+    - nginx_vars.yml

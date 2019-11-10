@@ -4,7 +4,37 @@
   roles:
     - upgrade
   tags: [setup, update]
+
 - hosts: all, !ansservers
   become: yes
-  roles:
-    - add-user
+  tasks:
+    - name: "Create group {{ TLS_GROUP }} (owns tls key material)"
+      group:
+        name: "{{ TLS_GROUP }}"
+        state: present
+
+    - name: Create common folders for key material on all hosts except ansservers
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: "{{ TLS_GROUP }}"
+        mode: 0750
+      with_items:
+        - /etc/ssl/trusted
+        - /etc/ssl/trusted/private
+        - /etc/ssl/trusted/csr
+
+- hosts: all
+  become: yes
+  tasks:
+    - name: Create common folders on all hosts
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+      with_items:
+        - /etc/pki/tls/crl
+        - /etc/pki/tls/certs

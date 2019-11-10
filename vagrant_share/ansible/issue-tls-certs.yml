@@ -8,51 +8,36 @@
         owner: "{{ UNAME }}"
         group: "{{ UNAME }}"
       with_items:
-        - "/home/{{ UNAME }}/tls_csr"
-        - "/home/{{ UNAME }}/tls_certs"
+        - "/home/{{ UNAME }}/tls/csr"
+        - "/home/{{ UNAME }}/tls/crl"
+        - "/home/{{ UNAME }}/tls/certs"
 
 - hosts: all, !ansservers
   become: yes
   roles:
     - pyopenssl
   tasks:
-    - name: Create public folder for certs
-      file:
-        path: /etc/pki/tls/certs
-        state: directory
-        mode: 0755
-
-    - name: Create user private folders for TLS keys and CSR
-      file:
-        path: "{{ item }}"
-        state: directory
-        owner: "{{ UNAME }}"
-        group: "{{ UNAME }}"
-        mode: 0700
-      with_items:
-        - "/home/{{ UNAME }}/pki/private"
-        - "/home/{{ UNAME }}/pki/csr"
-
     - name: Create HTTPS keys
       openssl_privatekey:
-        path: "/home/{{ UNAME }}/pki/private/iMovies_{{ansible_hostname}}_tls_key.pem"
+        path: "/etc/ssl/trusted/private/iMovies_{{ ansible_hostname }}_tls_key.pem"
         type: RSA
         size: 4096
         force: "{{ FORCE_TLS_CERT_REGEN }}"
 
-        owner: "{{ UNAME }}"
-        group: "{{ UNAME }}"
+        owner: root
+        group: "{{ TLS_GROUP }}"
+        mode: 0640
 
     - name: Create CSR for HTTPS keys
       openssl_csr:
-        path: "/home/{{ UNAME }}/pki/csr/iMovies_{{ansible_hostname}}_tls.csr"
-        privatekey_path: "/home/{{ UNAME }}/pki/private/iMovies_{{ansible_hostname}}_tls_key.pem"
+        path: "/etc/ssl/trusted/csr/iMovies_{{ ansible_hostname }}_tls.csr"
+        privatekey_path: "/etc/ssl/trusted/private/iMovies_{{ ansible_hostname }}_tls_key.pem"
 
         country_name: "{{ COUNTRY_NAME }}"
         state_or_province_name: "{{ STATE_OR_PROVINCE_NAME }}"
         locality_name: "{{ LOCALITY_NAME }}"
         organization_name: "{{ ORGANIZATION_NAME }}"
-        common_name: "iMovies {{ansible_hostname}}"
+        common_name: "{{ ansible_hostname }}"
         # Externally reachable servers have the imovies domain as SAN
         subjectAltName: "{{ 'DNS:www.imovies.ch, ' + 'DNS:' + ansible_hostname if ('webservers' in groups and ansible_hostname in groups['webservers']) else 'DNS:' + ansible_hostname }}"
 
@@ -66,65 +51,121 @@
 
         force: "{{ FORCE_TLS_CERT_REGEN }}"
 
-        owner: "{{ UNAME }}"
-        group: "{{ UNAME }}"
+        owner: root
+        group: "{{ TLS_GROUP }}"
+
     - name: Transfer CSR to config server
       synchronize:
         mode: pull
-        src: "/home/{{ UNAME }}/pki/csr/iMovies_{{ansible_hostname}}_tls.csr"
-        dest: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/tls_csr/"
+        src: "/etc/ssl/trusted/csr/iMovies_{{ ansible_hostname }}_tls.csr"
+        dest: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/tls/csr/"
         group: false
         owner: false
       delegate_to: "{{ groups['ansservers'][0] }}"
+
+- hosts: certservers
+  become: yes
+  roles:
+    - role: revoke-all-certs
+      when: FORCE_TLS_CERT_REGEN
+  vars:
+    ca_folder: "/home/{{ UNAME }}/intermediate_ca"
+    openssl_conf_name: Intermediate-CA-openssl.cnf
+    crl_name: Intermediate_CA.crl
+  tasks:
+    - name: Transfer CRL to config server
+      synchronize:
+        mode: pull
+        src: "/home/{{ UNAME }}/intermediate_ca/Intermediate_CA.crl"
+        dest: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/tls/crl"
+        group: false
+        owner: false
+      delegate_to: "{{ groups['ansservers'][0] }}"
+
+- hosts: ansservers
+  become: yes
+  tasks:
+    - name: Move TLS CRL to privileged folder
+      synchronize:
+        src: tls/crl/
+        dest: /etc/pki/tls/crl/
+
+- hosts: all, !ansservers
+  become: yes
+  tasks:
+    - name: Distribute new CRL
+      synchronize:
+        src: /etc/pki/tls/crl/
+        dest: /etc/pki/tls/crl/
+        rsync_path: "sudo rsync"
+
+    - name: Combine Root CA and intermediate CA CRL
+      shell: |
+        cat /etc/pki/tls/crl/Root_CA.crl /etc/pki/tls/crl/Intermediate_CA.crl \
+        > /etc/pki/tls/crl/tls_crl_chain.pem
 
 # The first core ca signs all internal tls certificates
 - hosts: "{{ groups['certservers'][0] }}"
   become: yes
   tasks:
-    - name: Create folders for TLS CSR and certificates
+    - name: Create folder for CSRs for TLS certificates on certserver
+      file:
+        path: "/home/{{ UNAME }}/intermediate_ca/csr/tls"
+        state: directory
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
+
+    - name: Transfer CSR to cert server
+      synchronize:
+        src: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/tls/csr/"
+        dest: "/home/{{ UNAME }}/intermediate_ca/csr/tls/"
+        group: false
+        owner: false
+
+    # Loop over all files in tls/csr and sign their certificate, the name of which
+    # is for <name>.csr --> <name>.crt
+    - name: Gather CSRs to sign
+      find:
+        paths: "/home/{{ UNAME }}/intermediate_ca/csr/tls"
+        patterns: "*.csr"
+      register: csr_files_glob
+
+    - name: Sign remote server CSRs to create TLS certificates
+      command: |
+        openssl ca -batch -config Intermediate-CA-openssl.cnf \
+        -extensions server_cert -notext \
+        -in {{ item.path }} \
+        -out certs/{{ item.path | basename | splitext | first }}.crt
+      args:
+        chdir: "/home/{{ UNAME }}/intermediate_ca/"
+      with_items:
+        - "{{ csr_files_glob.files }}"
+      when: FORCE_TLS_CERT_REGEN
+
+    - name: Fix certificate permissions
+      file:
+        path: "/home/{{ UNAME }}/intermediate_ca/certs/{{ item.path | basename | splitext | first }}.crt"
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
+      with_items:
+        - "{{ csr_files_glob.files }}"
+      when: FORCE_TLS_CERT_REGEN
+
+    - name: Create folders for TLS chains
       file:
         path: "{{ item }}"
         state: directory
         owner: "{{ UNAME }}"
         group: "{{ UNAME }}"
+        mode: 0700
       with_items:
-        - "/home/{{ UNAME }}/tls_csr"
-        - "/home/{{ UNAME }}/tls_certs"
-        - "/home/{{ UNAME }}/tls_chains"
-
-    - name: Transfer CSR to cert server
-      synchronize:
-        src: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/tls_csr/"
-        dest: "/home/{{ UNAME }}/tls_csr/"
-        group: false
-        owner: false
-
-    # Loop over all files in tls_csr and sign their certificate, the name of which
-    # is for <name>.csr --> <name>.crt
-    - name: Gather CSRs to sign
-      find:
-        paths: "/home/{{ UNAME }}/tls_csr"
-        patterns: "*.csr"
-      register: csr_files_glob
-
-    - name: Sign remote server CSRs
-      openssl_certificate:
-        path: "/home/{{ UNAME }}/tls_certs/{{ item.path | basename | splitext | first }}.crt"
-        csr_path: "{{ item.path }}"
-        provider: ownca
-        ownca_path: "/home/{{ UNAME }}/pki/certs/iMovies_{{ansible_hostname}}_Intermediate_CA.crt"
-        ownca_privatekey_path: "/home/{{ UNAME }}/pki/private/iMovies_{{ansible_hostname}}_Intermediate_CA_key.pem"
-        # Hack since the "+730d" syntax of this template seems to be broken
-        ownca_not_after: "{{ lookup('pipe','date +\"%Y%m%d%H%M%SZ\" -d \"+365 days\"') }}"
-        force: "{{ FORCE_TLS_CERT_REGEN }}"
-      with_items:
-        - "{{ csr_files_glob.files }}"
+        - "/home/{{ UNAME }}/intermediate_ca/chains"
 
     - name: Create certificate chain
       shell: |
-        cat "/home/{{ UNAME }}/tls_certs/{{ item.path | basename | splitext | first }}.crt" \
-        "/home/{{ UNAME }}/pki/certs/iMovies_{{ansible_hostname}}_Intermediate_CA.crt" \
-        > "/home/{{ UNAME }}/tls_chains/{{ item.path | basename | splitext | first }}.crt"
+        cat "/home/{{ UNAME }}/intermediate_ca/certs/{{ item.path | basename | splitext | first }}.crt" \
+        "/home/{{ UNAME }}/pki/certs/iMovies_{{ INTERMEDIATE_CERT_PURPOSES[0] }}_{{ ansible_hostname }}_Intermediate_CA.crt" \
+        > "/home/{{ UNAME }}/intermediate_ca/chains/{{ item.path | basename | splitext | first }}.crt"
       when: FORCE_TLS_CERT_REGEN
       with_items:
         - "{{ csr_files_glob.files }}"
@@ -132,8 +173,8 @@
     - name: Transfer certs to config server
       synchronize:
         mode: pull
-        src: "/home/{{ UNAME }}/tls_chains/"
-        dest: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/tls_certs/"
+        src: "/home/{{ UNAME }}/intermediate_ca/chains/"
+        dest: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/tls/certs/"
         group: false
         owner: false
       when: FORCE_TLS_CERT_REGEN
@@ -144,7 +185,7 @@
   tasks:
     - name: Transfer certificates to corresponding hosts
       synchronize:
-        src: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/tls_certs/iMovies_{{ ansible_hostname }}_tls.crt"
+        src: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/tls/certs/iMovies_{{ ansible_hostname }}_tls.crt"
         dest: /etc/pki/tls/certs/
       when: FORCE_TLS_CERT_REGEN
 
@@ -169,7 +210,7 @@
         mode: 0700
 
     - name: Convert private key to pkcs#1
-      command: "openssl rsa -in /home/{{ UNAME }}/pki/private/iMovies_{{ansible_hostname}}_tls_key.pem -out /etc/mysql/keys/iMovies_{{ inventory_hostname }}_tls_key.pem"
+      command: "openssl rsa -in /etc/ssl/trusted/private/iMovies_{{ansible_hostname}}_tls_key.pem -out /etc/mysql/keys/iMovies_{{ inventory_hostname }}_tls_key.pem"
 
     - name: Fix mysql private key permissions
       file:
