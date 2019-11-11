@@ -59,9 +59,9 @@ hosts = {
   "logservers" => {
   #     "asllog01" => { :ip => "10.0.0.61" },
   },
-  # "bkpservers" => {
-  #     "aslbkp01" => { :ip => "10.0.0.71" },
-  # }
+  "bkpservers" => {
+      "aslbkp01" => { :ip => "10.0.0.71" },
+  }
 }
 
 # TODO: Create client outside company network for testing
@@ -71,7 +71,8 @@ clients = {
     },
 }
 
-backupclients = [hosts["ansservers"], hosts["certservers"], hosts["dbservers"], hosts["logservers"]]
+# aslans01 is 'hardcoded' as local host
+backupclients = [hosts["certservers"], hosts["dbservers"], hosts["logservers"]]
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.provider "virtualbox"
@@ -173,7 +174,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     echo '###################################################' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
 
                     # Add Ansible host itself to inventory
-                    echo -e '\n[#{master_category_name}]\nlocalhost ansible_connection=local' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
+                    echo -e '\n[#{master_category_name}]\naslans01 ansible_connection=local' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
                 SHELL
 
                 # Add hostnames, install SSH keys
@@ -203,6 +204,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                 # Add backupclients
                 hostconf.vm.provision "shell", inline: <<-SHELL
                     echo -e "\n[backupclients]" | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
+                    # Add ansible master
+                    # TODO: don't hardcode
+                    echo -e 'aslans01 ansible_connection=local' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
                 SHELL
                 backupclients.each do |category|
                     category.each do |hostname, info|

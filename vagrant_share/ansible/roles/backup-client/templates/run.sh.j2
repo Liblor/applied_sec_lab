@@ -7,10 +7,11 @@ FILE_LOCK='/tmp/'$SCRIPT_NAME'.lock'
 BORG_HOST='aslbkp01'
 BORG_PATH="{{ BACKUP_PATH_ROOT }}/{{ inventory_hostname }}"
 BORG_RSH="sudo -u {{ backup_client_username }} ssh -i /home/{{ backup_client_username }}/.ssh/id_rsa_backup"
+export BORG_RSH
 
 BORG_REPO="ssh://{{ hostvars[groups['bkpservers'][0]]['UNAME'] }}@$BORG_HOST$BORG_PATH"
 export BORG_REPO
-BORG_PASSPHRASE="{{ lookup('vars', 'borg_' + ansible_hostname + '_passphrase') }}"
+BORG_PASSPHRASE="{{ lookup('vars', 'borg_' + inventory_hostname + '_passphrase') }}"
 export BORG_PASSPHRASE
 
 # Dummy functions.
