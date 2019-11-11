@@ -1,2 +1,9 @@
 ---
 - hosts: ansservers
+  become: yes
+  roles:
+    - borgbackup
+    - backup-client
+  vars:
+    backup_files:
+      - "/home/{{ UNAME }}"
