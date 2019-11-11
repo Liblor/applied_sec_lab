@@ -41,7 +41,7 @@ namespace CertServer.DataModifiers
         private bool MeetsPasswordPolicy(string password)
         {
             return !_passwordList.Contains(password)
-                && password.Length >= CAConfig.MinPasswordLength;
+                && password.Length >= Constants.MinPasswordLength;
         }
 
         public bool ChangePassword(User user, string newPassword)
