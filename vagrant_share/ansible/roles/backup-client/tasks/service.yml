@@ -13,7 +13,7 @@
     dest: /etc/borgbackup/run.sh
     owner: root
     group: root
-    mode: 0744
+    mode: 0700
 
 - name: Generate script configuration
   template:

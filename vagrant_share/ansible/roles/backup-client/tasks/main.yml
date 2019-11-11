@@ -1,3 +1,6 @@
 ---
+- name: Include phasephrase variables
+  include_vars:
+    file: /vagrant/borg_phasephrases.yml
 - import_tasks: service.yml
 - import_tasks: init_backup_repos.yml

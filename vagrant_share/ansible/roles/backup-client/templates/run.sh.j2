@@ -3,15 +3,14 @@
 SCRIPT_NAME='borgbackup'
 SCRIPT_PATH="$(dirname $(readlink -f $0))"
 FILE_LOCK='/tmp/'$SCRIPT_NAME'.lock'
-FILE_PHRASE="$SCRIPT_PATH/borg.phrase"
 
-BORG_HOST='aslbk01'
+BORG_HOST='aslbkp01'
 BORG_PATH="{{ BACKUP_PATH_ROOT }}/{{ inventory_hostname }}"
-BORG_RSH="sudo -u {{ UNAME }} ssh"
+BORG_RSH="sudo -u {{ backup_client_username }} ssh -i /home/{{ backup_client_username }}/.ssh/id_rsa_backup"
 
-BORG_REPO="ssh://{{ backup_client_username }}@$BORG_HOST:22/$BORG_PATH"
+BORG_REPO="ssh://{{ hostvars[groups['bkpservers'][0]]['UNAME'] }}@$BORG_HOST$BORG_PATH"
 export BORG_REPO
-BORG_PASSPHRASE=$(head -n 1 $FILE_PHRASE)
+BORG_PASSPHRASE="{{ lookup('vars', 'borg_' + ansible_hostname + '_passphrase') }}"
 export BORG_PASSPHRASE
 
 # Dummy functions.
@@ -72,8 +71,8 @@ function prune_repository() {
 	;
 }
 
-exec 1> >(logger -t $SCRIPT_NAME) 2>&1
-trap 'echo Interrupted.; unlock; exit 2' INT TERM
+#exec 1> >(logger -t $SCRIPT_NAME) 2>&1
+#trap 'echo Interrupted.; unlock; exit 2' INT TERM
 
 # Check lock file existance.
 if [ ! -e "$FILE_LOCK" ]; then
