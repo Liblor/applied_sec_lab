@@ -3,3 +3,6 @@
   become: yes
     - borgbackup
     - backup-client
+  vars:
+    backup_files:
+      - "/var/log"
