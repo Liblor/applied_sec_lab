@@ -25,7 +25,7 @@ namespace CoreCA.DataModel
         public string Email { get; set; }
 
         [Column("pwd")]
-        [Required, StringLength(64, MinimumLength = 1)]
+        [Required, StringLength(64, MinimumLength = Constants.MinPasswordLength)]
         public string PasswordHash { get; set; }
     }
 }

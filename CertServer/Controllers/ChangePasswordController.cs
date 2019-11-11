@@ -39,11 +39,11 @@ namespace CertServer.Controllers
         ///
         /// </remarks>
         /// <param name="passwordChangeRequest"></param>
-        /// <response code="200">Password successfully changed</response>
+        /// <response code="204">Password successfully changed</response>
         /// <response code="400">Password does not meet password policy</response>
         /// <response code="401">Invalid password</response>
         [Produces("application/json")]
-        [ProducesResponseType(200)]
+        [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [HttpPost("[controller]")]

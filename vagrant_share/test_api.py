@@ -42,7 +42,7 @@ test_response(response_swagger, 200)
 
 print("\n" + "-"*80 + "\n")
 response_ciphersuites = requests.get(url_ciphersuite, verify=False)
-print("Test get swagger json: ", end="")
+print("Test get cipher suites: ", end="")
 test_response(response_ciphersuites, 200)
 
 print("\n" + "-"*80 + "\n")
@@ -106,7 +106,7 @@ payload_invalid = {
 payload = json.dumps(payload_valid)
 response_revoke = requests.post(url_revoke, headers=headers, data=payload, verify=False)
 print("Test revoke certificate: ", end="")
-test_response(response_revoke, 200)
+test_response(response_revoke, 204)
 
 payload = json.dumps(payload_invalid)
 response_revoke = requests.post(url_revoke, headers=headers, data=payload, verify=False)
@@ -135,11 +135,18 @@ print("\n" + "-"*80 + "\n")
 
 newPw = "NG3xk0zp"
 oldPw = "D15Licz6"
+weakPw = "strawberry"
 
 payload_invalid = {
     "uid": "lb",
     "oldPassword": "invalidPW",
     "newPassword": newPw
+}
+
+payload_weak = {
+    "uid": "lb",
+    "oldPassword": oldPw,
+    "newPassword": weakPw
 }
 
 payload_valid = {
@@ -159,14 +166,19 @@ response_change_pw = requests.post(url_change_pw, headers=headers, data=payload,
 print("Test invalid password change: ", end="")
 test_response(response_change_pw, 401)
 
+payload = json.dumps(payload_weak)
+response_change_pw_weak = requests.post(url_change_pw, headers=headers, data=payload, verify=False)
+print("Test to change to a weak password: ", end="")
+test_response(response_change_pw_weak, 400)
+
 payload = json.dumps(payload_valid)
 response_change_pw = requests.post(url_change_pw, headers=headers, data=payload, verify=False)
 print("Test valid password change: ", end="")
-test_response(response_change_pw, 200)
+test_response(response_change_pw, 204)
 
 payload = json.dumps(payload_restore)
 response_change_pw = requests.post(url_change_pw, headers=headers, data=payload, verify=False)
 print("Restore old password: ", end="")
-test_response(response_change_pw, 200)
+test_response(response_change_pw, 204)
 
 print("\n" + "-"*80 + "\n")
