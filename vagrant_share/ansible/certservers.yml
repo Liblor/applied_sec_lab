@@ -14,7 +14,7 @@
     - backup-client
   vars:
     backup_files:
-        - "/home/{{ UNAME }}/backup"
+      - "/home/{{ UNAME }}/backup"
 
 - hosts: certservers
   become: yes
