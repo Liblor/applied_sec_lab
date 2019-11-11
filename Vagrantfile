@@ -16,11 +16,11 @@ ADMIN_UNAME = "admin"
 ADMIN_PASSWORD = "admin"
 ADMIN_REMOTE_PASSWORD = "CKLwhksWCuLzFWXRqoZdMinUfVj_aS"
 
-MASTER_MEM = 1024
-REMOTE_MEM = 512
 CPU_CAP_PERCENTAGE = 60
-VRAM = 8
-CLIENT_VRAM = 64
+MEM_CAP = 512
+CLIENT_MEM_CAP = 1024
+VRAM_CAP = 8
+CLIENT_VRAM_CAP = 64
 
 # Remove sensitive data from history
 REMOVE_SENSITIVE_DATA = \
@@ -52,30 +52,30 @@ master = {
 
 hosts = {
 	"certservers" => {
-	    "aslcert01" => { :ip => "10.0.0.21" },
-	    # "aslcert02" => { :ip => "10.0.0.22" },
+		"aslcert01" => { :ip => "10.0.0.21" },
+		# "aslcert02" => { :ip => "10.0.0.22" },
 	},
 	"dbservers" => {
-	    "asldb01" => { :ip => "10.0.0.31" },
-	    # Currently not working
-	    # "asldb02" => { :ip => "10.0.0.32" },
+		"asldb01" => { :ip => "10.0.0.31" },
+		# Currently not working
+		# "asldb02" => { :ip => "10.0.0.32" },
 	},
 	"webservers" => {
-	    "aslweb01" => {
-	        :ip => "10.0.0.41",
-	        :public_net_ip => "172.16.0.41"
-	    },
-	    # "aslweb02" => {
+		"aslweb01" => {
+			:ip => "10.0.0.41",
+			:public_net_ip => "172.16.0.41"
+		},
+		# "aslweb02" => {
 		# 	:ip => "10.0.0.42",
-	    #     :public_net_ip => "172.16.0.42"
+		#     :public_net_ip => "172.16.0.42"
 		# },
 	},
 	# "ldservers" => {
 	#     "aslld01" => { :ip => "10.0.0.51" },
 	# },
-	# "logservers" => {
-	#     "asllog01" => { :ip => "10.0.0.61" },
-	# },
+	"logservers" => {
+	    "asllog01" => { :ip => "10.0.0.61" },
+	},
 	# "bkpservers" => {
 	#     "aslbkp01" => { :ip => "10.0.0.71" },
 	# }
@@ -96,7 +96,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 	# Limit resource usage
 	config.vm.provider "virtualbox" do |vb|
-		vb.customize ["modifyvm", :id, "--vram", VRAM]
+		vb.customize ["modifyvm", :id, "--cpuexecutioncap", CPU_CAP_PERCENTAGE]
 	end # provider
 
 	# Create hosts
@@ -114,6 +114,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 						ip: "#{info[:public_net_ip]}",
 						virtualbox__intnet: VB_PUBLIC_NET_NAME
 				end
+
+				hostconf.vm.provider "virtualbox" do |vb|
+					vb.customize ["modifyvm", :id, "--name", "#{hostname}"]
+					vb.customize ["modifyvm", :id, "--vram", VRAM_CAP]
+					vb.memory = MEM_CAP
+				end # provider
 
 				hostconf.vm.provision "shell", inline: <<-SHELL
 					# Add ansible user
@@ -138,12 +144,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 						SHELL
 					end # host_peer_category.each
 				end # hosts.each (peer)
-
-				hostconf.vm.provider "virtualbox" do |vb|
-					vb.customize ["modifyvm", :id, "--cpuexecutioncap", CPU_CAP_PERCENTAGE]
-					vb.customize ["modifyvm", :id, "--name", "#{hostname}"]
-					vb.memory = REMOTE_MEM
-				end # provider
 			end # hostconf
 		end # category_hosts.each
 	end # hosts.each
@@ -168,6 +168,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 				end
 
 				hostconf.vm.synced_folder "./vagrant_share", "/vagrant", SharedFoldersEnableSymlinksCreate: false
+
+				hostconf.vm.provider "virtualbox" do |vb|
+					vb.customize ["modifyvm", :id, "--name", "#{master_hostname}"]
+					vb.customize ["modifyvm", :id, "--vram", VRAM_CAP]
+					vb.memory = MEM_CAP
+				end # provider
 
 				hostconf.vm.provision "shell", inline: <<-SHELL
 					# Install Ansible
@@ -245,11 +251,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 					EOF1
 					#{REMOVE_SENSITIVE_DATA}
 				SHELL
-
-				hostconf.vm.provider "virtualbox" do |vb|
-					vb.customize ["modifyvm", :id, "--name", "#{master_hostname}"]
-					vb.memory = MASTER_MEM
-				end # provider
 			end # hostconf
 		end # master_category_hosts.each
 	end # master.each
@@ -261,8 +262,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 				clientconf.vm.box = OS_BOX
 				clientconf.vm.hostname = client_hostname
 				clientconf.vm.network "private_network",
-				ip: "#{client_info[:public_net_ip]}",
-				virtualbox__intnet: VB_PUBLIC_NET_NAME
+					ip: "#{client_info[:public_net_ip]}",
+					virtualbox__intnet: VB_PUBLIC_NET_NAME
 				clientconf.vm.synced_folder "./vagrant_share", "/vagrant", SharedFoldersEnableSymlinksCreate: false
 
 				# Add public-net-connected host names
@@ -282,8 +283,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 					# Uncomment to launch VirtualBox GUI upon `vagrant up` (user:password = user:password)
 					vb.gui = true
 
-					vb.customize ["modifyvm", :id, "--vram", CLIENT_VRAM]
+					vb.customize ["modifyvm", :id, "--vram", CLIENT_VRAM_CAP]
 					vb.customize ["modifyvm", :id, "--name", "#{client_hostname}"]
+					vb.memory = CLIENT_MEM_CAP
 				end # virtualbox provider
 
 				clientconf.vm.provision "shell", inline: <<-SHELL
@@ -336,16 +338,23 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 					# Install root certificate in the browser's root of trust
 					DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y libnss3-tools
 
-					# Use default xfce panel without user prompt
+					# Use default XFCE panel without user prompt
 					sudo cp /etc/xdg/xfce4/panel/default.xml /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
 					# Activate autologin
 					sudo mkdir /etc/lightdm/lightdm.conf.d
 					sudo bash -c "echo -e '[SeatDefaults]\nautologin-user=#{CLIENT_UNAME}' > /etc/lightdm/lightdm.conf.d/12-autologin.conf"
 
-					# Initialize firefox so that its certificate DB is initialized
+					# Initialize Firefox so that its certificate DB is initialized
 					sudo su - #{CLIENT_UNAME} -c "timeout 3 firefox-esr -migration -no-remote -headless 2> /dev/null"
 					# Add our root CA to firefox root of trust
 					sudo /vagrant/scripts/mozilla-import-certificates.sh "/home/#{CLIENT_UNAME}"
+
+					# Add launcher to open login page
+					sudo mkdir /home/#{CLIENT_UNAME}/Desktop
+					sudo chown #{CLIENT_UNAME}: /home/#{CLIENT_UNAME}/Desktop
+					sudo chmod 700 /home/#{CLIENT_UNAME}/Desktop
+					sudo cp /vagrant/Login.desktop /home/#{CLIENT_UNAME}/Desktop/Login.desktop
+					sudo chown #{CLIENT_UNAME}: /home/#{CLIENT_UNAME}/Desktop/Login.desktop
 
 					#{REMOVE_SENSITIVE_DATA}
 				SHELL
@@ -379,6 +388,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 							end # master_category_hosts.each
 						end # master.each
 					end # trigger
+				else
+					# Reboot client to boot into GUI
+					clientconf.vm.provision "shell", inline: <<-SHELL
+						sudo reboot
+					SHELL
 				end # if PURGE_VAGRANT
 			end # clientconf
 		end # client_cat_boxes.each

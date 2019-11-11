@@ -1,0 +1,6 @@
+---
+- name: Install TLS support
+  package:
+    name: rsyslog-gnutls
+    state: present
+    update_cache: true
