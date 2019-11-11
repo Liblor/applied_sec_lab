@@ -166,6 +166,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     echo '#{ANSIBLE_UNAME} ALL=(ALL) NOPASSWD: ALL' | sudo EDITOR='tee -a' visudo
 
                     # Generate SSH keys for ansible remote configuration
+                    sudo rm -f /home/#{ANSIBLE_UNAME}/.ssh/id_rsa
                     sudo su - #{ANSIBLE_UNAME} -c "ssh-keygen -t ed25519 -a 100 -f /home/#{ANSIBLE_UNAME}/.ssh/id_rsa -N $(cat /vagrant/#{ANSIBLE_PASSPHRASE_FILE})"
                 SHELL
 
