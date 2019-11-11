@@ -21,8 +21,15 @@ namespace CertServer
         public static readonly string PasswordListPath = "/usr/share/wordlists/rockyou.txt";
         public static readonly int MinPasswordLength = 12;
 
+        // Order by decreasing preference, the first option is the default cipher suite.
         public static readonly CipherSuite[] CipherSuites =
         {
+            // Different ECDSA curves are only supported on Windows.
+            new CipherSuite {
+                Alg = "ECDSA",
+                HashAlg = "SHA512",
+                KeySize = 521
+            },
             new CipherSuite {
                 Alg = "RSA",
                 HashAlg = "SHA512",
@@ -32,12 +39,6 @@ namespace CertServer
                 Alg = "RSA",
                 HashAlg = "SHA512",
                 KeySize = 2048
-            },
-            // Different ECDSA curves are only supported on Windows.
-            new CipherSuite {
-                Alg = "ECDSA",
-                HashAlg = "SHA512",
-                KeySize = 521
             }
         };
 
