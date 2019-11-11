@@ -10,6 +10,7 @@ using System.Security.Cryptography.X509Certificates;
 using CertServer.Models;
 using CertServer.DataModifiers;
 using CoreCA.DataModel;
+using Org.BouncyCastle.Asn1.X509;
 
 namespace CertServer.Controllers
 {
@@ -148,9 +149,25 @@ namespace CertServer.Controllers
 
                     // Add CRL Distribution Point (CDP)
                     req.CertificateExtensions.Add(
-                        new X509Extension(
-                            new Oid("2.5.29.31"),
-                            System.Text.Encoding.ASCII.GetBytes(CAConfig.CrlDistributionPoint),
+                        new System.Security.Cryptography.X509Certificates.X509Extension(
+                            new Oid(X509Extensions.CrlDistributionPoints.Id),
+                            new CrlDistPoint(
+                                new[] { 
+                                    new DistributionPoint(
+                                        new DistributionPointName(
+                                            new GeneralNames(
+                                                new GeneralName(
+                                                    GeneralName.UniformResourceIdentifier,
+                                                    // Trim the 'aslcert' part of the hostname
+                                                    string.Format(CAConfig.CrlDistributionPointFormatString, Environment.MachineName.Substring(7))
+                                                    )
+                                                )
+                                            ), 
+                                        null, 
+                                        null
+                                    )
+                                }
+                            ).GetDerEncoded(),
                             false
                         )
                     );

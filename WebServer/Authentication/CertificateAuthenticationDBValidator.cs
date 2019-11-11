@@ -26,9 +26,8 @@ namespace WebServer.Authentication
 
             using (var chain = new X509Chain())
             {
-                // We build the chain to merely obtain the full issuer's certificate from the machine store, hence the Revocation.NoCheck flag.
-                // Revocation and validity should have already been checked earlier.
-                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
+                chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EndCertificateOnly;
                 chain.Build(cert);
 
                 // 0th element is our leaf cert
