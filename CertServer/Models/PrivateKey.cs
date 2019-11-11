@@ -9,7 +9,7 @@ namespace CertServer.Models
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Column("uid")]
-        [StringLength(64, MinimumLength = Constants.MinPasswordLength)]
+        [StringLength(64, MinimumLength = 1)]
         public string Uid { get; set; }
 
         [Column("private_cert", TypeName = "ntext")]
