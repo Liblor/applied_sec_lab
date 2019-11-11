@@ -1,6 +1,7 @@
 ---
 - hosts: logservers
   become: yes
+  roles:
     - borgbackup
     - backup-client
   vars:
