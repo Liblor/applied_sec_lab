@@ -13,11 +13,15 @@
 
 - hosts: dbservers
   become: yes
+  roles:
     - borgbackup
     - backup-client
+  vars_files:
+    - /vagrant/mysql_passwords.yml
   vars:
     backup_files:
       - "/etc/mysql"
+      - "/home/{{ UNAME }}/backup"
 
 - hosts: asldb01
   become: yes

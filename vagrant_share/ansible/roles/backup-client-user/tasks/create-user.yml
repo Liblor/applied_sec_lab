@@ -19,3 +19,12 @@
     flat: yes
     src: "/home/{{ backup_client_username }}/.ssh/id_rsa_backup.pub"
     dest: "{{ BACKUP_SSH_PUBK_LOCAL_PATH_PREFIX + inventory_hostname }}.pub"
+
+- name: Create a backup folder
+  file:
+    path: "/home/{{ UNAME }}/backup"
+    state: directory
+    owner: "{{ UNAME }}"
+    group: "{{ UNAME }}"
+    mode: 0700
+  when: inventory_hostname in groups['dbservers'] or inventory_hostname in groups['certservers']
