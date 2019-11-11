@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using WebServer.Authentication;
 
@@ -82,6 +83,15 @@ namespace WebServer
             services.AddHttpClient<CoreCAClient>(client =>
             {
                 client.BaseAddress = new Uri(webServerOptions.CoreCAURL);
+            }).ConfigurePrimaryHttpMessageHandler(() => {
+                var handler = new HttpClientHandler();
+                
+                if (!string.IsNullOrEmpty(webServerOptions.ClientCertPath))
+                {
+                    var cert = new X509Certificate2(webServerOptions.ClientCertPath);
+                    handler.ClientCertificates.Add(cert);
+                }
+                return handler;
             });
         }
 

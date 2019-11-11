@@ -1,0 +1,15 @@
+$ModLoad imtcp
+
+$DefaultNetstreamDriver gtls
+
+$DefaultNetstreamDriverCAFile /usr/local/share/ca-certificates/iMovies_Root_CA.crt
+$DefaultNetstreamDriverCertFile /etc/pki/tls/certs/iMovies_{{ ansible_hostname }}_tls.crt
+$DefaultNetstreamDriverKeyFile /etc/ssl/trusted/private/iMovies_{{ ansible_hostname }}_tls_key.pem
+
+$InputTCPServerStreamDriverAuthMode x509/name
+$InputTCPServerStreamDriverPermittedPeer *.internal.imovies.ch
+$InputTCPServerStreamDriverMode 1
+$InputTCPServerRun 10514
+
+$template RemoteLogs,"/var/log/%HOSTNAME%/%PROGRAMNAME%.log"
+*.* ?RemoteLogs
