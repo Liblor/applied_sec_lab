@@ -72,8 +72,8 @@ function prune_repository() {
 	;
 }
 
-#exec 1> >(logger -t $SCRIPT_NAME) 2>&1
-#trap 'echo Interrupted.; unlock; exit 2' INT TERM
+exec 1> >(logger -t $SCRIPT_NAME) 2>&1
+trap 'echo Interrupted.; unlock; exit 2' INT TERM
 
 # Check lock file existance.
 if [ ! -e "$FILE_LOCK" ]; then
