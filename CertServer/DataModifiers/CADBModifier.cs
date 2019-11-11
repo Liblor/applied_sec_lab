@@ -9,6 +9,7 @@ using System.Security.Cryptography.X509Certificates;
 using CertServer.Data;
 using CertServer.Models;
 using CoreCA.DataModel;
+using Org.BouncyCastle.X509;
 
 namespace CertServer.DataModifiers
 {
@@ -102,7 +103,7 @@ namespace CertServer.DataModifiers
         }
 
         // XXX: Test if CRL signature is correct
-        public string GenerateCRL()
+        public X509Crl GenerateCRL()
         {
             var coreCApkcs = new Org.BouncyCastle.Pkcs.Pkcs12Store(
                 new FileStream(CAConfig.CoreCACertPath, FileMode.Open, FileAccess.Read),
@@ -112,12 +113,12 @@ namespace CertServer.DataModifiers
             string alias = System.Environment.MachineName;
 
             Org.BouncyCastle.X509.X509Certificate coreCaCert = coreCApkcs.GetCertificate(alias).Certificate;
-            Org.BouncyCastle.X509.X509V2CrlGenerator crlGen = new Org.BouncyCastle.X509.X509V2CrlGenerator();
+            X509V2CrlGenerator crlGen = new X509V2CrlGenerator();
 
             DateTime now = DateTime.UtcNow;
             crlGen.SetIssuerDN(coreCaCert.SubjectDN);
             crlGen.SetThisUpdate(now);
-            crlGen.SetNextUpdate(now.AddMinutes(CAConfig.CRLNextUpdatedIntervalMinutes));
+            crlGen.SetNextUpdate(now.AddMinutes(Constants.CRLNextUpdatedIntervalMinutes));
 
             var revokedPubCerts = _dbContext.PublicCertificates.Where(p => p.IsRevoked);
 
@@ -139,27 +140,22 @@ namespace CertServer.DataModifiers
                 )
             );
 
-            Org.BouncyCastle.X509.X509Crl crl = crlGen.Generate(
+            X509Crl crl = crlGen.Generate(
                 new Org.BouncyCastle.Crypto.Operators.Asn1SignatureFactory(
                     "SHA512WITHRSA",
                     coreCApkcs.GetKey(alias).Key
                 )
             );
 
-            StringWriter crlPEM = new StringWriter();
-            Org.BouncyCastle.OpenSsl.PemWriter pemWriter = new Org.BouncyCastle.OpenSsl.PemWriter(crlPEM);
-            pemWriter.WriteObject(crl);
-            pemWriter.Writer.Close();
-
             _logger.LogInformation(
                 string.Format(
                     "Generated CRL at {0} valid for {1} minutes",
                     now,
-                    CAConfig.CRLNextUpdatedIntervalMinutes
+                    Constants.CRLNextUpdatedIntervalMinutes
                 )
             );
 
-            return crlPEM.ToString();
+            return crl;
         }
 
 
