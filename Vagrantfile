@@ -120,9 +120,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     echo '#{ANSIBLE_UNAME} ALL=(ALL) NOPASSWD: ALL' | sudo EDITOR='tee -a' visudo
 
                     # Remove sensitive data from history
-                    history -c
-                    unset HISTFILE
-                    rm -f ~/.bash_history
+                    history -c; unset HISTFILE; rm -f ~/.bash_history
                 SHELL
 
                 # Add hostnames
@@ -210,9 +208,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     sudo su - #{ANSIBLE_UNAME} -c 'eval "$(ssh-agent -s)" ; sshpass -P "Enter" -p $(cat /vagrant/#{ANSIBLE_PASSPHRASE_FILE}) ssh-add ~/.ssh/id_rsa ; ansible-galaxy install --force -r requirements.yml ; ansible-playbook -e "FORCE_ROOT_CA_CERT_REGEN=true" -i production site.yml --tags "all,setup" ; history -c ; unset HISTFILE ; rm -f ~/.bash_history'
 
                     # Remove sensitive data from history
-                    history -c
-                    unset HISTFILE
-                    rm -f ~/.bash_history
+                    history -c; unset HISTFILE; rm -f ~/.bash_history
                 SHELL
             end # hostconf
         end # master_category_hosts.each
@@ -267,21 +263,26 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
                     # Install root certificate in the browser's root of trust
                     DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y libnss3-tools
 
-                    # Use default xfce panel without user prompt
+                    # Use default XFCE panel without user prompt
                     sudo cp /etc/xdg/xfce4/panel/default.xml /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
                     # Activate autologin
                     sudo mkdir /etc/lightdm/lightdm.conf.d
                     sudo bash -c "echo -e '[SeatDefaults]\nautologin-user=#{CLIENT_UNAME}' > /etc/lightdm/lightdm.conf.d/12-autologin.conf"
 
-                    # Initialize firefox so that its certificate DB is initialized
+                    # Initialize Firefox so that its certificate DB is initialized
                     sudo su - #{CLIENT_UNAME} -c "timeout 3 firefox-esr -migration -no-remote -headless 2> /dev/null"
                     # Add our root CA to firefox root of trust
                     sudo /vagrant/scripts/mozilla-import-certificates.sh "/home/#{CLIENT_UNAME}"
 
+                    # Add launcher to open login page
+                    sudo mkdir /home/#{CLIENT_UNAME}/Desktop
+                    sudo chown #{CLIENT_UNAME}: /home/#{CLIENT_UNAME}/Desktop
+                    sudo chmod 700 /home/#{CLIENT_UNAME}/Desktop
+                    sudo cp /vagrant/Login.desktop /home/#{CLIENT_UNAME}/Desktop/Login.desktop
+                    sudo chown #{CLIENT_UNAME}: /home/#{CLIENT_UNAME}/Desktop/Login.desktop
+
                     # Remove sensitive data from history
-                    history -c
-                    unset HISTFILE
-                    rm -f ~/.bash_history
+                    history -c; unset HISTFILE; rm -f ~/.bash_history
 
                     # Reboot to start to user interface
                     sudo reboot
