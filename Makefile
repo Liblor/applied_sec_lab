@@ -24,4 +24,6 @@ purge:
 
 .PHONY: build
 build: purge update_box
+	# XXX: Change to the following after development:
+	# PURGE_VAGRANT="true" vagrant up
 	vagrant up

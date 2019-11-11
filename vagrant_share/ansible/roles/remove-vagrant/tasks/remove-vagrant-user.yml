@@ -1,6 +1,11 @@
 ---
+- name: Terminate all processes owned by the vagrant user (if there are any, fails silently)
+  command: pkill -KILL -u vagrant
+  failed_when: false
+
 - name: Remove vagrant user
   user:
     name: vagrant
     state: absent
     remove: yes
+    force: yes

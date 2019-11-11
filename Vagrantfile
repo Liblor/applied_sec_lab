@@ -12,12 +12,23 @@ ANSIBLE_UNAME = "ansible"
 ANSIBLE_REMOTE_TMP_PW = "ygqD-jh3LII1oNhurzQwAhoYe"
 CLIENT_UNAME = "user"
 CLIENT_PASSWORD = "password"
+ADMIN_UNAME = "admin"
+ADMIN_PASSWORD = "admin"
+ADMIN_REMOTE_PASSWORD = "CKLwhksWCuLzFWXRqoZdMinUfVj_aS"
 
 MASTER_MEM = 1024
 REMOTE_MEM = 512
 CPU_CAP_PERCENTAGE = 60
 VRAM = 8
 CLIENT_VRAM = 64
+
+# Remove sensitive data from history
+REMOVE_SENSITIVE_DATA = \
+	"history -c; "\
+	"unset HISTFILE; " \
+	"rm -f ~/.bash_history;"
+
+PURGE_VAGRANT = ENV['PURGE_VAGRANT'] || 'false'
 
 # List of all hosts
 # Naming:
@@ -26,266 +37,350 @@ CLIENT_VRAM = 64
 #   Types:
 #       cert    = Certificate Authority
 #       db      = Database server
-#       certDB  = Database for CA
 #       web     = Web Server
 #       ld      = Load Balancer
-#       legDB   = Legacy Database
 #       log     = Log Server
 #       bkp     = Backup Server
 master = {
-    "ansservers" => {
-        "aslans01" => { :ip => "10.0.0.11" },
-    }
+	"ansservers" => {
+		"aslans01" => {
+			:ip => "10.0.0.11",
+			:public_net_ip => "172.16.0.11"
+		},
+	}
 }
 
 hosts = {
-  "certservers" => {
-      "aslcert01" => { :ip => "10.0.0.21" },
-      # "aslcert02" => { :ip => "10.0.0.22" },
-  },
-  "dbservers" => {
-      "asldb01" => { :ip => "10.0.0.31" },
-      # Currently not working
-      # "asldb02" => { :ip => "10.0.0.32" },
-  },
-  "webservers" => {
-      "aslweb01" => {
-          :ip => "10.0.0.41",
-          :public_net_ip => "172.16.0.41"
-      },
-      # "aslweb02" => { :ip => "10.0.0.42" },
-  },
-  # "ldservers" => {
-  #     "aslld01" => { :ip => "10.0.0.51" },
-  # },
-  # "logservers" => {
-  #     "asllog01" => { :ip => "10.0.0.61" },
-  # },
-  # "bkpservers" => {
-  #     "aslbkp01" => { :ip => "10.0.0.71" },
-  # }
+	"certservers" => {
+	    "aslcert01" => { :ip => "10.0.0.21" },
+	    # "aslcert02" => { :ip => "10.0.0.22" },
+	},
+	"dbservers" => {
+	    "asldb01" => { :ip => "10.0.0.31" },
+	    # Currently not working
+	    # "asldb02" => { :ip => "10.0.0.32" },
+	},
+	"webservers" => {
+	    "aslweb01" => {
+	        :ip => "10.0.0.41",
+	        :public_net_ip => "172.16.0.41"
+	    },
+	    # "aslweb02" => {
+		# 	:ip => "10.0.0.42",
+	    #     :public_net_ip => "172.16.0.42"
+		# },
+	},
+	# "ldservers" => {
+	#     "aslld01" => { :ip => "10.0.0.51" },
+	# },
+	# "logservers" => {
+	#     "asllog01" => { :ip => "10.0.0.61" },
+	# },
+	# "bkpservers" => {
+	#     "aslbkp01" => { :ip => "10.0.0.71" },
+	# }
 }
 
-# TODO: Create client outside company network for testing
 clients = {
-    "publicnetclients" => {
-        "aslclient01" => { :public_net_ip => "172.16.0.11" },
-    },
+	"publicnetclients" => {
+		"aslclient01" => { :public_net_ip => "172.16.0.81" },
+	},
 }
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-    config.vm.provider "virtualbox"
-    config.vagrant.plugins = "vagrant-vbguest"
+	config.vm.provider "virtualbox"
+	config.vagrant.plugins = "vagrant-vbguest"
 
-    # Set correct locale for guests to prevent annoying errors
-    ENV['LC_ALL']="en_US.UTF-8"
+	# Set correct locale for guests to prevent annoying errors
+	ENV['LC_ALL'] = "en_US.UTF-8"
 
-    # Limit resource usage
-    config.vm.provider "virtualbox" do |vb|
-        vb.customize ["modifyvm", :id, "--vram", VRAM]
-    end # provider
+	# Limit resource usage
+	config.vm.provider "virtualbox" do |vb|
+		vb.customize ["modifyvm", :id, "--vram", VRAM]
+	end # provider
 
-    # Create hosts
-    hosts.each do |category_name, category_hosts|
-        category_hosts.each do |hostname, info|
-            config.vm.define hostname do |hostconf|
-                hostconf.vm.box = OS_BOX
-                hostconf.vm.hostname = hostname
-                hostconf.vm.network "private_network",
-                    ip: "#{info[:ip]}",
-                    virtualbox__intnet: VB_INTRANET_NAME
+	# Create hosts
+	hosts.each do |category_name, category_hosts|
+		category_hosts.each do |hostname, info|
+			config.vm.define hostname do |hostconf|
+				hostconf.vm.box = OS_BOX
+				hostconf.vm.hostname = hostname
+				hostconf.vm.network "private_network",
+					ip: "#{info[:ip]}",
+					virtualbox__intnet: VB_INTRANET_NAME
 
-                if info.key?(:public_net_ip)
-                    hostconf.vm.network "private_network",
-                        ip: "#{info[:public_net_ip]}",
-                        virtualbox__intnet: VB_PUBLIC_NET_NAME
-                end
+				if info.key?(:public_net_ip)
+					hostconf.vm.network "private_network",
+						ip: "#{info[:public_net_ip]}",
+						virtualbox__intnet: VB_PUBLIC_NET_NAME
+				end
 
-                hostconf.vm.provision "shell", inline: <<-SHELL
-                    # Add ansible user
-                    sudo adduser --disabled-password --gecos "" #{ANSIBLE_UNAME}
-                    echo -e "#{ANSIBLE_REMOTE_TMP_PW}\n#{ANSIBLE_REMOTE_TMP_PW}" | sudo passwd #{ANSIBLE_UNAME}
+				hostconf.vm.provision "shell", inline: <<-SHELL
+					# Add ansible user
+					sudo adduser --disabled-password --gecos "" #{ANSIBLE_UNAME}
+					echo "#{ANSIBLE_UNAME}:#{ANSIBLE_REMOTE_TMP_PW}" | sudo chpasswd
 
-                    # Allow password authentication for setting the machines up.
-                    sudo sed -i "s|^PasswordAuthentication no$|PasswordAuthentication yes|" /etc/ssh/sshd_config
-                    sudo systemctl reload sshd
+					# Give the ansible user passwordless sudo
+					echo '#{ANSIBLE_UNAME} ALL=(ALL) NOPASSWD: ALL' | sudo EDITOR='tee -a' visudo
 
-                    # Give the ansible user passwordless sudo
-                    echo '#{ANSIBLE_UNAME} ALL=(ALL) NOPASSWD: ALL' | sudo EDITOR='tee -a' visudo
+					# Remove root user password
+					sudo passwd -d root
 
-                    # Remove sensitive data from history
-                    history -c
-                    unset HISTFILE
-                    rm -f ~/.bash_history
-                SHELL
+					#{REMOVE_SENSITIVE_DATA}
+				SHELL
 
-                # Add hostnames
-                hosts.each do |peer_category_name, peer_category_hosts|
-                    peer_category_hosts.each do |peer_hostname, peer_info|
-                        hostconf.vm.provision "shell", inline: <<-SHELL
-                            # Add hostname
-                            echo "#{peer_info[:ip]} #{peer_hostname}" | sudo tee -a /etc/hosts
-                        SHELL
-                    end # host_peer_category.each
-                end # hosts.each (peer)
+				# Add hostnames
+				hosts.each do |peer_category_name, peer_category_hosts|
+					peer_category_hosts.each do |peer_hostname, peer_info|
+						hostconf.vm.provision "shell", inline: <<-SHELL
+							# Add hostname
+							echo "#{peer_info[:ip]} #{peer_hostname}" | sudo tee -a /etc/hosts
+						SHELL
+					end # host_peer_category.each
+				end # hosts.each (peer)
 
-                hostconf.vm.provider "virtualbox" do |vb|
-                    vb.customize ["modifyvm", :id, "--cpuexecutioncap", CPU_CAP_PERCENTAGE]
-                    vb.customize ["modifyvm", :id, "--name", "#{hostname}"]
-                    vb.memory = REMOTE_MEM
-                end # provider
-            end # hostconf
-        end # category_hosts.each
-    end # hosts.each
+				hostconf.vm.provider "virtualbox" do |vb|
+					vb.customize ["modifyvm", :id, "--cpuexecutioncap", CPU_CAP_PERCENTAGE]
+					vb.customize ["modifyvm", :id, "--name", "#{hostname}"]
+					vb.memory = REMOTE_MEM
+				end # provider
+			end # hostconf
+		end # category_hosts.each
+	end # hosts.each
 
 
-    # Ansible master
-    master.each do |master_category_name, master_category_hosts|
-        master_category_hosts.each do |master_hostname, master_info|
-            config.vm.define master_hostname do |hostconf|
-                hostconf.vm.box = OS_BOX
-                hostconf.vm.hostname = master_hostname
-                hostconf.vm.network "private_network",
-                    ip: "#{master_info[:ip]}",
-                    virtualbox__intnet: VB_INTRANET_NAME
-                hostconf.vm.synced_folder "./vagrant_share", "/vagrant", SharedFoldersEnableSymlinksCreate: false
+	# Ansible master
+	master.each do |master_category_name, master_category_hosts|
+		master_category_hosts.each do |master_hostname, master_info|
+			config.vm.define master_hostname do |hostconf|
+				hostconf.vm.box = OS_BOX
+				hostconf.vm.hostname = master_hostname
 
-                hostconf.vm.provision "shell", inline: <<-SHELL
-                    # Install Ansible
-                    sudo apt-get update
-                    DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y ansible sshpass
+				# TODO: Adapt to put masters in DMZ and route their
+				# traffic to internal network
+				hostconf.vm.network "private_network",
+					ip: "#{master_info[:ip]}",
+					virtualbox__intnet: VB_INTRANET_NAME
+				if master_info.key?(:public_net_ip)
+					hostconf.vm.network "private_network",
+						ip: "#{master_info[:public_net_ip]}",
+						virtualbox__intnet: VB_PUBLIC_NET_NAME
+				end
 
-                    # Add ansible user
-                    sudo adduser --disabled-password --gecos "" #{ANSIBLE_UNAME}
+				hostconf.vm.synced_folder "./vagrant_share", "/vagrant", SharedFoldersEnableSymlinksCreate: false
 
-                    # Give the ansible user passwordless sudo
-                    echo '#{ANSIBLE_UNAME} ALL=(ALL) NOPASSWD: ALL' | sudo EDITOR='tee -a' visudo
+				hostconf.vm.provision "shell", inline: <<-SHELL
+					# Install Ansible
+					sudo apt-get update
+					DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y ansible sshpass
 
-                    # Generate SSH keys for ansible remote configuration
-                    sudo su - #{ANSIBLE_UNAME} -c "ssh-keygen -t ed25519 -a 100 -f /home/#{ANSIBLE_UNAME}/.ssh/id_rsa -N $(cat /vagrant/#{ANSIBLE_PASSPHRASE_FILE})"
-                SHELL
+					# Add ansible user
+					sudo adduser --disabled-password --gecos "" #{ANSIBLE_UNAME}
 
-                hostconf.vm.provision "shell", inline: <<-SHELL
-                    sudo cp -r /vagrant/ansible/* "/home/#{ANSIBLE_UNAME}"
+					# Add user for remote admin
+					sudo adduser --disabled-password --gecos "" #{ADMIN_UNAME}
+					echo -e "#{ADMIN_REMOTE_PASSWORD}\n#{ADMIN_REMOTE_PASSWORD}" | sudo passwd #{ADMIN_UNAME}
+					sudo usermod -aG sudo #{ADMIN_UNAME}
 
-                    echo '###################################################' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
-                    echo '# This file is automatically generated by Vagrant #' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
-                    echo '###################################################' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
+					# Give the ansible user passwordless sudo
+					echo '#{ANSIBLE_UNAME} ALL=(ALL) NOPASSWD: ALL' | sudo EDITOR='tee -a' visudo
 
-                    # Add Ansible host itself to inventory
-                    echo -e '\n[#{master_category_name}]\nlocalhost ansible_connection=local' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
-                SHELL
+					# Remove root user password
+					sudo passwd -d root
 
-                # Add hostnames, install SSH keys
-                hosts.each do |category_name, category_hosts|
-                    hostconf.vm.provision "shell", inline: <<-SHELL
-                        echo -e "\n[#{category_name}]" | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
-                    SHELL
+					# Generate SSH keys for ansible remote configuration
+					sudo su - #{ANSIBLE_UNAME} -c "ssh-keygen -t ed25519 -a 100 -f /home/#{ANSIBLE_UNAME}/.ssh/id_rsa -N $(cat /vagrant/#{ANSIBLE_PASSPHRASE_FILE})"
+				SHELL
 
-                    category_hosts.each do |hostname, info|
-                        hostconf.vm.provision "shell", inline: <<-SHELL
-                            # Add hostname
-                            echo "#{info[:ip]} #{hostname}" | sudo tee -a /etc/hosts
-                            echo "#{hostname}" | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
+				hostconf.vm.provision "shell", inline: <<-SHELL
+					sudo cp -r /vagrant/ansible/* "/home/#{ANSIBLE_UNAME}"
 
-                            # Add ssh key to remote servers
-                            sudo sshpass -p "#{ANSIBLE_REMOTE_TMP_PW}" ssh-copy-id -i /home/#{ANSIBLE_UNAME}/.ssh/id_rsa -o StrictHostKeyChecking=accept-new #{ANSIBLE_UNAME}@#{hostname}
+					echo '###################################################' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
+					echo '# This file is automatically generated by Vagrant #' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
+					echo '###################################################' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
 
-                            # Remove temporary password for ansible users of remote servers again
-                            sudo sshpass -p "#{ANSIBLE_REMOTE_TMP_PW}" ssh #{ANSIBLE_UNAME}@#{hostname} "sudo passwd -d #{ANSIBLE_UNAME}; sudo usermod --lock #{ANSIBLE_UNAME}"
+					# Add Ansible host itself to inventory
+					echo -e '\n[#{master_category_name}]\nlocalhost ansible_connection=local' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
+				SHELL
 
-                            # Accept host keys for ansible user
-                            sudo su - #{ANSIBLE_UNAME} -c 'sshpass -P "Enter" -p $(cat /vagrant/#{ANSIBLE_PASSPHRASE_FILE}) ssh -o StrictHostKeyChecking=accept-new #{ANSIBLE_UNAME}@#{hostname} exit'
-                        SHELL
-                    end # hosts
-                end # category_hosts.each
+				# Add hostnames, install SSH keys
+				hosts.each do |category_name, category_hosts|
+					hostconf.vm.provision "shell", inline: <<-SHELL
+						echo -e "\n[#{category_name}]" | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
+					SHELL
 
-                hostconf.vm.provision "shell", inline: <<-SHELL
-                    sudo su - #{ANSIBLE_UNAME} -c 'eval "$(ssh-agent -s)" ; sshpass -P "Enter" -p $(cat /vagrant/#{ANSIBLE_PASSPHRASE_FILE}) ssh-add ~/.ssh/id_rsa ; ansible-galaxy install --force -r requirements.yml ; ansible-playbook -e "FORCE_ROOT_CA_CERT_REGEN=true" -i production site.yml --tags "all,setup" ; history -c ; unset HISTFILE ; rm -f ~/.bash_history'
+					category_hosts.each do |hostname, info|
+						hostconf.vm.provision "shell", inline: <<-SHELL
+							# Add hostname
+							echo "#{info[:ip]} #{hostname}" | sudo tee -a /etc/hosts
+							echo "#{hostname}" | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
 
-                    # Remove sensitive data from history
-                    history -c
-                    unset HISTFILE
-                    rm -f ~/.bash_history
-                SHELL
+							# Add ssh key to remote servers
+							sudo sshpass -p "#{ANSIBLE_REMOTE_TMP_PW}" ssh-copy-id -i /home/#{ANSIBLE_UNAME}/.ssh/id_rsa -o StrictHostKeyChecking=accept-new #{ANSIBLE_UNAME}@#{hostname}
 
-                hostconf.vm.provider "virtualbox" do |vb|
-                    vb.customize ["modifyvm", :id, "--name", "#{master_hostname}"]
-                    vb.memory = MASTER_MEM
-                end # provider
-            end # hostconf
-        end # master_category_hosts.each
-    end # master.each
+							# Accept host keys for ansible user
+							sudo su - #{ANSIBLE_UNAME} -c 'sshpass -P "Enter" -p $(cat /vagrant/#{ANSIBLE_PASSPHRASE_FILE}) ssh -o StrictHostKeyChecking=accept-new #{ANSIBLE_UNAME}@#{hostname} exit'
 
-    # Create clients with VirtualBox GUI
-    clients.each do |client_cat_name, client_cat_boxes|
-        client_cat_boxes.each do |client_hostname, client_info|
-            config.vm.define client_hostname do |clientconf|
-                clientconf.vm.box = OS_BOX
-                clientconf.vm.hostname = client_hostname
-                clientconf.vm.network "private_network",
-                    ip: "#{client_info[:public_net_ip]}",
-                    virtualbox__intnet: VB_PUBLIC_NET_NAME
-                clientconf.vm.synced_folder "./vagrant_share", "/vagrant", SharedFoldersEnableSymlinksCreate: false
+							# Remove temporary password for ansible users of remote servers again
+							# Disable password authentication
+							sudo sshpass -p "#{ANSIBLE_REMOTE_TMP_PW}" ssh #{ANSIBLE_UNAME}@#{hostname} <<-EOF
+								sudo passwd -d #{ANSIBLE_UNAME}
+								sudo usermod --lock #{ANSIBLE_UNAME}
+								sudo sed -i 's|^#PasswordAuthentication yes$|PasswordAuthentication no|' /etc/ssh/sshd_config
+								sudo systemctl reload sshd
+							EOF
+						SHELL
+					end # hosts
+				end # category_hosts.each
 
-                # Add public-net-connected host names
-                hosts.each do |host_cat_name, host_cat_boxes|
-                    host_cat_boxes.each do |host_name, host_info|
-                        if host_info.key?(:public_net_ip)
-                            clientconf.vm.provision "shell", inline: <<-SHELL
-                                # Add hostname
-                                echo "#{host_info[:public_net_ip]} #{host_name}" | sudo tee -a /etc/hosts
-                            SHELL
-                        end # if public_net_ip exists
-                    end # host_peer_category.each
-                end # hosts.each (peer)
+				hostconf.vm.provision "shell", inline: <<-SHELL
+					sudo -i -u #{ANSIBLE_UNAME} bash <<-EOF1
+						exec ssh-agent bash -s 10<&0 << EOF2
+							sshpass -P 'Enter' -p $(cat /vagrant/#{ANSIBLE_PASSPHRASE_FILE}) ssh-add ~/.ssh/id_rsa
+							exec bash <&10-
+						EOF2
+						ansible-galaxy install --force -r requirements.yml
+						ansible-playbook -e 'FORCE_ROOT_CA_CERT_REGEN=true' -i production site.yml --tags 'all, setup'
+						#{REMOVE_SENSITIVE_DATA}
+					EOF1
+					#{REMOVE_SENSITIVE_DATA}
+				SHELL
 
-                # Configure client machine hostname & GUI access
-                clientconf.vm.provider "virtualbox" do |vb, override|
-                    # Uncomment to launch VirtualBox GUI upon `vagrant up` (user:password = user:password)
-                    vb.gui = true
+				hostconf.vm.provider "virtualbox" do |vb|
+					vb.customize ["modifyvm", :id, "--name", "#{master_hostname}"]
+					vb.memory = MASTER_MEM
+				end # provider
+			end # hostconf
+		end # master_category_hosts.each
+	end # master.each
 
-                    vb.customize ["modifyvm", :id, "--vram", CLIENT_VRAM]
-                    vb.customize ["modifyvm", :id, "--name", "#{client_hostname}"]
-                end # virtualbox provider
+	# Create clients with VirtualBox GUI
+	clients.each do |client_cat_name, client_cat_boxes|
+		client_cat_boxes.each do |client_hostname, client_info|
+			config.vm.define client_hostname do |clientconf|
+				clientconf.vm.box = OS_BOX
+				clientconf.vm.hostname = client_hostname
+				clientconf.vm.network "private_network",
+				ip: "#{client_info[:public_net_ip]}",
+				virtualbox__intnet: VB_PUBLIC_NET_NAME
+				clientconf.vm.synced_folder "./vagrant_share", "/vagrant", SharedFoldersEnableSymlinksCreate: false
 
-                clientconf.vm.provision "shell", inline: <<-SHELL
-                    # Add a normal user
-                    sudo adduser --disabled-login --gecos "User" #{CLIENT_UNAME}
-                    echo "#{CLIENT_UNAME}:#{CLIENT_PASSWORD}" | sudo chpasswd
+				# Add public-net-connected host names
+				hosts.each do |host_cat_name, host_cat_boxes|
+					host_cat_boxes.each do |host_name, host_info|
+						if host_info.key?(:public_net_ip)
+							clientconf.vm.provision "shell", inline: <<-SHELL
+								# Add hostname
+								echo "#{host_info[:public_net_ip]} #{host_name}" | sudo tee -a /etc/hosts
+							SHELL
+						end # if public_net_ip exists
+					end # host_peer_category.each
+				end # hosts.each (peer)
 
-                    # Upgrade all packages
-                    sudo apt-get update
-                    DEBIAN_FRONTEND=noninteractive sudo -E apt-get upgrade -y
+				# Configure client machine hostname & GUI access
+				clientconf.vm.provider "virtualbox" do |vb, override|
+					# Uncomment to launch VirtualBox GUI upon `vagrant up` (user:password = user:password)
+					vb.gui = true
 
-                    # Install user interface and Firefox
-                    DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y x-window-system lightdm xfce4 firefox-esr --no-install-recommends
-                    sudo systemctl set-default graphical.target
+					vb.customize ["modifyvm", :id, "--vram", CLIENT_VRAM]
+					vb.customize ["modifyvm", :id, "--name", "#{client_hostname}"]
+				end # virtualbox provider
 
-                    # Install root certificate in the browser's root of trust
-                    DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y libnss3-tools
+				clientconf.vm.provision "shell", inline: <<-SHELL
+					# Add user for administrating our infrastructure from remote
+					sudo adduser --disabled-login --gecos "User" #{ADMIN_UNAME}
+					echo "#{ADMIN_UNAME}:#{ADMIN_PASSWORD}" | sudo chpasswd
 
-                    # Use default xfce panel without user prompt
-                    sudo cp /etc/xdg/xfce4/panel/default.xml /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
-                    # Activate autologin
-                    sudo mkdir /etc/lightdm/lightdm.conf.d
-                    sudo bash -c "echo -e '[SeatDefaults]\nautologin-user=#{CLIENT_UNAME}' > /etc/lightdm/lightdm.conf.d/12-autologin.conf"
+					# Add a normal user
+					sudo adduser --disabled-login --gecos "User" #{CLIENT_UNAME}
+					echo "#{CLIENT_UNAME}:#{CLIENT_PASSWORD}" | sudo chpasswd
 
-                    # Initialize firefox so that its certificate DB is initialized
-                    sudo su - #{CLIENT_UNAME} -c "timeout 3 firefox-esr -migration -no-remote -headless 2> /dev/null"
-                    # Add our root CA to firefox root of trust
-                    sudo /vagrant/scripts/mozilla-import-certificates.sh "/home/#{CLIENT_UNAME}"
+					# Install sshpass
+					DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y sshpass
+				SHELL
 
-                    # Remove sensitive data from history
-                    history -c
-                    unset HISTFILE
-                    rm -f ~/.bash_history
+				master.each do |master_category_name, master_category_hosts|
+					master_category_hosts.each do |master_hostname, master_info|
+						disable_password_auth = \
+							"sudo sed -i 's|^#PasswordAuthentication yes$|PasswordAuthentication no|' /etc/ssh/sshd_config; " \
+							"sudo systemctl reload sshd; "
 
-                    # Reboot to start to user interface
-                    sudo reboot
-                SHELL
-            end # clientconf
-        end # client_cat_boxes.each
-    end # clients.each
+						clientconf.vm.provision "shell", inline: <<-SHELL
+							# Add hostname
+							echo "#{master_info[:public_net_ip]} #{master_hostname}" | sudo tee -a /etc/hosts
 
+							# Generate admin key material, install them on the config servers and
+							# disable password login
+							sudo -i -u #{ADMIN_UNAME} bash <<-EOF1
+								mkdir .ssh
+								ssh-keygen -t ecdsa -b 521 -f ~/.ssh/imovies_#{master_hostname} -P '' -C '#{ADMIN_UNAME}@imovies.ch'
+								sshpass -p '#{ADMIN_REMOTE_PASSWORD}' ssh-copy-id -i ~/.ssh/imovies_#{master_hostname} -o StrictHostKeyChecking=accept-new #{ADMIN_UNAME}@#{master_hostname}
+
+								ssh -i ~/.ssh/imovies_#{master_hostname} #{ADMIN_UNAME}@#{master_hostname} <<-EOF2
+									echo "#{ADMIN_REMOTE_PASSWORD}" | sudo -S -i -u #{ANSIBLE_UNAME} bash -c "#{disable_password_auth}"
+								EOF2
+							EOF1
+						SHELL
+					end # master_category_hosts.each
+				end # master.each
+
+				clientconf.vm.provision "shell", inline: <<-SHELL
+					# Upgrade all packages
+					sudo apt-get update
+					DEBIAN_FRONTEND=noninteractive sudo -E apt-get upgrade -y
+
+					# Install user interface and Firefox
+					DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y x-window-system lightdm xfce4 firefox-esr --no-install-recommends
+					sudo systemctl set-default graphical.target
+
+					# Install root certificate in the browser's root of trust
+					DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y libnss3-tools
+
+					# Use default xfce panel without user prompt
+					sudo cp /etc/xdg/xfce4/panel/default.xml /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
+					# Activate autologin
+					sudo mkdir /etc/lightdm/lightdm.conf.d
+					sudo bash -c "echo -e '[SeatDefaults]\nautologin-user=#{CLIENT_UNAME}' > /etc/lightdm/lightdm.conf.d/12-autologin.conf"
+
+					# Initialize firefox so that its certificate DB is initialized
+					sudo su - #{CLIENT_UNAME} -c "timeout 3 firefox-esr -migration -no-remote -headless 2> /dev/null"
+					# Add our root CA to firefox root of trust
+					sudo /vagrant/scripts/mozilla-import-certificates.sh "/home/#{CLIENT_UNAME}"
+
+					#{REMOVE_SENSITIVE_DATA}
+				SHELL
+
+				if PURGE_VAGRANT == 'true'
+					clientconf.trigger.after :up do |trigger|
+						trigger.name = "Cleanup script"
+						trigger.info = "Remove vagrant after vagrant up"
+						cleanup_script = \
+							"exec ssh-agent bash -c '" \
+								"sshpass -P \'Enter\' -p $(cat /vagrant/#{ANSIBLE_PASSPHRASE_FILE}) ssh-add ~/.ssh/id_rsa; " \
+								"ansible-playbook -i production site.yml --tags \'cleanup\''; " \
+							"#{REMOVE_SENSITIVE_DATA}"
+
+						master.each do |master_category_name, master_category_hosts|
+							master_category_hosts.each do |master_hostname, master_info|
+								trigger.run_remote = {
+									inline: <<-SHELL
+										# Run ansible to remove vagrant
+										sudo -i -u #{ADMIN_UNAME} bash <<-EOF1
+											ssh -i ~/.ssh/imovies_#{master_hostname} #{ADMIN_UNAME}@#{master_hostname} <<-EOF2
+												echo "#{ADMIN_REMOTE_PASSWORD}" | sudo -S -i -u #{ANSIBLE_UNAME} bash -c "#{cleanup_script}"
+												#{REMOVE_SENSITIVE_DATA}
+											EOF2
+										EOF1
+
+										# Reboot client to boot into GUI
+										sudo reboot
+									SHELL
+								}
+							end # master_category_hosts.each
+						end # master.each
+					end # trigger
+				end # if PURGE_VAGRANT
+			end # clientconf
+		end # client_cat_boxes.each
+	end # clients.each
 end # config
