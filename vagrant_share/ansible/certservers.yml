@@ -1,12 +1,20 @@
 ---
 - hosts: certservers
   become: yes
+  tasks:
+    - name: Create backup directory
+      file:
+        path: "/home/{{ UNAME }}/backup"
+        state: directory
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
+        mode: 0700
   roles:
     - borgbackup
     - backup-client
   vars:
     backup_files:
-        - "/etc"
+        - "/home/{{ UNAME }}/backup"
 
 - hosts: certservers
   become: yes
