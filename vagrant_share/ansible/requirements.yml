@@ -1,5 +1,3 @@
 ---
 - src: nginxinc.nginx
   version: master
-
-- src: infothrill.lynis

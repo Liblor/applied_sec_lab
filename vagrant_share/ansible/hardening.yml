@@ -24,7 +24,7 @@
     - hardening
   vars:
     # TODO Adjust this once Vagrant no longer needs access.
-    sshd_admin_net: [10.0.0.0/16]
+    sshd_admin_net: [127.0.0.1/8,172.16.0.11/16,10.0.0.0/16]
     ssh_allow_groups: sshuser
 
 - hosts: ansservers
@@ -34,7 +34,7 @@
   vars:
     # TODO Adjust this once Vagrant no longer needs access.
     # TODO Once a firewall is installed, adjust this to the public network.
-    sshd_admin_net: [10.0.0.0/16]
+    sshd_admin_net: [127.0.0.1/8,172.16.0.11/16,10.0.0.0/16]
     ssh_allow_groups: sshuser
 
 - hosts: all
