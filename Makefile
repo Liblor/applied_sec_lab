@@ -28,23 +28,23 @@ build: purge update_box
 
 .PHONY: push
 push:
-	@echo -e "[${PASS_COLOR}push${CLEAR_COLOR}] Prepare environment"
+	@printf "[${PASS_COLOR}push${CLEAR_COLOR}] %s\n" 'Prepare environment'
 	@rm -rf ./vagrant_share/CertServer.tar.gz ./vagrant_share/WebServer.tar.gz
-	@echo -e "[${PASS_COLOR}push${CLEAR_COLOR}] Building CertServer"
+	@printf "[${PASS_COLOR}push${CLEAR_COLOR}] %s\n" 'Building CertServer'
 	@cd CertServer/ \
 		&& dotnet publish --configuration=Releases --verbosity q -o ../vagrant_share/CertServer \
 		&& cd ../vagrant_share \
 		&& tar -czf ./CertServer.tar.gz ./CertServer \
 		&& rm -r ./CertServer \
 		&& cd ../
-	@echo -e "[${PASS_COLOR}push${CLEAR_COLOR}] Building WebServer"
+	@printf "[${PASS_COLOR}push${CLEAR_COLOR}] %s\n" 'Building WebServer'
 	@cd WebServer/ \
 		&& dotnet publish --configuration=Releases --verbosity q -o ../vagrant_share/WebServer \
 		&& cd ../vagrant_share \
 		&& tar -czf ./WebServer.tar.gz ./WebServer \
 		&& rm -r ./WebServer \
 		&& cd ../
-	@echo -e "[${PASS_COLOR}push${CLEAR_COLOR}] Deploying new builds"
+	@printf "[${PASS_COLOR}push${CLEAR_COLOR}] %s builds\n" 'Deploying new'
 	@vagrant ssh aslans01 -- 'sudo su ansible -c /vagrant/scripts/deploy_builds.sh'
-	@echo -e "[${PASS_COLOR}push${CLEAR_COLOR}] Cleaning up"
+	@printf "[${PASS_COLOR}push${CLEAR_COLOR}] %s\n" 'Cleaning up'
 	@rm -rf ./vagrant_share/CertServer.tar.gz ./vagrant_share/WebServer.tar.gz
