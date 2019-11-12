@@ -4,6 +4,7 @@ using System;
 using System.Security.Cryptography;
 
 using CoreCA.DataModel;
+using CertServer.Models;
 
 namespace CertServer.DataModifiers
 {
@@ -11,7 +12,7 @@ namespace CertServer.DataModifiers
     {
         private readonly IMoviesUserContext _dbContext;
         private readonly ILogger _logger;
-        private readonly string _passwordList;
+        private readonly PasswordPolicyValidator _passwordPolicyValidator;
 
         public UserDBAuthenticator(
             IMoviesUserContext dbContext,
@@ -20,7 +21,7 @@ namespace CertServer.DataModifiers
         {
             _dbContext = dbContext;
             _logger = logger;
-            _passwordList = System.IO.File.ReadAllText(CAConfig.PasswordListPath);
+            _passwordPolicyValidator = PasswordPolicyValidator.GetInstance();
         }
 
         public IDbContextTransaction GetScope()
@@ -40,7 +41,7 @@ namespace CertServer.DataModifiers
 
         private bool MeetsPasswordPolicy(string password)
         {
-            return !_passwordList.Contains(password)
+            return !_passwordPolicyValidator.IsValidPassword(password)
                 && password.Length >= Constants.MinPasswordLength;
         }
 
