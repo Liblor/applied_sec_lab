@@ -36,7 +36,6 @@
           listen_all:
             ip: 0.0.0.0
             port: 80
-            opts: [http2]
         server_name: "{{ ansible_hostname }}"
         web_server:
           locations:
