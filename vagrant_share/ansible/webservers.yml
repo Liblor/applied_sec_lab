@@ -6,6 +6,11 @@
     - asl-webserver
   vars:
     trusted_user: "{{ UNAME }}"
+    crl_directory: /etc/pki/tls/crl
+    root_crl: /etc/pki/tls/crl/Root_CA.crl
+    intermediate_crl: /etc/pki/tls/crl/Intermediate_CA.crl
+    chained_crl: /etc/pki/tls/crl/tls_crl_chain.pem
+
   vars_files:
     - /vagrant/mysql_passwords.yml
 
