@@ -1,0 +1,32 @@
+---
+- include: disablenet.yml
+- include: disablefs.yml
+- include: systemdconf.yml
+- include: journalconf.yml
+- include: timesyncd.yml
+- include: fstab.yml
+- include: pkgupdate.yml
+- include: hosts.yml
+- include: logindefs.yml
+- include: sysctl.yml
+- include: limits.yml
+- include: adduser.yml
+- include: rootaccess.yml
+- include: packages.yml
+- include: sshdconfig.yml
+- include: password.yml
+- include: cron.yml
+- include: ctrlaltdel.yml
+- include: auditd.yml
+- include: disablemod.yml
+- include: users.yml
+- include: suid.yml
+- include: umask.yml
+- include: path.yml
+- include: logindconf.yml
+- include: resolvedconf.yml
+- include: issue.yml
+- include: lockroot.yml
+- include: mount.yml
+- include: extras.yml
+...

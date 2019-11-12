@@ -1,0 +1,41 @@
+---
+- name: debian family package installation
+  become: 'yes'
+  become_method: sudo
+  apt:
+    name: "{{ packages_debian }}"
+    state: latest
+    install_recommends: 'no'
+  environment:
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  tags:
+    - apt
+    - packages
+    - security
+
+- name: debian family package removal
+  become: 'yes'
+  become_method: sudo
+  apt:
+    name: "{{ packages_blacklist }}"
+    state: absent
+    purge: 'yes'
+  environment:
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  ignore_errors: true
+  tags:
+    - apt
+    - packages
+    - security
+
+- name: rng-tools package installation
+  become: 'yes'
+  become_method: sudo
+  package:
+    name: rng-tools
+    state: latest
+  tags:
+    - rng-tools
+    - packages
+    - security
+...

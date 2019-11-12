@@ -1,0 +1,16 @@
+---
+# CCE-27511-5
+
+- name: disable ctrl-alt-del
+  become: 'yes'
+  become_method: sudo
+  systemd:
+    name: ctrl-alt-del.target
+    masked: 'yes'
+    enabled: 'no'
+    state: stopped
+  tags:
+    - systemd
+    - ctrl-alt-del
+    - security
+...

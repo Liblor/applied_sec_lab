@@ -1,0 +1,9 @@
+---
+- name: Install the package
+  package:
+    name: lynis
+    state: present
+    update_cache: true
+
+- name: Audit the system
+  command: lynis audit system --quiet

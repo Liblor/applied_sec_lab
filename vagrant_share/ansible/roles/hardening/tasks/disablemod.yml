@@ -1,0 +1,27 @@
+---
+# usb-storage: CCE-27277-3
+# bluetooth: CCE-27327-6
+# bluetooth, bnep, btusb: CVE-2017-1000251
+
+- name: disablemod.conf
+  become: 'yes'
+  become_method: sudo
+  file:
+    state: touch
+    path: /etc/modprobe.d/disablemod.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: disable misc kernel modules
+  become: 'yes'
+  become_method: sudo
+  lineinfile:
+    dest: /etc/modprobe.d/disablemod.conf
+    line: "install {{ item }} /bin/true"
+  with_items:
+    - "{{ misc_modules_blacklist }}"
+  tags:
+    - modprobe
+    - security
+...
