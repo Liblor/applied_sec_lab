@@ -195,6 +195,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 					sudo passwd -d root
 
 					# Generate SSH keys for ansible remote configuration
+					sudo rm -f /home/#{ANSIBLE_UNAME}/.ssh/id_rsa
 					sudo su - #{ANSIBLE_UNAME} -c "ssh-keygen -t ed25519 -a 100 -f /home/#{ANSIBLE_UNAME}/.ssh/id_rsa -N $(cat /vagrant/#{ANSIBLE_PASSPHRASE_FILE})"
 				SHELL
 
@@ -334,8 +335,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 					sudo mkdir /etc/lightdm/lightdm.conf.d
 					sudo bash -c "echo -e '[SeatDefaults]\nautologin-user=#{CLIENT_UNAME}' > /etc/lightdm/lightdm.conf.d/12-autologin.conf"
 
-					# Initialize Firefox so that its certificate DB is initialized
-					sudo su - #{CLIENT_UNAME} -c "timeout 3 firefox-esr -migration -no-remote -headless 2> /dev/null"
+					# Hack to initialize Firefox so that its certificate DB is initialized
+          sudo su - #{CLIENT_UNAME} -c "firefox --screenshot /dev/null https://google.com 2> /dev/null"
 					# Add our root CA to firefox root of trust
 					sudo /vagrant/scripts/mozilla-import-certificates.sh "/home/#{CLIENT_UNAME}"
 
