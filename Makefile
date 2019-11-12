@@ -1,6 +1,9 @@
 RELEASE	:= 1
 DEBUG	:= 2
 
+CLEAR_COLOR := \x1b[0m
+ERROR_COLOR := \x1b[31;01m
+
 ifeq ($(BUILD_TYPE),)
 	BUILD_TYPE := $(DEBUG)
 endif
@@ -33,8 +36,8 @@ ifeq ($(BUILD_TYPE), $(DEBUG))
 .PHONY: up
 up:
 	@echo "Build for development."
-	@echo "\033[0;31mVagrant setup will NOT be purged after install. \
-	Use 'BUILD_TYPE=${RELEASE} vagrant up' to purge Vagrant.\033[0m"
+	@echo -e "${ERROR_COLOR}Vagrant setup will NOT be purged after install. \
+	Use 'BUILD_TYPE=${RELEASE} vagrant up' to purge Vagrant.${CLEAR_COLOR}"
 	vagrant up
 else
 .PHONY: up
