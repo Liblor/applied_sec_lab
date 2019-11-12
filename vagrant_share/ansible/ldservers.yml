@@ -1,0 +1,5 @@
+---
+- hosts: ldservers
+  become: yes
+  roles:
+    - asl-ldserver
