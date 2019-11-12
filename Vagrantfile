@@ -185,7 +185,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 					# Add user for remote admin
 					sudo adduser --disabled-password --gecos "" #{ADMIN_UNAME}
-					echo -e "#{ADMIN_REMOTE_PASSWORD}\n#{ADMIN_REMOTE_PASSWORD}" | sudo passwd #{ADMIN_UNAME}
+					echo "#{ADMIN_UNAME}:#{ADMIN_REMOTE_PASSWORD}" | sudo chpasswd
 					sudo usermod -aG sudo #{ADMIN_UNAME}
 
 					# Give the ansible user passwordless sudo
@@ -232,8 +232,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 							sudo sshpass -p "#{ANSIBLE_REMOTE_TMP_PW}" ssh #{ANSIBLE_UNAME}@#{hostname} <<-EOF
 								sudo passwd -d #{ANSIBLE_UNAME}
 								sudo usermod --lock #{ANSIBLE_UNAME}
-								sudo sed -i 's|^#PasswordAuthentication yes$|PasswordAuthentication no|' /etc/ssh/sshd_config
-								sudo systemctl reload sshd
 							EOF
 						SHELL
 					end # hosts
@@ -257,7 +255,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 	# Create clients with VirtualBox GUI
 	clients.each do |client_cat_name, client_cat_boxes|
-		client_cat_boxes.each do |client_hostname, client_info|
+		client_cat_boxes.each_with_index do |client_hostname, client_info, client_index|
 			config.vm.define client_hostname do |clientconf|
 				clientconf.vm.box = OS_BOX
 				clientconf.vm.hostname = client_hostname
@@ -303,10 +301,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 				master.each do |master_category_name, master_category_hosts|
 					master_category_hosts.each do |master_hostname, master_info|
-						disable_password_auth = \
-							"sudo sed -i 's|^#PasswordAuthentication yes$|PasswordAuthentication no|' /etc/ssh/sshd_config; " \
-							"sudo systemctl reload sshd; "
-
 						clientconf.vm.provision "shell", inline: <<-SHELL
 							# Add hostname
 							echo "#{master_info[:public_net_ip]} #{master_hostname}" | sudo tee -a /etc/hosts
@@ -317,10 +311,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 								mkdir .ssh
 								ssh-keygen -t ecdsa -b 521 -f ~/.ssh/imovies_#{master_hostname} -P '' -C '#{ADMIN_UNAME}@imovies.ch'
 								sshpass -p '#{ADMIN_REMOTE_PASSWORD}' ssh-copy-id -i ~/.ssh/imovies_#{master_hostname} -o StrictHostKeyChecking=accept-new #{ADMIN_UNAME}@#{master_hostname}
-
-								ssh -i ~/.ssh/imovies_#{master_hostname} #{ADMIN_UNAME}@#{master_hostname} <<-EOF2
-									echo "#{ADMIN_REMOTE_PASSWORD}" | sudo -S -i -u #{ANSIBLE_UNAME} bash -c "#{disable_password_auth}"
-								EOF2
 							EOF1
 						SHELL
 					end # master_category_hosts.each
@@ -359,7 +349,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 					#{REMOVE_SENSITIVE_DATA}
 				SHELL
 
-				if PURGE_VAGRANT == 'true'
+				if PURGE_VAGRANT == 'true' && client_index + 1 == client_cat_boxes.length
 					clientconf.trigger.after :up do |trigger|
 						trigger.name = "Cleanup script"
 						trigger.info = "Remove vagrant after vagrant up"
