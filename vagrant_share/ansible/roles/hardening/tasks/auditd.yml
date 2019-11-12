@@ -1,0 +1,32 @@
+---
+- name: audit.rules
+  become: 'yes'
+  become_method: sudo
+  template:
+    src: etc/audit/rules.d/hardening.rules.j2
+    dest: /etc/audit/rules.d/hardening.rules
+    backup: 'yes'
+    mode: 0600
+    owner: root
+    group: root
+  notify:
+    - generate auditd
+    - restart auditd
+  tags:
+    - auditd
+    - audit.rules
+    - security
+
+- name: set audit grub cmdline
+  become: 'yes'
+  become_method: sudo
+  lineinfile:
+    regexp: '^GRUB_CMDLINE_LINUX='
+    line: 'GRUB_CMDLINE_LINUX="{{ grub_cmdline }}"'
+    dest: /etc/default/grub
+    state: present
+  tags:
+    - auditd
+    - grub
+    - security
+...
