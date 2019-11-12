@@ -5,7 +5,6 @@
 - include: journalconf.yml
 - include: timesyncd.yml
 - include: fstab.yml
-- include: pkgupdate.yml
 - include: hosts.yml
 - include: logindefs.yml
 - include: sysctl.yml

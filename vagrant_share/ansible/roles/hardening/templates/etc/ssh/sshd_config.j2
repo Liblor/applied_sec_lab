@@ -1,26 +1,8 @@
 # {{ ansible_managed }}
-# https://wiki.mozilla.org/Security/Guidelines/OpenSSH
-# CCE-27320-1
-# CCE-80220-7
-# CCE-80221-5
-# CCE-80222-3
-# CCE-80223-1
-# CCE-80224-9
-# CCE-80225-6
-# CCE-27433-2
-# CCE-27082-7
-# CCE-27377-1
-# CCE-27413-4
-# CCE-80226-4
-# CCE-27445-6
-# CCE-27471-2
-# CCE-27314-4
-# CCE-27363-1
 
 LogLevel VERBOSE
 
 LoginGraceTime 20
-PermitRootLogin no
 
 PasswordAuthentication no
 
@@ -37,12 +19,10 @@ Banner /etc/issue.net
 
 AcceptEnv LANG LC_*
 
-Subsystem sftp internal-sftp
-
 X11Forwarding no
 
 PrintLastLog yes
-IgnoreUserKnownHosts yes
+#IgnoreUserKnownHosts yes
 PermitEmptyPasswords no
 AllowGroups {{ ssh_allow_groups }}
 MaxAuthTries 2
