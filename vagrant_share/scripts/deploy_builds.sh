@@ -1,4 +1,4 @@
-#/usr/bin/env bash
+#!/usr/bin/env bash
 
 cs_archive='/vagrant/CertServer.tar.gz'
 ws_archive='/vagrant/WebServer.tar.gz'
@@ -9,7 +9,7 @@ if ! [ -f "$cs_archive" -a -f "$ws_archive" ] ; then
 fi
 
 eval "$(ssh-agent -s)"
-sshpass -P "Enter" -p $(cat /vagrant/ansible_passphrase.txt) ssh-add ~/.ssh/id_rsa
+sshpass -P "Enter" -p "$(cat /vagrant/ansible_passphrase.txt)" ssh-add ~/.ssh/id_rsa
 
 function deploy {
 	local from=$1
