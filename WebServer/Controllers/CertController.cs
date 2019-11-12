@@ -34,18 +34,25 @@ namespace WebServer.Controllers
 
         private CertificatesData FetchCertificatesData()
         {
-            var valid = _certContext.PublicCertificates.AsEnumerable()
+            string uid = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var valid = _certContext.PublicCertificates
+                .Where(c => c.Uid == uid)
+                .AsEnumerable()
                 .Where(c =>
                 c.Parse().NotBefore <= DateTime.Now &&
                 DateTime.Now <= c.Parse().NotAfter &&
                 !c.IsRevoked)
                 .Select(c => new Certificate(c));
 
-            var revoked = _certContext.PublicCertificates.AsEnumerable()
+            var revoked = _certContext.PublicCertificates
+                .Where(c => c.Uid == uid)
+                .AsEnumerable()
                 .Where(c => c.IsRevoked)
                 .Select(c => new Certificate(c));
 
-            var expired = _certContext.PublicCertificates.AsEnumerable()
+            var expired = _certContext.PublicCertificates
+                .Where(c => c.Uid == uid)
+                .AsEnumerable()
                 .Where(c =>
                 DateTime.Now > c.Parse().NotAfter &&
                 !c.IsRevoked)

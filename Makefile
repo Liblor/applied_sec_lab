@@ -1,5 +1,5 @@
 RELEASE	:= 1
-DEBUG	:= 2
+DEBUG		:= 2
 
 CLEAR_COLOR := \x1b[0m
 ERROR_COLOR := \x1b[31;01m
@@ -8,12 +8,9 @@ ifeq ($(BUILD_TYPE),)
 	BUILD_TYPE := $(DEBUG)
 endif
 
-.PHONY: init_submodules
-init_submodules:
+.PHONY: submodules
+submodules:
 	git submodule update --init --recursive
-
-.PHONY: update_submodules
-update_submodules:
 	git submodule update --remote
 
 .PHONY: update_box
