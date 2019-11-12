@@ -7,3 +7,6 @@
 
 - name: Audit the system
   command: lynis audit system --quiet
+  register: out
+
+- debug: var=out
