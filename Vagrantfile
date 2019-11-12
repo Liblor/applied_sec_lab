@@ -256,7 +256,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 	# Create clients with VirtualBox GUI
 	clients.each do |client_cat_name, client_cat_boxes|
-		client_cat_boxes.each_with_index do |client_hostname, client_info, client_index|
+		client_cat_boxes.each_with_index do |(client_hostname, client_info), client_index|
 			config.vm.define client_hostname do |clientconf|
 				clientconf.vm.box = OS_BOX
 				clientconf.vm.hostname = client_hostname
