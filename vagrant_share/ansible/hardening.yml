@@ -1,16 +1,11 @@
 ---
-- hosts: all, !ansservers
+- hosts: all
   become: yes
   tasks:
     - name: Add group for SSH
       group:
         name: sshuser
         state: present
-    - name: Add ansible user to SSH group
-      user:
-        name: ansible
-        groups: sshuser
-        append: yes
     - name: Add vagrant user to SSH group
       user:
         name: vagrant
@@ -19,19 +14,17 @@
 
 - hosts: all, !ansservers
   become: yes
-  roles:
-    - hardening
-  vars:
-    ssh_allow_groups: sshuser
-
-- hosts: ansservers
-  become: yes
-  roles:
-    - hardening
-  vars:
-    ssh_allow_groups: sshuser
+  tasks:
+    - name: Add ansible user to SSH group
+      user:
+        name: ansible
+        groups: sshuser
+        append: yes
 
 - hosts: all
   become: yes
   roles:
+    - hardening
     - lynis
+  vars:
+    ssh_allow_groups: sshuser
