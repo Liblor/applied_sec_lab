@@ -1,3 +1,10 @@
+RELEASE	:= 1
+DEBUG	:= 2
+
+ifeq ($(BUILD_TYPE),)
+	BUILD_TYPE := $(DEBUG)
+endif
+
 .PHONY: init_submodules
 init_submodules:
 	git submodule update --init --recursive
@@ -22,8 +29,19 @@ client:
 purge:
 	vagrant destroy -f
 
-.PHONY: build
-build: purge update_box
-	# XXX: Change to the following after development:
-	# PURGE_VAGRANT="true" vagrant up
+ifeq ($(BUILD_TYPE), $(DEBUG))
+.PHONY: up
+up:
+	@echo "Build for development."
+	@echo "\033[0;31mVagrant setup will NOT be purged after install. \
+	Use 'BUILD_TYPE=${RELEASE} vagrant up' to purge Vagrant.\033[0m"
 	vagrant up
+else
+.PHONY: up
+up:
+	@echo "Build for release."
+	PURGE_VAGRANT="true" vagrant up
+endif
+
+.PHONY: build
+build: purge update_box up
