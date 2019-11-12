@@ -29,4 +29,6 @@
     - auditd
     - grub
     - security
+
+# TODO We might have to rebuild the grub2 configuration here.
 ...
