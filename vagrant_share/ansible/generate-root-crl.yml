@@ -8,7 +8,7 @@
     ca_folder: "/home/{{ UNAME }}/root_ca"
     openssl_conf_name: Root-CA-openssl.cnf
     crl_name: Root_CA.crl
-    revoke_all: true
+    search_pattern: "*Intermediate_CA.crt"
   tasks:
     - name: Move Root CA CRL to privileged folder
       synchronize:

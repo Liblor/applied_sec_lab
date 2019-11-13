@@ -11,6 +11,7 @@
     openssl_conf_name: Root-CA-openssl.cnf
     crl_name: Root_CA.crl
     cert_to_revoke: "/home/{{ UNAME }}/root_ca/certs/iMovies_bkp_key.crt"
+    search_pattern: "iMovies_bkp.crt"
   tasks:
     - name: Generate RSA key to backup user private keys
       openssl_privatekey:
@@ -40,7 +41,7 @@
         openssl ca -batch -config Root-CA-openssl.cnf \
         -extensions backup_cert -notext \
         -in csr/iMovies_bkp_key.csr \
-        -out certs/iMovies_bkp_key.crt
+        -out certs/iMovies_bkp.crt
       args:
         chdir: root_ca/
       when: FORCE_BKP_KEY_REGEN
@@ -62,8 +63,8 @@
 
     - name: Distribute public backup key
       synchronize:
-        src: root_ca/certs/iMovies_bkp_key.crt
-        dest: /etc/pki/bkp/certs
+        src: root_ca/certs/iMovies_bkp.crt
+        dest: /etc/pki/bkp/certs/
         owner: false
         group: false
       when: FORCE_BKP_KEY_REGEN
