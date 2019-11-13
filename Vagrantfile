@@ -371,9 +371,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 												#{REMOVE_SENSITIVE_DATA}
 											EOF2
 										EOF1
-
-										# Reboot client to boot into GUI
-										sudo reboot
 									SHELL
 								}
 							end # master_category_hosts.each

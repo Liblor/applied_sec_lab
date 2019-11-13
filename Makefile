@@ -41,6 +41,8 @@ else
 up:
 	@printf 'Build for release.\n'
 	PURGE_VAGRANT="true" vagrant up
+	@printf 'Remove shared folders\n'
+	./scripts/remove-shared-folders.sh
 endif
 
 .PHONY: build
