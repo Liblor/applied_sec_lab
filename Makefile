@@ -33,7 +33,7 @@ ifeq ($(BUILD_TYPE), $(DEBUG))
 .PHONY: up
 up:
 	@printf 'Build for development.\n'
-	@printf '${ERROR_COLOR}Vagrant setup will NOT be purged after install.\n'
+	@printf "${ERROR_COLOR}Vagrant setup will NOT be purged after install.\n"
 	@printf "Use 'BUILD_TYPE=${RELEASE} vagrant up' to purge Vagrant.${CLEAR_COLOR}\n"
 	vagrant up
 else
