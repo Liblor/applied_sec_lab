@@ -1,5 +1,13 @@
+RELEASE := 1
+DEBUG   := 2
+
 CLEAR_COLOR := \x1b[0m
-PASS_COLOR := \x1b[32;01m
+PASS_COLOR  := \x1b[32;01m
+ERROR_COLOR := \x1b[31;01m
+
+ifeq ($(BUILD_TYPE),)
+	BUILD_TYPE := $(DEBUG)
+endif
 
 .PHONY: submodules
 submodules:
@@ -22,9 +30,24 @@ client:
 purge:
 	vagrant destroy -f
 
-.PHONY: build
-build: purge update_box
+ifeq ($(BUILD_TYPE), $(DEBUG))
+.PHONY: up
+up:
+	@printf 'Build for development.\n'
+	@printf "${ERROR_COLOR}Vagrant setup will NOT be purged after install.\n"
+	@printf "Use 'BUILD_TYPE=${RELEASE} vagrant up' to purge Vagrant.${CLEAR_COLOR}\n"
 	vagrant up
+else
+.PHONY: up
+up:
+	@printf 'Build for release.\n'
+	PURGE_VAGRANT="true" vagrant up
+	@printf 'Remove shared folders\n'
+	./scripts/remove-shared-folders.sh
+endif
+
+.PHONY: build
+build: purge update_box up
 
 .PHONY: push
 push:
