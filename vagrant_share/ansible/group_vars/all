@@ -6,12 +6,15 @@ STATE_OR_PROVINCE_NAME: Zurich
 LOCALITY_NAME: Zurich
 ORGANIZATION_NAME: iMovies
 
+CRL_DISTRIBUTION_POINT: "http://imovies.ch/crl/revoked.crl"
+
 # Folders
 VAGRANT_SHARED_FOLDERNAME: vagrant
 
 # Regenerate certificates
 FORCE_ROOT_CA_CERT_REGEN: false
 FORCE_INTERMEDIATE_CA_CERT_REGEN: "{{FORCE_ROOT_CA_CERT_REGEN}}"
+FORCE_BKP_KEY_REGEN: "{{FORCE_ROOT_CA_CERT_REGEN}}"
 FORCE_TLS_CERT_REGEN: "{{FORCE_INTERMEDIATE_CA_CERT_REGEN}}"
 
 # Save user secrets ID compiled into certserver release

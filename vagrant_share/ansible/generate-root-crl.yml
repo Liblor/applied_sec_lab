@@ -1,0 +1,27 @@
+---
+- hosts: ansservers
+  become: yes
+  roles:
+    - role: revoke-certs
+      when: FORCE_INTERMEDIATE_CA_CERT_REGEN
+  vars:
+    ca_folder: "/home/{{ UNAME }}/root_ca"
+    openssl_conf_name: Root-CA-openssl.cnf
+    crl_name: Root_CA.crl
+    revoke_all: true
+  tasks:
+    - name: Move Root CA CRL to privileged folder
+      synchronize:
+        src: root_ca/Root_CA.crl
+        dest: /etc/pki/tls/crl/
+
+# Distribute CRL
+- hosts: all, !ansservers
+  become: yes
+  tasks:
+    - name: Distribute new intermediate CA CRL
+      synchronize:
+        src: root_ca/Root_CA.crl
+        dest: /etc/pki/tls/crl/
+        rsync_path: "sudo rsync"
+      when: FORCE_INTERMEDIATE_CA_CERT_REGEN or FORCE_BKP_KEY_REGEN
