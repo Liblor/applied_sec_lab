@@ -42,7 +42,7 @@ namespace CertServer.DataModifiers
 
         private bool MeetsPasswordPolicy(string password)
         {
-            return !_passwordPolicyValidator.IsValidPassword(password)
+            return _passwordPolicyValidator.IsValidPassword(password)
                 && password.Length >= Constants.MinPasswordLength;
         }
 

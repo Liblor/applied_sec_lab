@@ -9,6 +9,6 @@ namespace CertServer.Models
             passwordList = System.IO.File.ReadAllText(CAConfig.PasswordListPath);
         }
 
-        public bool IsValidPassword(string password) => passwordList.Contains(password);
+        public bool IsValidPassword(string password) => !passwordList.Contains(password);
     }
 }
