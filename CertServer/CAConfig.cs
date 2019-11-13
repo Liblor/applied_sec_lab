@@ -8,15 +8,16 @@ namespace CertServer
         public static readonly string APIName = "Core CA API";
         public static readonly string APIVersion = "v1";
 
-        public static readonly string CrlDistributionPoint = "https://www.imovies.ch/crl/revoked.crl";
+        public static readonly string CrlDistributionPointFormatString = "http://aslweb{0}/crl/revoked.crl";
 
         public static readonly string CoreCACertPath = "/home/coreca/pki/private/iMovies_external_"
             + System.Environment.MachineName
             + "_Intermediate_CA_cert_and_priv_key.pfx";
 
         public static readonly int UserCertValidityPeriod = 150;
-        public static readonly int CRLNextUpdatedIntervalMinutes = 10;
         public static readonly double SerialNumberWarningThreshold = 0.9;
+
+        public static readonly string PasswordListPath = "/usr/share/wordlists/rockyou.txt";
 
         // Order by decreasing preference, the first option is the default cipher suite.
         public static readonly CipherSuite[] CipherSuites =
