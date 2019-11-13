@@ -12,6 +12,7 @@ using Microsoft.OpenApi.Models;
 
 using CertServer.Data;
 using CertServer.DataModifiers;
+using CoreCA.DataModel;
 
 namespace CertServer
 {
@@ -33,7 +34,7 @@ namespace CertServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers(opt => opt.OutputFormatters.Add(new CrlDerOutputFormatter()));
 
             // Use lowercase routing although controller names are uppercase
             services.AddRouting(options => options.LowercaseUrls = true);

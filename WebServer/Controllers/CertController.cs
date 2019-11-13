@@ -113,7 +113,7 @@ namespace WebServer.Controllers
 
             if (certb64 == null)
             {
-                TempData["ErrorMessage"] = "New certificate request failed.";
+                TempData["ErrorMessage"] = "Certificate download failed.";
                 return RedirectToAction(nameof(Index));
             }
 

@@ -10,6 +10,7 @@ using System.Security.Cryptography.X509Certificates;
 using CertServer.Models;
 using CertServer.DataModifiers;
 using CoreCA.DataModel;
+using Org.BouncyCastle.Asn1.X509;
 
 namespace CertServer.Controllers
 {
@@ -148,12 +149,35 @@ namespace CertServer.Controllers
 
                     // Add CRL Distribution Point (CDP)
                     req.CertificateExtensions.Add(
-                        new X509Extension(
-                            new Oid("2.5.29.31"),
-                            System.Text.Encoding.ASCII.GetBytes(CAConfig.CrlDistributionPoint),
+                        new System.Security.Cryptography.X509Certificates.X509Extension(
+                            new Oid(X509Extensions.CrlDistributionPoints.Id),
+                            new CrlDistPoint(
+                                new[] { 
+                                    new DistributionPoint(
+                                        new DistributionPointName(
+                                            new GeneralNames(
+                                                new GeneralName(
+                                                    GeneralName.UniformResourceIdentifier,
+                                                    // Trim the 'aslcert' part of the hostname
+                                                    string.Format(CAConfig.CrlDistributionPointFormatString, Environment.MachineName.Substring(7))
+                                                    )
+                                                )
+                                            ), 
+                                        null, 
+                                        null
+                                    )
+                                }
+                            ).GetDerEncoded(),
                             false
                         )
                     );
+
+                    X509Certificate2 coreCaPublicCert = new X509Certificate2(coreCACert.Export(X509ContentType.Cert));
+                    if (coreCaPublicCert.HasPrivateKey)
+                    {
+                        _logger.LogError("Core CA public certificate exported with private key!");
+                        throw new CryptographicUnexpectedOperationException();
+                    }
 
                     // Use transaction to prevent race conditions on the serial number
                     X509Certificate2 userCert;
@@ -186,7 +210,7 @@ namespace CertServer.Controllers
                                 SerialNr = serialNr.SerialNr,
                                 Uid = user.Id,
                                 Certificate = Convert.ToBase64String(
-                                    userCert.Export(X509ContentType.Pkcs12)
+                                    userCert.Export(X509ContentType.Cert)
                                 ),
                                 IsRevoked = false
                             }
@@ -195,46 +219,23 @@ namespace CertServer.Controllers
                         scope.Commit();
                     }
 
-                    // XXX: Send privKeyExport to backup server
+                    var collection = new X509Certificate2Collection();
 
-                    // Create pkcs12 file including the user certificate and private key
-                    Pkcs12Builder pkcs12Builder = new Pkcs12Builder();
+                    X509Certificate2 userCertWithPrivKey;
+                    if (privKey is RSA rsa)
+                        userCertWithPrivKey = userCert.CopyWithPrivateKey(rsa);
+                    else if (privKey is ECDsa dsa)
+                        userCertWithPrivKey = userCert.CopyWithPrivateKey(dsa);
+                    else
+                        throw new CryptographicUnexpectedOperationException();
 
-                    Pkcs12SafeContents pkcs12Cert = new Pkcs12SafeContents();
-                    pkcs12Cert.AddCertificate(userCert);
-                    pkcs12Cert.AddCertificate(coreCACert);
-                    pkcs12Builder.AddSafeContentsUnencrypted(pkcs12Cert);
+                    collection.Add(userCertWithPrivKey);
+                    collection.Add(coreCaPublicCert);
 
-                    Pkcs12SafeContents pkcs12PrivKey = new Pkcs12SafeContents();
-                    pkcs12PrivKey.AddShroudedKey(
-                        privKey,
-                        certRequest.CertPassphrase,
-                        pbeParameters
-                    );
+                    byte[] certBytes = collection.Export(X509ContentType.Pkcs12, certRequest.CertPassphrase);
+                    // XXX: Send privKeyExport to backup server                    
 
-                    pkcs12Builder.AddSafeContentsUnencrypted(pkcs12PrivKey);
-
-                    pkcs12Builder.SealWithMac(
-                        certRequest.CertPassphrase,
-                        HashAlgorithmName.SHA512,
-                        10000
-                    );
-
-                    // Since the size of the pkcs12 encoding is unknown,
-                    // we might need to retry
-                    Span<Byte> pkcs12ArchiveRaw;
-                    int pkcs12ArchiveSize = 1024;
-                    int bytesWritten = 0;
-
-                    do {
-                        pkcs12ArchiveSize *= 2;
-                        pkcs12ArchiveRaw = new byte[pkcs12ArchiveSize];
-
-                    } while(!pkcs12Builder.TryEncode(pkcs12ArchiveRaw, out bytesWritten));
-
-                    string pkcs12ArchiveB64 = Convert.ToBase64String(
-                        pkcs12ArchiveRaw.ToArray().Take(bytesWritten).ToArray()
-                    );
+                    string pkcs12ArchiveB64 = Convert.ToBase64String(certBytes);
 
                     // Add encrypted private key to DB
                     _caDBModifier.AddPrivateKey(
