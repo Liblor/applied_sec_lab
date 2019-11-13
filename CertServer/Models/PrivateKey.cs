@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+using CoreCA.DataModel;
+
 namespace CertServer.Models
 {
     public class PrivateKey

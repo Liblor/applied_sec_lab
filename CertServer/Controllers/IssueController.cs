@@ -67,204 +67,205 @@ namespace CertServer.Controllers
         [HttpPost("[controller]")]
         public IActionResult IssueCertificate(CertRequest certRequest)
         {
-            CipherSuite cipherSuite = certRequest.RequestedCipherSuite;
-
-            if (cipherSuite.IsValidCipherSuite())
+            if (certRequest.CertPassphrase.Length < Constants.MinPassphraseLength)
             {
-                User user = _userDBAuthenticator.AuthenticateAndGetUser(certRequest.Uid, certRequest.Password);
-
-                if (user != null)
-                {
-                    // Load the certificate
-                    X509Certificate2 coreCACert = new X509Certificate2(CAConfig.CoreCACertPath);
-
-                    HashAlgorithmName hashAlg = new HashAlgorithmName(cipherSuite.HashAlg);
-                    AsymmetricAlgorithm privKey = null;
-
-                    CertificateRequest req = null;
-
-                    PbeParameters pbeParameters = new PbeParameters(
-                        PbeEncryptionAlgorithm.Aes256Cbc,
-                        HashAlgorithmName.SHA512,
-                        10000
-                    );
-
-                    if (cipherSuite.Alg.Equals("RSA"))
-                    {
-                        privKey = RSA.Create(cipherSuite.KeySize);
-
-                        req = new CertificateRequest(
-                            "CN=" + user.Id,
-                            (RSA) privKey,
-                            hashAlg,
-                            RSASignaturePadding.Pss
-                        );
-                    }
-                    else if (cipherSuite.Alg.Equals("ECDSA"))
-                    {
-                        privKey = ECDsa.Create();
-
-                        req = new CertificateRequest(
-                            "CN=" + user.Id,
-                            (ECDsa) privKey,
-                            hashAlg
-                        );
-                    }
-
-                    // Add email as SAN
-                    SubjectAlternativeNameBuilder sanBuilder = new SubjectAlternativeNameBuilder();
-                    sanBuilder.AddEmailAddress(user.Email);
-                    req.CertificateExtensions.Add(sanBuilder.Build());
-
-                    // Arguments: Is no CA, no restricted nr of path levels, (nr of path levels), is not critical
-                    req.CertificateExtensions.Add(
-                        new X509BasicConstraintsExtension(false, false, 0, false)
-                    );
-
-                    req.CertificateExtensions.Add(
-                        new X509SubjectKeyIdentifierExtension(req.PublicKey, false)
-                    );
-
-                    req.CertificateExtensions.Add(
-                        new X509KeyUsageExtension(
-                            X509KeyUsageFlags.KeyEncipherment
-                            | X509KeyUsageFlags.DigitalSignature
-                            | X509KeyUsageFlags.NonRepudiation,
-                            false
-                        )
-                    );
-
-                    OidCollection oidCollection = new OidCollection();
-                    // Set Client Authentication Oid
-                    oidCollection.Add(new Oid("1.3.6.1.5.5.7.3.2"));
-                    // Set Secure Email / Email protection Oid
-                    oidCollection.Add(new Oid("1.3.6.1.5.5.7.3.4"));
-
-                    req.CertificateExtensions.Add(
-                        new X509EnhancedKeyUsageExtension(
-                            oidCollection,
-                            false
-                        )
-                    );
-
-                    // Add CRL Distribution Point (CDP)
-                    req.CertificateExtensions.Add(
-                        new System.Security.Cryptography.X509Certificates.X509Extension(
-                            new Oid(X509Extensions.CrlDistributionPoints.Id),
-                            new CrlDistPoint(
-                                new[] { 
-                                    new DistributionPoint(
-                                        new DistributionPointName(
-                                            new GeneralNames(
-                                                new GeneralName(
-                                                    GeneralName.UniformResourceIdentifier,
-                                                    // Trim the 'aslcert' part of the hostname
-                                                    string.Format(CAConfig.CrlDistributionPointFormatString, Environment.MachineName.Substring(7))
-                                                    )
-                                                )
-                                            ), 
-                                        null, 
-                                        null
-                                    )
-                                }
-                            ).GetDerEncoded(),
-                            false
-                        )
-                    );
-
-                    X509Certificate2 coreCaPublicCert = new X509Certificate2(coreCACert.Export(X509ContentType.Cert));
-                    if (coreCaPublicCert.HasPrivateKey)
-                    {
-                        _logger.LogError("Core CA public certificate exported with private key!");
-                        throw new CryptographicUnexpectedOperationException();
-                    }
-
-                    // Use transaction to prevent race conditions on the serial number
-                    X509Certificate2 userCert;
-
-                    using (
-                        IDbContextTransaction scope = _caDBModifier.GetScope()
+                _logger.LogWarning(
+                    string.Format(
+                        "User {} tried to issue new certificate with too short passphrase.",
+                        certRequest.Uid
                     )
-                    {
-                        SerialNumber serialNr = _caDBModifier.GetMaxSerialNr();
-
-                        // It is necessary to use this constructor to be able to sign keys
-                        // that use different algorithms than the one for the core CA's key
-                        userCert = req.Create(
-                            coreCACert.SubjectName,
-                            X509SignatureGenerator.CreateForRSA(
-                                (RSA) coreCACert.PrivateKey,
-                                RSASignaturePadding.Pss
-                            ),
-                            DateTimeOffset.UtcNow,
-                            DateTimeOffset.UtcNow.AddDays(CAConfig.UserCertValidityPeriod),
-                            serialNr.SerialNrBytes
-                        );
-
-                        // Revoke all other certificates of this user
-                        _caDBModifier.RevokeAllCertificatesOfUser(user);
-
-                        // Add certificate to DB
-                        _caDBModifier.AddCertificate(
-                            new PublicCertificate {
-                                SerialNr = serialNr.SerialNr,
-                                Uid = user.Id,
-                                Certificate = Convert.ToBase64String(
-                                    userCert.Export(X509ContentType.Cert)
-                                ),
-                                IsRevoked = false
-                            }
-                        );
-
-                        scope.Commit();
-                    }
-
-                    var collection = new X509Certificate2Collection();
-
-                    X509Certificate2 userCertWithPrivKey;
-                    if (privKey is RSA rsa)
-                        userCertWithPrivKey = userCert.CopyWithPrivateKey(rsa);
-                    else if (privKey is ECDsa dsa)
-                        userCertWithPrivKey = userCert.CopyWithPrivateKey(dsa);
-                    else
-                        throw new CryptographicUnexpectedOperationException();
-
-                    collection.Add(userCertWithPrivKey);
-                    collection.Add(coreCaPublicCert);
-
-                    byte[] certBytes = collection.Export(X509ContentType.Pkcs12, certRequest.CertPassphrase);
-                    // XXX: Send privKeyExport to backup server                    
-
-                    string pkcs12ArchiveB64 = Convert.ToBase64String(certBytes);
-
-                    // Add encrypted private key to DB
-                    _caDBModifier.AddPrivateKey(
-                        new PrivateKey {
-                            Uid = user.Id,
-                            KeyPkcs12 = pkcs12ArchiveB64
-                        }
-                    );
-
-                    _logger.LogInformation("Successfully issued new certificate for user " + user.Id);
-
-                    return Ok(
-                        new UserCertificate {
-                            Pkcs12Archive = pkcs12ArchiveB64
-                        }
-                    );
-                }
-                else {
-                    _logger.LogWarning(
-                        "Unauthorized attempt to issue certificate for user "
-                        + certRequest.Uid
-                    );
-                    return Unauthorized();
-                }
+                );
+                return BadRequest("Too short passphrase");
             }
-            else
+
+            CipherSuite cipherSuite = certRequest.RequestedCipherSuite;
+            if (!cipherSuite.IsValidCipherSuite())
             {
                 _logger.LogWarning("Invalid cipher suite:\n" + cipherSuite);
                 return BadRequest("Invalid cipher suite.");
+            }
+
+            User user = _userDBAuthenticator.AuthenticateAndGetUser(certRequest.Uid, certRequest.Password);
+            if (user != null)
+            {
+                // Load the certificate
+                X509Certificate2 coreCACert = new X509Certificate2(CAConfig.CoreCACertPath);
+
+                HashAlgorithmName hashAlg = new HashAlgorithmName(cipherSuite.HashAlg);
+                AsymmetricAlgorithm privKey = null;
+
+                CertificateRequest req = null;
+
+                if (cipherSuite.Alg.Equals("RSA"))
+                {
+                    privKey = RSA.Create(cipherSuite.KeySize);
+
+                    req = new CertificateRequest(
+                        "CN=" + user.Id,
+                        (RSA) privKey,
+                        hashAlg,
+                        RSASignaturePadding.Pss
+                    );
+                }
+                else if (cipherSuite.Alg.Equals("ECDSA"))
+                {
+                    privKey = ECDsa.Create();
+
+                    req = new CertificateRequest(
+                        "CN=" + user.Id,
+                        (ECDsa) privKey,
+                        hashAlg
+                    );
+                }
+
+                // Add email as SAN
+                SubjectAlternativeNameBuilder sanBuilder = new SubjectAlternativeNameBuilder();
+                sanBuilder.AddEmailAddress(user.Email);
+                req.CertificateExtensions.Add(sanBuilder.Build());
+
+                // Arguments: Is no CA, no restricted nr of path levels, (nr of path levels), is not critical
+                req.CertificateExtensions.Add(
+                    new X509BasicConstraintsExtension(false, false, 0, false)
+                );
+
+                req.CertificateExtensions.Add(
+                    new X509SubjectKeyIdentifierExtension(req.PublicKey, false)
+                );
+
+                req.CertificateExtensions.Add(
+                    new X509KeyUsageExtension(
+                        X509KeyUsageFlags.KeyEncipherment
+                        | X509KeyUsageFlags.DigitalSignature
+                        | X509KeyUsageFlags.NonRepudiation,
+                        false
+                    )
+                );
+
+                OidCollection oidCollection = new OidCollection();
+                // Set Client Authentication Oid
+                oidCollection.Add(new Oid("1.3.6.1.5.5.7.3.2"));
+                // Set Secure Email / Email protection Oid
+                oidCollection.Add(new Oid("1.3.6.1.5.5.7.3.4"));
+
+                req.CertificateExtensions.Add(
+                    new X509EnhancedKeyUsageExtension(
+                        oidCollection,
+                        false
+                    )
+                );
+
+                // Add CRL Distribution Point (CDP)
+                req.CertificateExtensions.Add(
+                    new System.Security.Cryptography.X509Certificates.X509Extension(
+                        new Oid(X509Extensions.CrlDistributionPoints.Id),
+                        new CrlDistPoint(
+                            new[] {
+                                new DistributionPoint(
+                                    new DistributionPointName(
+                                        new GeneralNames(
+                                            new GeneralName(
+                                                GeneralName.UniformResourceIdentifier,
+                                                // Trim the 'aslcert' part of the hostname
+                                                string.Format(CAConfig.CrlDistributionPointFormatString, Environment.MachineName.Substring(7))
+                                                )
+                                            )
+                                        ),
+                                    null,
+                                    null
+                                )
+                            }
+                        ).GetDerEncoded(),
+                        false
+                    )
+                );
+
+                X509Certificate2 coreCaPublicCert = new X509Certificate2(coreCACert.Export(X509ContentType.Cert));
+                if (coreCaPublicCert.HasPrivateKey)
+                {
+                    _logger.LogError("Core CA public certificate exported with private key!");
+                    throw new CryptographicUnexpectedOperationException();
+                }
+
+                // Use transaction to prevent race conditions on the serial number
+                X509Certificate2 userCert;
+
+                using (
+                    IDbContextTransaction scope = _caDBModifier.GetScope()
+                )
+                {
+                    SerialNumber serialNr = _caDBModifier.GetMaxSerialNr();
+
+                    // It is necessary to use this constructor to be able to sign keys
+                    // that use different algorithms than the one for the core CA's key
+                    userCert = req.Create(
+                        coreCACert.SubjectName,
+                        X509SignatureGenerator.CreateForRSA(
+                            (RSA) coreCACert.PrivateKey,
+                            RSASignaturePadding.Pss
+                        ),
+                        DateTimeOffset.UtcNow,
+                        DateTimeOffset.UtcNow.AddDays(CAConfig.UserCertValidityPeriod),
+                        serialNr.SerialNrBytes
+                    );
+
+                    _caDBModifier.RevokeAllCertificatesOfUser(user);
+
+                    // Add certificate to DB
+                    _caDBModifier.AddCertificate(
+                        new PublicCertificate {
+                            SerialNr = serialNr.SerialNr,
+                            Uid = user.Id,
+                            Certificate = Convert.ToBase64String(
+                                userCert.Export(X509ContentType.Cert)
+                            ),
+                            IsRevoked = false
+                        }
+                    );
+
+                    scope.Commit();
+                }
+
+                var collection = new X509Certificate2Collection();
+
+                X509Certificate2 userCertWithPrivKey;
+                if (privKey is RSA rsa)
+                    userCertWithPrivKey = userCert.CopyWithPrivateKey(rsa);
+                else if (privKey is ECDsa dsa)
+                    userCertWithPrivKey = userCert.CopyWithPrivateKey(dsa);
+                else
+                    throw new CryptographicUnexpectedOperationException();
+
+                collection.Add(userCertWithPrivKey);
+                collection.Add(coreCaPublicCert);
+
+                byte[] certBytes = collection.Export(X509ContentType.Pkcs12, certRequest.CertPassphrase);
+
+                // XXX: Send privKeyExport to backup server
+
+                string pkcs12ArchiveB64 = Convert.ToBase64String(certBytes);
+
+                // Add encrypted private key to DB
+                _caDBModifier.AddPrivateKey(
+                    new PrivateKey {
+                        Uid = user.Id,
+                        KeyPkcs12 = pkcs12ArchiveB64
+                    }
+                );
+
+                _logger.LogInformation("Successfully issued new certificate for user " + user.Id);
+
+                return Ok(
+                    new UserCertificate {
+                        Pkcs12Archive = pkcs12ArchiveB64
+                    }
+                );
+            }
+            else {
+                _logger.LogWarning(
+                    "Unauthorized attempt to issue certificate for user "
+                    + certRequest.Uid
+                );
+                return Unauthorized();
             }
         }
     }
