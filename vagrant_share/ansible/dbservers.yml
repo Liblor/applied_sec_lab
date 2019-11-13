@@ -15,22 +15,19 @@
         group: "{{ UNAME }}"
         mode: 0640
 
+    # use openssl commmand because
+    # ansibles openssl adds extention that is not
+    # compatible with galera...
+    # andible 2.8 supports 'useCommonNameForSAN: no'
+    # but we use older version
     - name: Create CSR for Galera Rep
-      openssl_csr:
-        path: "/etc/mysql/keys/{{ inventory_hostname }}_galera.csr"
-        privatekey_path: "{{ GALERA_KEY }}"
-
-        country_name: "{{ COUNTRY_NAME }}"
-        state_or_province_name: "{{ STATE_OR_PROVINCE_NAME }}"
-        locality_name: "{{ LOCALITY_NAME }}"
-        organization_name: "{{ ORGANIZATION_NAME }}"
-        # This is bad practice, but galera needs it
-        # otherwise verification fails...
-        common_name: "{{ ansible_eth1.ipv4.address }}"
-        subject_alt_name: "IP: "
-        force: "yes"
-        owner: "{{ UNAME }}"
-        group: "{{ UNAME }}"
+      shell: >-
+        openssl req -new -nodes
+        -days 365000
+        -key {{ GALERA_KEY }}
+        -out /etc/mysql/keys/{{ inventory_hostname }}_galera.csr
+        -subj
+        "/C={{ COUNTRY_NAME }}/ST={{ STATE_OR_PROVINCE_NAME }}/O={{ ORGANIZATION_NAME }}/CN={{ ansible_eth1.ipv4.address }}"
 
     - name: Fetch CSR
       fetch:
@@ -55,19 +52,15 @@
         force: yes
 
     - name: "Create CSR for CA"
-      openssl_csr:
-        path: "{{ DB_CA_CSR }}"
-        privatekey_path: "{{ DB_CA_KEY }}"
-        common_name: "iMovies Galera CA"
+      shell: >-
+        openssl req -new -x509 -nodes
+        -days 365000 
+        -key {{ DB_CA_KEY }}
+        -out {{ DB_CA_CRT }}
+        -subj
+        "/C={{ COUNTRY_NAME }}/ST={{ STATE_OR_PROVINCE_NAME }}/O={{ ORGANIZATION_NAME }}/CN=iMovies Galera CA"
 
-    - name: "Sign the CSR file"
-      openssl_certificate:
-        path: "{{ DB_CA_CRT }}"
-        privatekey_path: "{{ DB_CA_KEY }}"
-        csr_path: "{{ DB_CA_CSR }}"
-        provider: selfsigned
-
-    - name: Sign Certs
+    - name: Sign DB Certs
       openssl_certificate:
         path: "/home/{{ UNAME }}/{{ item }}_galera.crt"
         csr_path: "/home/{{ UNAME }}/{{ item }}_galera.csr"
