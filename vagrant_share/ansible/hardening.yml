@@ -16,6 +16,15 @@
         groups: sshuser
         append: yes
 
+- hosts: ansservers
+  become: yes
+  tasks:
+    - name: Add admin user to SSH group
+      user:
+        name: admin
+        groups: sshuser
+        append: yes
+
 - hosts: all
   become: yes
   roles:
