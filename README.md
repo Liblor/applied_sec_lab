@@ -62,6 +62,9 @@ View running instances:
 Connect to an instance:
 - `vagrant ssh <name>`
 
+To purge vagrant from all VMs, create a new instance with:
+- `PURGE_VAGRANT="true" vagrant up`
+
 ### Ansible
 ```
 TODO

@@ -3,6 +3,7 @@ using System;
 
 using CertServer.DataModifiers;
 using CertServer.Models;
+using CoreCA.DataModel;
 
 namespace CertServer.Controllers
 {
@@ -25,10 +26,10 @@ namespace CertServer.Controllers
         ///     GET /api/crl
         ///
         /// </remarks>
-        /// <returns>Signed CRL in PEM format</returns>
+        /// <returns>Signed CRL in DER-encoded format</returns>
 
         // XXX: Return type?
-        [Produces("text/plain")]
+        [Produces(Constants.CrlMimeType)]
         [ProducesResponseType(200)]
         [HttpGet("[controller]")]
         public IActionResult GetCRL()
