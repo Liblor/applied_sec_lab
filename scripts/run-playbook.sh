@@ -19,6 +19,7 @@ script="\
 	exec ssh-agent bash -c '\
 	sshpass -P Enter -p \$(cat $ANSIBLE_PASSPHRASE_FILE) ssh-add ~/.ssh/id_rsa;\
 	ansible-playbook -i ~/production ~/$PLAYBOOK.yml\
+	$REMOVE_SENSITIVE_DATA\
 	'\
 "
 
