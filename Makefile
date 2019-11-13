@@ -32,22 +32,19 @@ purge:
 
 ifeq ($(BUILD_TYPE), $(DEBUG))
 .PHONY: up
-up:
+up: purge update_box
 	@printf 'Build for development.\n'
 	@printf "${ERROR_COLOR}Vagrant setup will NOT be purged after install.\n"
 	@printf "Use 'BUILD_TYPE=${RELEASE} vagrant up' to purge Vagrant.${CLEAR_COLOR}\n"
 	vagrant up
 else
 .PHONY: up
-up:
+up: purge update_box
 	@printf 'Build for release.\n'
 	PURGE_VAGRANT="true" vagrant up
 	@printf 'Remove shared folders\n'
 	./scripts/remove-shared-folders.sh
 endif
-
-.PHONY: build
-build: purge update_box up
 
 .PHONY: push
 push:
