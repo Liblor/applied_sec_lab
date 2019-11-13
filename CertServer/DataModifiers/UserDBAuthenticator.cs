@@ -16,12 +16,13 @@ namespace CertServer.DataModifiers
 
         public UserDBAuthenticator(
             IMoviesUserContext dbContext,
-            ILogger<UserDBAuthenticator> logger
+            ILogger<UserDBAuthenticator> logger,
+            PasswordPolicyValidator passwordPolicyValidator
         )
         {
             _dbContext = dbContext;
             _logger = logger;
-            _passwordPolicyValidator = PasswordPolicyValidator.GetInstance();
+            _passwordPolicyValidator = passwordPolicyValidator;
         }
 
         public IDbContextTransaction GetScope()
