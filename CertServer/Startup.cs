@@ -12,6 +12,7 @@ using Microsoft.OpenApi.Models;
 
 using CertServer.Data;
 using CertServer.DataModifiers;
+using CertServer.Models;
 
 namespace CertServer
 {
@@ -63,6 +64,9 @@ namespace CertServer
 
             services.AddScoped<UserDBAuthenticator>();
             services.AddScoped<CADBModifier>();
+
+            var passwordPolicyValidator = new PasswordPolicyValidator();
+            services.AddSingleton(passwordPolicyValidator);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
