@@ -162,6 +162,7 @@ default_storage_engine=InnoDB
 innodb_autoinc_lock_mode=2
 wsrep_cluster_name="imovies_db_cluster"
 wsrep_node_address="{{ ansible_eth1.ipv4.address }}"
+wsrep_sst_method = mariabackup
 wsrep_sst_auth = mysql:
 #wsrep_provider_options="socket.ssl_key=;socket.ssl_cert=;socket.ssl_ca="
 bind-address=0.0.0.0
