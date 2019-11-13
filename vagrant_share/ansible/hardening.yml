@@ -6,11 +6,6 @@
       group:
         name: sshuser
         state: present
-    - name: Add vagrant user to SSH group
-      user:
-        name: vagrant
-        groups: sshuser
-        append: yes
 
 - hosts: all, !ansservers
   become: yes
