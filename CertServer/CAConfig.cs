@@ -17,6 +17,8 @@ namespace CertServer
         public static readonly int UserCertValidityPeriod = 150;
         public static readonly double SerialNumberWarningThreshold = 0.9;
 
+        public static readonly string PasswordListPath = "/usr/share/wordlists/rockyou.txt";
+
         // Order by decreasing preference, the first option is the default cipher suite.
         public static readonly CipherSuite[] CipherSuites =
         {
