@@ -1,4 +1,109 @@
 ---
+# === Galera Cert setup === #
+
+# create server csr
+- hosts: dbservers
+  become: yes
+  tasks:
+    - name: Create Galera Rep keys
+      openssl_privatekey:
+        path: "{{ GALERA_KEY }}"
+        type: RSA
+        size: 4096
+        force: yes
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
+        mode: 0640
+
+    - name: Create CSR for Galera Rep
+      openssl_csr:
+        path: "/etc/mysql/keys/{{ inventory_hostname }}_galera.csr"
+        privatekey_path: "{{ GALERA_KEY }}"
+
+        country_name: "{{ COUNTRY_NAME }}"
+        state_or_province_name: "{{ STATE_OR_PROVINCE_NAME }}"
+        locality_name: "{{ LOCALITY_NAME }}"
+        organization_name: "{{ ORGANIZATION_NAME }}"
+        # This is bad practice, but galera needs it
+        # otherwise verification fails...
+        common_name: "{{ ansible_eth1.ipv4.address }}"
+        subject_alt_name: "IP: "
+        force: "yes"
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
+
+    - name: Fetch CSR
+      fetch:
+        flat: yes
+        src: "/etc/mysql/keys/{{ inventory_hostname }}_galera.csr"
+        dest: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/{{ inventory_hostname }}_galera.csr"
+  vars:
+    - GALERA_KEY: "/etc/mysql/keys/{{ inventory_hostname }}_galera_key.pem"
+  tags: galera_tls
+
+# create self-signed ca and sign csr
+- hosts: aslans01
+  become: yes
+  tasks:
+    - name: Generate RSA keys for Galera replication traffic CA
+      openssl_privatekey:
+        path: "{{ DB_CA_KEY }}"
+        type: RSA
+        size: 4096
+        owner: "root"
+        group: "root"
+        force: yes
+
+    - name: "Create CSR for CA"
+      openssl_csr:
+        path: "{{ DB_CA_CSR }}"
+        privatekey_path: "{{ DB_CA_KEY }}"
+        common_name: "iMovies Galera CA"
+
+    - name: "Sign the CSR file"
+      openssl_certificate:
+        path: "{{ DB_CA_CRT }}"
+        privatekey_path: "{{ DB_CA_KEY }}"
+        csr_path: "{{ DB_CA_CSR }}"
+        provider: selfsigned
+
+    - name: Sign Certs
+      openssl_certificate:
+        path: "/home/{{ UNAME }}/{{ item }}_galera.crt"
+        csr_path: "/home/{{ UNAME }}/{{ item }}_galera.csr"
+        ownca_path: "{{ DB_CA_CRT }}"
+        ownca_privatekey_path: "{{ DB_CA_KEY }}"
+        provider: ownca
+      loop: "{{ groups['dbservers'] }}"
+  vars:
+    - DB_CA_KEY: "/home/{{ UNAME }}/ca-key.pem"
+    - DB_CA_CSR: "/home/{{ UNAME }}/ca-cert.csr"
+    - DB_CA_CRT: "/home/{{ UNAME }}/ca-cert.pem"
+  tags: galera_tls
+
+- hosts: dbservers
+  become: yes
+  tasks:
+    - name: "Include galera CA cert"
+      copy:
+        src: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/ca-cert.pem"
+        dest: "/etc/mysql/keys/ca-cert.pem"
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
+        mode: '0644'
+
+    - name: "Include galera db cert"
+      copy:
+        src: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/{{ inventory_hostname }}_galera.crt"
+        dest: "/etc/mysql/keys/{{ inventory_hostname }}_galera_cert.pem"
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
+        mode: '0644'
+  tags: galera_tls
+
+
+# === DB setup === #
+
 - hosts: dbservers
   become: yes
   vars_files:
@@ -9,7 +114,7 @@
     - asl-dbserver
   vars:
     trusted_user: mysql
-  tags: [ never, setup ]
+  tags: setup
 
 - hosts: asldb01
   become: yes
