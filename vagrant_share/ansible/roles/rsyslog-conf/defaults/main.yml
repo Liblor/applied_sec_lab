@@ -1,0 +1,3 @@
+---
+rsyslog_conf_receive: false
+rsyslog_conf_send: false

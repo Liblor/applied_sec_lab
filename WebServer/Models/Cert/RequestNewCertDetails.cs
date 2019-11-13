@@ -1,12 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 
+using CoreCA.DataModel;
+
 namespace WebServer.Models.Cert
 {
     public class RequestNewCertDetails
     {
-        // TODO: validate passphrase requirements in the Core CA too, re-think arbitrary min-length
+        // TODO: re-think arbitrary min-length
         [Required, DataType(DataType.Password)]
-        [Display(Name = "Certificate encryption passphrase"), StringLength(256, MinimumLength = 12)]
+        [Display(Name = "Certificate encryption passphrase"), StringLength(256, MinimumLength = Constants.MinPassphraseLength)]
         public string Passphrase { get; set; }
 
         [Required, DataType(DataType.Password)]

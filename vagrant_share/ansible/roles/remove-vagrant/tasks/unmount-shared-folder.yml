@@ -1,0 +1,5 @@
+---
+- name: Unmount shared folders
+  mount:
+    path: /vagrant
+    state: absent
