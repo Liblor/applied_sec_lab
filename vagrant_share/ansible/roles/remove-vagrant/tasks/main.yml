@@ -1,0 +1,3 @@
+---
+- import_tasks: unmount-shared-folder.yml
+- import_tasks: remove-vagrant-user.yml
