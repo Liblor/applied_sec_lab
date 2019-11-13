@@ -110,3 +110,24 @@
         group: "{{ UNAME }}"
         mode: 0600
         force: "{{ FORCE_INTERMEDIATE_CA_CERT_REGEN }}"
+
+# The intermediate certificate must be installed in the root of trust of
+# web servers, otherwise the httpclient of dotnet will fail to validate its
+# client certificate for internal TLS communication and refuse to use it.
+- hosts: webservers
+  become: yes
+  tasks:
+    - name: Distribute intermediate CA certificates to web server
+      synchronize:
+        src: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/root_ca/certs/iMovies_{{ item[0] }}_{{ item[1] }}_Intermediate_CA.crt"
+        dest: /usr/local/share/ca-certificates/
+        owner: false
+        group: false
+        rsync_path: "sudo rsync"
+      with_nested:
+        - "{{ INTERMEDIATE_CERT_PURPOSES }}"
+        - "{{ groups['certservers'] }}"
+
+    - name: Apply new certificate
+      command: update-ca-certificates
+      when: FORCE_INTERMEDIATE_CA_CERT_REGEN

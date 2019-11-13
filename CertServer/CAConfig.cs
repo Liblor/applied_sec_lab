@@ -8,7 +8,7 @@ namespace CertServer
         public static readonly string APIName = "Core CA API";
         public static readonly string APIVersion = "v1";
 
-        public static readonly string CrlDistributionPoint = "https://www.imovies.ch/crl/revoked.crl";
+        public static readonly string CrlDistributionPointFormatString = "http://aslweb{0}/crl/revoked.crl";
 
         public static readonly string CoreCACertPath = "/home/coreca/pki/private/iMovies_external_"
             + System.Environment.MachineName
@@ -17,11 +17,19 @@ namespace CertServer
         public static readonly string BackupFolder = "/home/coreca/backup/";
 
         public static readonly int UserCertValidityPeriod = 150;
-        public static readonly int CRLNextUpdatedIntervalMinutes = 10;
         public static readonly double SerialNumberWarningThreshold = 0.9;
 
+        public static readonly string PasswordListPath = "/usr/share/wordlists/rockyou.txt";
+
+        // Order by decreasing preference, the first option is the default cipher suite.
         public static readonly CipherSuite[] CipherSuites =
         {
+            // Different ECDSA curves are only supported on Windows.
+            new CipherSuite {
+                Alg = "ECDSA",
+                HashAlg = "SHA512",
+                KeySize = 521
+            },
             new CipherSuite {
                 Alg = "RSA",
                 HashAlg = "SHA512",
@@ -31,12 +39,6 @@ namespace CertServer
                 Alg = "RSA",
                 HashAlg = "SHA512",
                 KeySize = 2048
-            },
-            // Different ECDSA curves are only supported on Windows.
-            new CipherSuite {
-                Alg = "ECDSA",
-                HashAlg = "SHA512",
-                KeySize = 521
             }
         };
 
