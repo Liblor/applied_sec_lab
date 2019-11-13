@@ -1,13 +1,6 @@
-RELEASE := 1
-DEBUG   := 2
-
 CLEAR_COLOR := \x1b[0m
 PASS_COLOR  := \x1b[32;01m
 ERROR_COLOR := \x1b[31;01m
-
-ifeq ($(BUILD_TYPE),)
-	BUILD_TYPE := $(DEBUG)
-endif
 
 .PHONY: submodules
 submodules:
@@ -29,22 +22,7 @@ client:
 .PHONY: purge
 purge:
 	vagrant destroy -f
-
-ifeq ($(BUILD_TYPE), $(DEBUG))
-.PHONY: up
-up: purge update_box
-	@printf 'Build for development.\n'
-	@printf "${ERROR_COLOR}Vagrant setup will NOT be purged after install.\n"
-	@printf "Use 'BUILD_TYPE=${RELEASE} vagrant up' to purge Vagrant.${CLEAR_COLOR}\n"
-	vagrant up
-else
-.PHONY: up
-up: purge update_box
-	@printf 'Build for release.\n'
-	PURGE_VAGRANT="true" vagrant up
-	@printf 'Remove shared folders\n'
-	./scripts/remove-shared-folders.sh
-endif
+	rm -rf ./vagrant_share/sshkey_store/*
 
 .PHONY: push
 push:
@@ -64,7 +42,28 @@ push:
 		&& tar -czf ./WebServer.tar.gz ./WebServer \
 		&& rm -r ./WebServer \
 		&& cd ../
-	@printf "[${PASS_COLOR}push${CLEAR_COLOR}] %s builds\n" 'Deploying new'
+	@printf "[${PASS_COLOR}push${CLEAR_COLOR}] %s\n" 'Deploying new builds'
 	@vagrant ssh aslans01 -- 'sudo su ansible -c /vagrant/scripts/deploy_builds.sh'
 	@printf "[${PASS_COLOR}push${CLEAR_COLOR}] %s\n" 'Cleaning up'
 	@rm -rf ./vagrant_share/CertServer.tar.gz ./vagrant_share/WebServer.tar.gz
+
+.PHONY: build
+build:
+	@printf "${ERROR_COLOR}%s${CLEAR_COLOR}\n" 'Make sure to use "make release" for the final submission'
+	@make purge update_box
+	@printf "[${PASS_COLOR}build${CLEAR_COLOR}] %s\n" 'Build new VMs'
+	vagrant up
+	@printf "[${PASS_COLOR}build${CLEAR_COLOR}] %s\n" 'Run hardening script'
+	./scripts/run-playbook.sh hardening
+
+.PHONY: release
+release: build
+	@printf "[${PASS_COLOR}release${CLEAR_COLOR}] %s\n" 'Run cleanup script'
+	./scripts/run-playbook.sh cleanup
+	@printf "[${PASS_COLOR}release${CLEAR_COLOR}] %s\n" 'Remove shared folders'
+	./scripts/remove-shared-folders.sh
+	@printf "[${PASS_COLOR}release${CLEAR_COLOR}] %s\n" 'Prepare environment'
+	rm -rf ./build
+	mkdir ./build
+	@printf "[${PASS_COLOR}release${CLEAR_COLOR}] %s\n" 'Export VMs'
+	./scripts/export-vms.sh
