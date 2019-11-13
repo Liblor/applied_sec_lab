@@ -17,6 +17,8 @@
   unarchive:
     src: "/home/{{ UNAME }}/app/CertServer.tar.gz"
     dest: "/home/{{ UNAME }}/app"
+    owner: "{{ UNAME }}"
+    group: "{{ UNAME }}"
     remote_src: yes
 
 - name: Remove the archive
