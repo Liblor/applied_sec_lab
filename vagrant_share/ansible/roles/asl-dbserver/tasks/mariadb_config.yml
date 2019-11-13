@@ -1,19 +1,31 @@
 ---
-- name: Create 60-server.cnf config
-  template:
-    src: 60-server.cnf.j2
-    dest: /etc/mysql/mariadb.conf.d/60-server.cnf
-    owner: root
-    group: root
-    mode: '0644'
+- name: Grant permissions for 'mysql' user for Galera SST
+  command: 'mysql -u {{ mysql_root_username }} -p{{ mysql_root_password }} -NBe "{{ item }}"'
+  with_items:
+    - "GRANT RELOAD, PROCESS, LOCK TABLES, REPLICATION CLIENT ON *.* TO 'mysql'@'localhost';"
+  no_log: True
+  changed_when: false
 
 - name: Stop service mariaDB, if running
   systemd:
     name: mysql
     state: stopped
 
+- name: Create my.cnf config
+  template:
+    src: my.cnf.j2
+    dest: /etc/mysql/my.cnf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Bootstrap Galera
+  shell: galera_new_cluster
+  when: ansible_hostname == 'asldb01'
+
 - name: Restart mariaDB
   systemd:
     state: restarted
     daemon_reload: yes
     name: mariadb
+  when: ansible_hostname != 'asldb01'
