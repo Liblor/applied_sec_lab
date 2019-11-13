@@ -16,6 +16,4 @@
 
 - import_playbook: logging.yml
 
-- import_playbook: hardening.yml
-
 - import_playbook: post-config-cleanup.yml
