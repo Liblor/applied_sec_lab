@@ -81,7 +81,7 @@
     ca_folder: "/home/{{ UNAME }}/intermediate_ca"
     openssl_conf_name: Intermediate-CA-openssl.cnf
     crl_name: Intermediate_CA.crl
-    revoke_all: true
+    search_pattern: "*_tls.crt"
   tasks:
     - name: Transfer CRL to config server
       synchronize:
