@@ -1,4 +1,5 @@
 using CoreCA.Client;
+using CoreCA.DataModel;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -43,6 +44,7 @@ namespace WebServer
             services.AddControllersWithViews(opt =>
             {
                 opt.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+                opt.OutputFormatters.Add(new CrlDerOutputFormatter());
             });
 
             services.AddAuthentication()
@@ -53,8 +55,8 @@ namespace WebServer
                 .AddCertificate(opt =>
                 {
                     opt.AllowedCertificateTypes = CertificateTypes.Chained;
-                    opt.RevocationFlag = X509RevocationFlag.EntireChain;
-                    opt.RevocationMode = X509RevocationMode.NoCheck; // TODO: switch to online
+                    opt.RevocationFlag = X509RevocationFlag.EndCertificateOnly;
+                    opt.RevocationMode = X509RevocationMode.Online;
                     opt.ValidateCertificateUse = true;
                     opt.ValidateValidityPeriod = true;
 
@@ -103,12 +105,8 @@ namespace WebServer
                     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
             if (Environment.IsDevelopment())
-
             {
                 app.UseDeveloperExceptionPage();
-                // Keep HTTP->HTTPS redirection to test client authentication over SSL during development only; in production,
-                // HTTPS terminates at the nginx reverse proxy and Kestrel only receives plain HTTP, which would cause infinite redirect loops.
-                app.UseHttpsRedirection();
             }
             app.UseStaticFiles();
 

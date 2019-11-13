@@ -30,6 +30,16 @@ namespace CoreCA.Client
             _logger = logger;
         }
 
+        public async Task<byte[]> GetCRL()
+        {
+            var response = await _httpClient.GetAsync("/api/CRL");
+
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            return await response.Content.ReadAsByteArrayAsync();
+        }
+
         public async Task<string> DownloadPrivateKey(string uid, string userPassword)
         {
             var request = new DownloadPrivateKeyRequest
