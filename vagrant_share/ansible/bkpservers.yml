@@ -4,3 +4,5 @@
   roles:
     - borgbackup
     - backup-server
+
+- import_playbook: backup-priv-keys.yml

@@ -195,7 +195,25 @@ namespace CertServer.Controllers
                         scope.Commit();
                     }
 
-                    // XXX: Send privKeyExport to backup server
+                    // Send private key, encrypted with the public key of the backup server, to the backup
+                    X509Certificate2 backupServerCert = new X509Certificate2(CAConfig.BackupServerCertPath);
+
+                    using (var chain = new X509Chain())
+                    {
+                        chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
+                        chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
+                        chain.Build(backupServerCert);
+
+                        byte[] privKeyEncrypted = ((RSA) backupServerCert.PublicKey.Key).Encrypt(
+                            privKey.ExportPkcs8PrivateKey(),
+                            RSAEncryptionPadding.OaepSHA512
+                        );
+
+                        System.IO.File.WriteAllBytes(
+                            CAConfig.BackupFolder + user.Id + '_' + backupServerCert.Thumbprint + ".pem.enc",
+                            privKeyEncrypted
+                        );
+                    }
 
                     // Create pkcs12 file including the user certificate and private key
                     Pkcs12Builder pkcs12Builder = new Pkcs12Builder();
