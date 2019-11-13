@@ -11,6 +11,11 @@
     name: mysql
     state: stopped
 
+- name: Patch wsrep_sst_mariabackup
+  patch:
+    src: wsrep_sst_mariabackup.patch
+    dest: /usr/bin/wsrep_sst_mariabackup
+
 - name: Create my.cnf config
   template:
     src: my.cnf.j2
