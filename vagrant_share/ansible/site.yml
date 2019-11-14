@@ -16,3 +16,4 @@
 - import_playbook: logservers.yml
 
 - import_playbook: logging.yml
+- import_playbook: post-config-cleanup.yml
