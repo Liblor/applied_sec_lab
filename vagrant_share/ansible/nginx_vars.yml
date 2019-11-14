@@ -61,7 +61,7 @@ nginx_http_template:
               value: $scheme
             header_ssl_cert:
               name: X-SSL-CERT
-              value: $ssl_client_escaped_cert;
+              value: $ssl_client_escaped_cert
     upstreams:
       upstream:
         name: aspnet
