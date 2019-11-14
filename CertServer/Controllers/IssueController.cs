@@ -1,11 +1,13 @@
-using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 using CertServer.Models;
 using CertServer.DataModifiers;
@@ -31,6 +33,35 @@ namespace CertServer.Controllers
             _caDBModifier = caDBModifier;
             _userDBAuthenticator = userDBAuthenticator;
             _logger = logger;
+        }
+
+        // Send private key, encrypted with the public key of the backup server, to the backup
+        private void BackupPrivateKey(string privKeyExport, string fileName)
+        {
+            X509Certificate2 backupServerCert = new X509Certificate2(CAConfig.BackupServerCertPath);
+
+            using (var chain = new X509Chain())
+            {
+                chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
+                chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
+                chain.Build(backupServerCert);
+
+                // OaepSHA1 instead of OaepSHA512 padding is used because OpenSSL only supports the former,
+                // which would make key recovery more difficult for system administrators.
+                byte[] privKeyEncrypted = ((RSA) backupServerCert.PublicKey.Key).Encrypt(
+                    Encoding.ASCII.GetBytes(privKeyExport),
+                    RSAEncryptionPadding.OaepSHA1
+                );
+
+                System.IO.File.WriteAllBytes(
+                    CAConfig.BackupFolder + fileName,
+                    privKeyEncrypted
+                );
+            }
+            Process.Start(
+                "/usr/bin/bash",
+                string.Format("-c \"sudo {0}\"", CAConfig.BackupScript)
+            );
         }
 
         /// <summary>
@@ -93,12 +124,14 @@ namespace CertServer.Controllers
 
                 HashAlgorithmName hashAlg = new HashAlgorithmName(cipherSuite.HashAlg);
                 AsymmetricAlgorithm privKey = null;
+                string privKeyExport = null;
 
                 CertificateRequest req = null;
 
                 if (cipherSuite.Alg.Equals("RSA"))
                 {
                     privKey = RSA.Create(cipherSuite.KeySize);
+                    privKeyExport = ((RSA) privKey).ToPem();
 
                     req = new CertificateRequest(
                         "CN=" + user.Id,
@@ -110,6 +143,7 @@ namespace CertServer.Controllers
                 else if (cipherSuite.Alg.Equals("ECDSA"))
                 {
                     privKey = ECDsa.Create();
+                    privKeyExport = ((ECDsa) privKey).ToPem();
 
                     req = new CertificateRequest(
                         "CN=" + user.Id,
@@ -238,28 +272,9 @@ namespace CertServer.Controllers
                 collection.Add(userCertWithPrivKey);
                 collection.Add(coreCaPublicCert);
 
+                BackupPrivateKey(privKeyExport, user.Id + '_' + userCert.Thumbprint + ".pem.enc");
+
                 byte[] certBytes = collection.Export(X509ContentType.Pkcs12, certRequest.CertPassphrase);
-
-                // Send private key, encrypted with the public key of the backup server, to the backup
-                X509Certificate2 backupServerCert = new X509Certificate2(CAConfig.BackupServerCertPath);
-
-                using (var chain = new X509Chain())
-                {
-                    chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
-                    chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
-                    chain.Build(backupServerCert);
-
-                    byte[] privKeyEncrypted = ((RSA) backupServerCert.PublicKey.Key).Encrypt(
-                        privKey.ExportPkcs8PrivateKey(),
-                        RSAEncryptionPadding.OaepSHA512
-                    );
-
-                    System.IO.File.WriteAllBytes(
-                        CAConfig.BackupFolder + user.Id + '_' + backupServerCert.Thumbprint + ".pem.enc",
-                        privKeyEncrypted
-                    );
-                }
-
                 string pkcs12ArchiveB64 = Convert.ToBase64String(certBytes);
 
                 // Add encrypted private key to DB
