@@ -36,18 +36,15 @@ hosts = {
 		# "asldb02" => { :ip => "172.17.0.32" },
 	},
 	"webservers" => {
-		"aslweb01" => {
-			:ip => "172.17.0.41",
-			:public_net_ip => "172.16.0.41"
-		},
-		# "aslweb02" => {
-		# 	:ip => "172.17.0.42",
-		#     :public_net_ip => "172.16.0.42"
-		# },
+		"aslweb01" => { :ip => "172.17.0.41" },
+		# "aslweb02" => { :ip => "172.17.0.42" },
 	},
-	# "ldservers" => {
-	#     "aslld01" => { :ip => "172.17.0.51" },
-	# },
+	"ldservers" => {
+		"aslld01" => {
+			:ip => "172.17.0.51",
+			:public_net_ip => "172.16.0.51",
+		},
+	},
 	"logservers" => {
 	    "asllog01" => { :ip => "172.17.0.61" },
 	},
@@ -115,6 +112,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 							# Add hostname
 							echo "#{peer_info[:ip]} #{peer_hostname}" | sudo tee -a /etc/hosts
 						SHELL
+
+						if peer_info.key?(:public_net_ip)
+							hostconf.vm.provision "shell", inline: <<-SHELL
+								# Add hostname
+								# use :ip and not :public_net_ip here intentionally! (internal hosts)
+								echo "#{peer_info[:ip]} imovies.ch" | sudo tee -a /etc/hosts
+								echo "#{peer_info[:ip]} www.imovies.ch" | sudo tee -a /etc/hosts
+							SHELL
+						end # if public_net_ip exists
 					end # host_peer_category.each
 				end # hosts.each (peer)
 			end # hostconf
@@ -241,7 +247,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 						if host_info.key?(:public_net_ip)
 							clientconf.vm.provision "shell", inline: <<-SHELL
 								# Add hostname
-								echo "#{host_info[:public_net_ip]} #{host_name}" | sudo tee -a /etc/hosts
+								echo "#{host_info[:public_net_ip]} imovies.ch" | sudo tee -a /etc/hosts
+								echo "#{host_info[:public_net_ip]} www.imovies.ch" | sudo tee -a /etc/hosts
 							SHELL
 						end # if public_net_ip exists
 					end # host_peer_category.each

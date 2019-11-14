@@ -1,4 +1,5 @@
 using CoreCA.DataModel;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
@@ -26,7 +27,7 @@ namespace CoreCA.Client
             if (httpClient == null)
                 throw new ArgumentNullException(nameof(httpClient));
 
-            _httpClient= httpClient;
+            _httpClient = httpClient;
             _logger = logger;
         }
 
@@ -113,6 +114,21 @@ namespace CoreCA.Client
             var response = await _httpClient.PostAsync("/api/ChangePassword", Serialize(request));
 
             return response.IsSuccessStatusCode;
+        }
+
+        public async Task<HealthCheckResult> CheckHealth()
+        {
+            var response = await _httpClient.GetAsync("/health");
+
+            if (!response.IsSuccessStatusCode)
+                return HealthCheckResult.Unhealthy("CertServer reported Unhealthy");
+
+            string content = await response.Content.ReadAsStringAsync();
+
+            if (content == nameof(HealthCheckResult.Degraded))
+                return HealthCheckResult.Degraded("CertServer reported Degraded");
+
+            return HealthCheckResult.Healthy();
         }
     }
 }
