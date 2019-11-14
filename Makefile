@@ -56,7 +56,7 @@ build:
 	@printf "[${PASS_COLOR}build${CLEAR_COLOR}] %s\n" 'Running hardening script'
 	./scripts/run-playbook.sh hardening
 
-.PHONY: cleanup
+.PHONY: cleanup_vms
 cleanup_vms:
 	@printf "[${PASS_COLOR}cleanup${CLEAR_COLOR}] %s\n" 'Running cleanup script'
 	./scripts/run-playbook.sh cleanup
