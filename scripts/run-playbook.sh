@@ -18,7 +18,7 @@ ANSIBLE_MASTER_IP=$(awk "/$ANSIBLE_MASTER/,0" $PROJECT_ROOT/Vagrantfile | grep '
 script="\
 	exec ssh-agent bash -c '\
 	sshpass -P Enter -p \$(cat $ANSIBLE_PASSPHRASE_FILE) ssh-add ~/.ssh/id_rsa;\
-	ansible-playbook -i ~/production ~/$PLAYBOOK.yml\
+	ansible-playbook -i ~/production ~/$PLAYBOOK.yml;\
 	$REMOVE_SENSITIVE_DATA\
 	'\
 "
