@@ -35,6 +35,10 @@ namespace CertServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHealthChecks()
+                .AddDbContextCheck<IMoviesUserContext>()
+                .AddDbContextCheck<IMoviesCAContext>();
+
             services.AddControllers(opt => opt.OutputFormatters.Add(new CrlDerOutputFormatter()));
 
             // Use lowercase routing although controller names are uppercase
@@ -104,6 +108,7 @@ namespace CertServer
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health");
             });
         }
     }
