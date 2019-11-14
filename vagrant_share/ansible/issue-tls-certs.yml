@@ -35,7 +35,7 @@
     # Externally reachable servers have the imovies domain as SAN
     - name: Add external SAN
       set_fact:
-        SAN: "{{ SAN + ', DNS:www.imovies.ch' }}"
+        SAN: "{{ SAN + ', DNS:imovies.ch, DNS:www.imovies.ch' }}"
       when: "'webservers' in groups and ansible_hostname in groups['webservers']"
 
     - name: Create CSR for HTTPS keys
