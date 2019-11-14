@@ -1,0 +1,25 @@
+﻿@model WebServer.ViewModels.AdminStats
+
+@{
+    ViewData["Title"] = "Admin dashboard";
+}
+
+<h1 class="text-center">@ViewData["Title"]</h1>
+
+<div class="viewport d-flex flex-column mx-auto">
+    <h2>System information</h2>
+    <table class="table table-striped">
+        <tbody>
+            <tr>
+                <th scope="row">Certificates issued</th>
+                <th scope="row">Certificates revoked</th>
+                <th scope="row">Current serial number</th>
+            </tr>
+            <tr>
+                <td>@Model.NumIssuedCertificates</td>
+                <td>@Model.NumRevokedCertificates</td>
+                <td>@Model.CurrentSerialNum</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
