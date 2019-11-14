@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using CoreCA.DataModel;
 
 namespace CoreCA.DataModel
 {
@@ -11,7 +12,7 @@ namespace CoreCA.DataModel
         public string OldPassword { get; set; }
 
         [Required]
-        [StringLength(64, MinimumLength = 1)]
+        [StringLength(64, MinimumLength = Constants.MinPasswordLength)]
         public string NewPassword { get; set; }
     }
 }
