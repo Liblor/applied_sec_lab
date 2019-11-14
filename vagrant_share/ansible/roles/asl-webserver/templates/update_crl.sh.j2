@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+crl_directory='{{ crl_directory }}'
+root_crl='{{ root_crl }}'
+intermediate_crl='{{ intermediate_crl }}'
+client_crl="$crl_directory/revoked.crl"
+chained_crl='{{ chained_crl }}'
+
+if ! [ -f "$root_crl" -a -f "$intermediate_crl" ] ; then
+	echo "CRLs could not be found." >&2
+	exit 1
+fi
+
+echo "Downloading new client CRL to $client_crl."
+curl 'http://localhost/crl/revoked.crl' > "$client_crl"
+
+echo 'Converting client CRL to PEM format.'
+openssl crl -inform DER -in "$client_crl" -outform PEM -out "$client_crl"
+
+echo "Concatenating all CRLs into $chained_crl."
+cat "$root_crl" "$intermediate_crl" "$client_crl" > "$chained_crl"
+
+echo "Removing file $client_crl."
+rm -f "$client_crl"
+
+echo 'Reloading nginx to apply new CRL.'
+systemctl reload nginx
