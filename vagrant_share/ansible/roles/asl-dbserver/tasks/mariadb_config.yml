@@ -24,6 +24,27 @@
     group: root
     mode: '0644'
 
+- name: Disable mariadb autostart as joiner
+  systemd:
+    name: mariadb
+    enabled: no
+  when: ansible_hostname == 'asldb01'
+
+- name: Add galera service
+  copy:
+    src: galera.service
+    dest: /etc/systemd/system/galera.service
+    owner: root
+    group: root
+    mode: '0644'
+  when: ansible_hostname == 'asldb01'
+
+- name: Enable bootstarp autostart (doner)
+  systemd:
+    name: galera
+    enabled: yes
+  when: ansible_hostname == 'asldb01'
+
 - name: Bootstrap Galera
   shell: galera_new_cluster
   when: ansible_hostname == 'asldb01'
