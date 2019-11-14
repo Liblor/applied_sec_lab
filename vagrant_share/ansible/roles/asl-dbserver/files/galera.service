@@ -1,0 +1,11 @@
+[Unit]
+Description="MariaDB Galera Bootstrap"
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/galera_new_cluster
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

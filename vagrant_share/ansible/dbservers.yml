@@ -1,6 +1,18 @@
 ---
 # === Galera Cert setup === #
 
+- hosts: aslans01
+  become: yes
+  tasks:
+    - name: Creates directory
+      file:
+        path: "{{ CA_FOLDER }}"
+        state: directory
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
+  vars:
+    - CA_FOLDER: "/home/{{ UNAME }}/ca"
+
 # create server csr
 - hosts: dbservers
   become: yes
@@ -33,7 +45,7 @@
       fetch:
         flat: yes
         src: "/etc/mysql/keys/{{ inventory_hostname }}_galera.csr"
-        dest: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/{{ inventory_hostname }}_galera.csr"
+        dest: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/ca/{{ inventory_hostname }}_galera.csr"
   vars:
     - GALERA_KEY: "/etc/mysql/keys/{{ inventory_hostname }}_galera_key.pem"
   tags: galera_tls
@@ -62,16 +74,17 @@
 
     - name: Sign DB Certs
       openssl_certificate:
-        path: "/home/{{ UNAME }}/{{ item }}_galera.crt"
-        csr_path: "/home/{{ UNAME }}/{{ item }}_galera.csr"
+        path: "{{ CA_FOLDER }}/{{ item }}_galera.crt"
+        csr_path: "{{ CA_FOLDER }}/{{ item }}_galera.csr"
         ownca_path: "{{ DB_CA_CRT }}"
         ownca_privatekey_path: "{{ DB_CA_KEY }}"
         provider: ownca
       loop: "{{ groups['dbservers'] }}"
   vars:
-    - DB_CA_KEY: "/home/{{ UNAME }}/ca-key.pem"
-    - DB_CA_CSR: "/home/{{ UNAME }}/ca-cert.csr"
-    - DB_CA_CRT: "/home/{{ UNAME }}/ca-cert.pem"
+    - CA_FOLDER: "/home/{{ UNAME }}/ca"
+    - DB_CA_KEY: "{{ CA_FOLDER }}/ca-key.pem"
+    - DB_CA_CSR: "{{ CA_FOLDER }}/ca-cert.csr"
+    - DB_CA_CRT: "{{ CA_FOLDER }}/ca-cert.pem"
   tags: galera_tls
 
 - hosts: dbservers
@@ -79,7 +92,7 @@
   tasks:
     - name: "Include galera CA cert"
       copy:
-        src: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/ca-cert.pem"
+        src: "{{ CA_FOLDER }}/ca-cert.pem"
         dest: "/etc/mysql/keys/ca-cert.pem"
         owner: "{{ UNAME }}"
         group: "{{ UNAME }}"
@@ -87,12 +100,24 @@
 
     - name: "Include galera db cert"
       copy:
-        src: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/{{ inventory_hostname }}_galera.crt"
+        src: "{{ CA_FOLDER }}/{{ inventory_hostname }}_galera.crt"
         dest: "/etc/mysql/keys/{{ inventory_hostname }}_galera_cert.pem"
         owner: "{{ UNAME }}"
         group: "{{ UNAME }}"
         mode: '0644'
+  vars:
+    - CA_FOLDER: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/ca"
   tags: galera_tls
+
+- hosts: aslans01
+  become: yes
+  tasks:
+    - name: Remove CA directory
+      file:
+        path: "{{ CA_FOLDER }}"
+        state: absent
+  vars:
+    - CA_FOLDER: "/home/{{ UNAME }}/ca"
 
 
 # === DB setup === #
