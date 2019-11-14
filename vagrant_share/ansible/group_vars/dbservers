@@ -1,2 +1,11 @@
 ---
 UNAME: mysql
+
+ports_input_tcp:
+  - mysql
+  - 4444
+  - 4567
+  - 4568
+ports_input_udp:
+  - mysql
+  - 4567

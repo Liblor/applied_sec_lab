@@ -1,0 +1,14 @@
+---
+- name: Install the package
+  package:
+    name: nftables
+    state: present
+    update_cache: true
+
+- name: Enable the service
+  systemd:
+    name: nftables.service
+    enabled: yes
+    masked: no
+  notify:
+    - "restart nftables"

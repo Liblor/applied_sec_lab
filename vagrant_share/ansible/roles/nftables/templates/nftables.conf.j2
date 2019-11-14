@@ -1,0 +1,56 @@
+#!/usr/sbin/nft -f
+
+# {{ ansible_managed }}
+
+flush ruleset
+
+table inet filter {
+	chain global {
+		ct state established,related accept
+		ct state invalid drop
+	}
+
+	chain input {
+		type filter hook input priority 0;
+		policy drop;
+
+		iif lo accept
+		jump global
+
+		ip protocol icmp accept
+		ip6 nexthdr icmpv6 accept
+
+		tcp dport { {{ default_input_ports }} } accept
+		udp dport { {{ default_input_ports }} } accept
+
+		{% for port in ports_input_tcp %}
+			tcp dport {{ port }} accept
+		{% endfor %}
+
+		{% for port in ports_input_udp %}
+			udp dport {{ port }} accept
+		{% endfor %}
+	}
+
+	chain output {
+		type filter hook output priority 0;
+		policy drop;
+
+		oif lo accept
+		jump global
+
+		ip protocol icmp accept
+		ip6 nexthdr icmpv6 accept
+
+		tcp dport { {{ default_output_ports }} } accept
+		udp dport { {{ default_output_ports }} } accept
+
+		{% for port in ports_output_tcp %}
+			tcp dport {{ port }} accept
+		{% endfor %}
+
+		{% for port in ports_output_udp %}
+			udp dport {{ port }} accept
+		{% endfor %}
+	}
+}

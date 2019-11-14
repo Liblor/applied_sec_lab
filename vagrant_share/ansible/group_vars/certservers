@@ -7,3 +7,8 @@ DB_IMOVIES_NAME: imovies
 DB_IMOVIES_CA_NAME: imovies_ca
 DB_USER: "{{ ansible_hostname }}"
 DB_PASSWORD: "{{ lookup('vars', 'mysql_' + ansible_hostname + '_password') }}"
+
+ports_input_tcp:
+  - https
+ports_input_udp:
+  - https

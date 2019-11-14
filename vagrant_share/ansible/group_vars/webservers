@@ -1,2 +1,9 @@
 ---
 UNAME: webserver
+
+ports_input_tcp:
+  - http
+  - https
+ports_input_udp:
+  - http
+  - https
