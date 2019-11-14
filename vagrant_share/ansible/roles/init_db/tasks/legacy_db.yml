@@ -19,8 +19,26 @@
     login_user: "{{ mysql_root_username }}"
     login_password: "{{ mysql_root_password }}"
 
+- name: Copy CA admins table script
+  copy:
+    src: imovies_users_admins_table.sql
+    dest: /tmp
+
+- name: Create the CA admins table
+  mysql_db:
+    name: imovies
+    state: import
+    target: /tmp/imovies_users_admins_table.sql
+    login_user: "{{ mysql_root_username }}"
+    login_password: "{{ mysql_root_password }}"
+
 # XXX: maybe shred first
 - name: Remove dump
   file:
     path: /tmp/imovies_users.dump
+    state: absent
+
+- name: Remove CA admins table script
+  file:
+    path: /tmp/imovies_users_admins_table.sql
     state: absent

@@ -74,6 +74,15 @@ namespace WebServer
                 policyBuilder.RequireAuthenticatedUser();
 
                 opt.DefaultPolicy = policyBuilder.Build();
+
+                // Admins may only authenticate using certificates
+                var adminPolicy = new AuthorizationPolicyBuilder(
+                    CertificateAuthenticationDefaults.AuthenticationScheme)
+                    .RequireAuthenticatedUser()
+                    .RequireClaim(Constants.AdminClaim)
+                    .Build();
+
+                opt.AddPolicy(Constants.AdminPolicy, adminPolicy);
             });
 
             services.AddDbContext<IMoviesUserContext>(opt => opt.UseMySql(Configuration.GetConnectionString("IMoviesUserDB")));
