@@ -3,6 +3,7 @@
 - import_playbook: packages.yml
 - import_playbook: users.yml
 - import_playbook: files.yml
+
 - import_playbook: distribute-root-cert.yml
 - import_playbook: issue-intermediate-certs.yml
 - import_playbook: issue-tls-certs.yml
@@ -11,8 +12,8 @@
 - import_playbook: certservers.yml
 - import_playbook: bkservers.yml
 - import_playbook: dbservers.yml
+- import_playbook: ldservers.yml
 - import_playbook: webservers.yml
 - import_playbook: logservers.yml
 
 - import_playbook: logging.yml
-- import_playbook: post-config-cleanup.yml
