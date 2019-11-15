@@ -5,4 +5,4 @@ CREATE TABLE admins (
     PRIMARY KEY(uid)
 );
 
-INSERT INTO admins VALUES ('a3');
+INSERT INTO admins VALUES ('ms');
