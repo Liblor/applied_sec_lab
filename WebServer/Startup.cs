@@ -16,6 +16,7 @@ using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Web;
 using WebServer.Authentication;
+using WebServer.HealthChecks;
 
 namespace WebServer
 {
@@ -41,6 +42,11 @@ namespace WebServer
                 .ValidateDataAnnotations();
 
             var webServerOptions = webServerOptionsSection.Get<WebServerOptions>();
+
+            services.AddHealthChecks()
+                .AddDbContextCheck<IMoviesUserContext>()
+                .AddDbContextCheck<IMoviesCertContext>()
+                .AddCheck<CertServerHealthCheck>(nameof(CertServerHealthCheck));
 
             services.AddControllersWithViews(opt =>
             {
@@ -137,6 +143,8 @@ namespace WebServer
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Account}/{action=Index}/{id?}");
+
+                endpoints.MapHealthChecks("/health");
             });
         }
     }
