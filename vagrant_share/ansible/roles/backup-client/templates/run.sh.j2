@@ -67,18 +67,6 @@ function create_backup() {
 	;
 }
 
-function prune_repository() {
-	borg prune                          \
-		--list                          \
-		--prefix '{hostname}-'          \
-		--show-rc                       \
-		--keep-daily    7               \
-		--keep-weekly   4               \
-		--keep-monthly  7               \
-		--keep-yearly   4               \
-	;
-}
-
 exec 1> >(logger -t $SCRIPT_NAME) 2>&1
 trap 'echo Interrupted.; unlock; exit 2' INT TERM
 
@@ -99,10 +87,6 @@ pre_backup
 echo "Creating backup."
 create_backup
 exit_on_failure 2 "Creating backup failed."
-
-echo "Pruning repository."
-prune_repository
-exit_on_failure 2 "Pruning repository failed."
 
 post_backup
 
