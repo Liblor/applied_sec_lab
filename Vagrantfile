@@ -7,15 +7,15 @@ VAGRANTFILE_API_VERSION = "2"
 
 # List of all hosts
 # Naming:
-#   All internal machines have the prefix als (Applied Security Lab) and
-#   two digits suffix, which is increment for multiple machines of the same type
-#   Types:
-#       cert    = Certificate Authority
-#       db      = Database server
-#       web     = Web Server
-#       ld      = Load Balancer
-#       log     = Log Server
-#       bkp     = Backup Server
+#  All internal machines have the prefix als (Applied Security Lab) and
+#  two digits suffix, which is increment for multiple machines of the same type
+#  Types:
+#    cert = Certificate Authority
+#    db   = Database server
+#    web  = Web Server
+#    ld   = Load Balancer
+#    log  = Log Server
+#    bkp  = Backup Server
 master = {
 	"ansservers" => {
 		"aslans01" => {
@@ -45,10 +45,10 @@ hosts = {
 		},
 	},
 	"logservers" => {
-	    "asllog01" => { :ip => "172.17.0.61" },
+		"asllog01" => { :ip => "172.17.0.61" },
 	},
 	# "bkpservers" => {
-	#     "aslbkp01" => { :ip => "172.17.0.71" },
+	#	"aslbkp01" => { :ip => "172.17.0.71" },
 	# }
 }
 
