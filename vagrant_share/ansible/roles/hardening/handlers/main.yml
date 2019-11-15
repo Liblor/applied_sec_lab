@@ -1,18 +1,4 @@
 ---
-# https://github.com/ansible/ansible/issues/22171
-- name: restart auditd
-  become: 'yes'
-  become_method: sudo
-  command: service auditd restart
-  ignore_errors: true
-  args:
-    warn: false
-
-- name: generate auditd
-  become: 'yes'
-  become_method: sudo
-  command: augenrules
-
 - name: restart sysctl
   become: 'yes'
   become_method: sudo
