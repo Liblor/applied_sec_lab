@@ -32,7 +32,6 @@ hosts = {
 	},
 	"dbservers" => {
 		"asldb01" => { :ip => "172.17.0.31" },
-		# Currently not working
 		# "asldb02" => { :ip => "172.17.0.32" },
 	},
 	"webservers" => {
@@ -185,7 +184,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 					echo '###################################################' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
 
 					# Add Ansible host itself to inventory
-					echo -e '\n[#{master_category_name}]\nlocalhost ansible_connection=local' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
+					echo -e '\n[#{master_category_name}]\n#{master_hostname} ansible_connection=local' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
 				SHELL
 
 				# Add hostnames, install SSH keys
