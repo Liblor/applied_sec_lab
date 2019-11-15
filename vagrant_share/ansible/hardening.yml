@@ -6,11 +6,16 @@
       group:
         name: sshuser
         state: present
+    - name: Add Vagrant user to SSH group
+      user:
+        name: vagrant
+        groups: sshuser
+        append: yes
 
 - hosts: all, !ansservers
   become: yes
   tasks:
-    - name: Add ansible user to SSH group
+    - name: Add Ansible user to SSH group
       user:
         name: ansible
         groups: sshuser
