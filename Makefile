@@ -30,6 +30,11 @@ client:
 purge:
 	vagrant destroy -f
 
+.PHONY: halt
+halt:
+	vagrant ssh asldb02 -c "sudo systemctl stop mariadb"
+	vagrant halt
+
 ifeq ($(BUILD_TYPE), $(DEBUG))
 .PHONY: up
 up: purge update_box
