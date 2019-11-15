@@ -33,6 +33,8 @@
 - hosts: all
   become: yes
   roles:
+    # TODO Add role for nftables.
+    #- nftables
     - hardening
     - lynis
   vars:
