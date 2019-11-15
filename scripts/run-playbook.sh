@@ -26,6 +26,7 @@ script="\
 ssh \
 	-o UserKnownHostsFile=/dev/null \
 	-o StrictHostKeyChecking=no \
+	-o IdentitiesOnly=yes \
 	-i "./vagrant_share/sshkey_store/$CLIENT/imovies_$ANSIBLE_MASTER" \
 	"$ADMIN_UNAME@$ANSIBLE_MASTER_IP" <<-EOF
 	echo $ADMIN_REMOTE_PASSWORD | sudo -S -i -u $ANSIBLE_UNAME bash -c "$script"
