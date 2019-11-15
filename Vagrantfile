@@ -188,6 +188,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 					# Add Ansible host itself to inventory
 					echo -e '\n[#{master_category_name}]\n#{master_hostname} ansible_connection=local' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
+				SHELL
 
 				# Add hostnames, install SSH keys
 				hosts.each do |category_name, category_hosts|
