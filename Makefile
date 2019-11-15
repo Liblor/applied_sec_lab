@@ -22,6 +22,12 @@ clean:
 	@printf "[${PASS_COLOR}clean${CLEAR_COLOR}] %s\n" 'Removing SSH key store'
 	rm -rf ./vagrant_share/sshkey_store/*
 
+.PHONY: halt
+halt:
+	vagrant ssh asldb02 -c "sudo systemctl stop mariadb"
+	vagrant halt
+
+
 .PHONY: push
 push:
 	@printf "[${PASS_COLOR}push${CLEAR_COLOR}] %s\n" 'Prepare environment'
@@ -56,8 +62,8 @@ build:
 	@printf "[${PASS_COLOR}build${CLEAR_COLOR}] %s\n" 'Running hardening script'
 	./scripts/run-playbook.sh hardening
 
-.PHONY: cleanup_vms
-cleanup_vms:
+.PHONY: _cleanup
+_cleanup:
 	@printf "[${PASS_COLOR}cleanup${CLEAR_COLOR}] %s\n" 'Running cleanup script'
 	./scripts/run-playbook.sh cleanup
 	@printf "[${PASS_COLOR}cleanup${CLEAR_COLOR}] %s\n" 'Removing shared folders'
@@ -65,6 +71,7 @@ cleanup_vms:
 
 .PHONY: export
 export:
+	@printf "${ERROR_COLOR}%s${CLEAR_COLOR}\n" 'Make sure to use "make release" for the final submission'
 	@printf "[${PASS_COLOR}export${CLEAR_COLOR}] %s\n" 'Preparing environment'
 	rm -rf ./build
 	mkdir ./build
@@ -72,4 +79,4 @@ export:
 	./scripts/export-vms.sh
 
 .PHONY: release
-release: clean build cleanup_vms export
+release: clean build _cleanup export
