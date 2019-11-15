@@ -48,7 +48,7 @@ hosts = {
 		"asllog01" => { :ip => "172.17.0.61" },
 	},
 	"bkpservers" => {
-	    "aslbkp01" => { :ip => "10.0.0.71" },
+		"aslbkp01" => { :ip => "10.0.0.71" },
 	}
 }
 
@@ -217,21 +217,20 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 					end # hosts
 				end # category_hosts.each
 
-        # Add backupclients
-        hostconf.vm.provision "shell", inline: <<-SHELL
-            echo -e "\n[backupclients]" | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
-            # Add ansible master
-            # TODO: don't hardcode
-            echo -e 'aslans01 ansible_connection=local' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
-        SHELL
-        backupclients.each do |category|
-            category.each do |hostname, info|
-                hostconf.vm.provision "shell", inline: <<-SHELL
-                    # Add hostname
-                    echo "#{hostname}" | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
-                SHELL
-            end # hosts
-        end # backupclients.each
+				# Add backupclients
+				hostconf.vm.provision "shell", inline: <<-SHELL
+				echo -e "\n[backupclients]" | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
+				# Add ansible master
+				echo -e '#{master_hostname} ansible_connection=local' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
+				SHELL
+				backupclients.each do |category|
+					category.each do |hostname, info|
+						hostconf.vm.provision "shell", inline: <<-SHELL
+						# Add hostname
+						echo "#{hostname}" | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
+						SHELL
+					end # hosts
+				end # backupclients.each
 
 				hostconf.vm.provision "shell", inline: <<-SHELL
 					sudo -i -u #{ANSIBLE_UNAME} bash <<-EOF1
