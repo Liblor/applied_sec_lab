@@ -1,0 +1,17 @@
+- name: Install HAproxy
+  apt:
+    name:
+      - haproxy
+
+- name: Install HAproxy config
+  template:
+    src: haproxy.cfg
+    dest: /etc/haproxy/haproxy.cfg
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Restart the service
+  systemd:
+    name: haproxy
+    state: restarted

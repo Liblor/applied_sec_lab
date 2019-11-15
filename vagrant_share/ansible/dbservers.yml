@@ -1,15 +1,138 @@
 ---
+# === Galera Cert setup === #
+
+- hosts: aslans01
+  become: yes
+  tasks:
+    - name: Creates directory
+      file:
+        path: "{{ CA_FOLDER }}"
+        state: directory
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
+  vars:
+    - CA_FOLDER: "/home/{{ UNAME }}/ca"
+
+# create server csr
+- hosts: dbservers
+  become: yes
+  tasks:
+    - name: Create Galera Rep keys
+      openssl_privatekey:
+        path: "{{ GALERA_KEY }}"
+        type: RSA
+        size: 4096
+        force: yes
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
+        mode: 0640
+
+    # use openssl commmand because
+    # ansibles openssl adds extention that is not
+    # compatible with galera...
+    # andible 2.8 supports 'useCommonNameForSAN: no'
+    # but we use older version
+    - name: Create CSR for Galera Rep
+      shell: >-
+        openssl req -new -nodes
+        -days 365000
+        -key {{ GALERA_KEY }}
+        -out /etc/mysql/keys/{{ inventory_hostname }}_galera.csr
+        -subj
+        "/C={{ COUNTRY_NAME }}/ST={{ STATE_OR_PROVINCE_NAME }}/O={{ ORGANIZATION_NAME }}/CN={{ ansible_eth1.ipv4.address }}"
+
+    - name: Fetch CSR
+      fetch:
+        flat: yes
+        src: "/etc/mysql/keys/{{ inventory_hostname }}_galera.csr"
+        dest: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/ca/{{ inventory_hostname }}_galera.csr"
+  vars:
+    - GALERA_KEY: "/etc/mysql/keys/{{ inventory_hostname }}_galera_key.pem"
+  tags: galera_tls
+
+# create self-signed ca and sign csr
+- hosts: aslans01
+  become: yes
+  tasks:
+    - name: Generate RSA keys for Galera replication traffic CA
+      openssl_privatekey:
+        path: "{{ DB_CA_KEY }}"
+        type: RSA
+        size: 4096
+        owner: "root"
+        group: "root"
+        force: yes
+
+    - name: "Create CSR for CA"
+      shell: >-
+        openssl req -new -x509 -nodes
+        -days 365000 
+        -key {{ DB_CA_KEY }}
+        -out {{ DB_CA_CRT }}
+        -subj
+        "/C={{ COUNTRY_NAME }}/ST={{ STATE_OR_PROVINCE_NAME }}/O={{ ORGANIZATION_NAME }}/CN=iMovies Galera CA"
+
+    - name: Sign DB Certs
+      openssl_certificate:
+        path: "{{ CA_FOLDER }}/{{ item }}_galera.crt"
+        csr_path: "{{ CA_FOLDER }}/{{ item }}_galera.csr"
+        ownca_path: "{{ DB_CA_CRT }}"
+        ownca_privatekey_path: "{{ DB_CA_KEY }}"
+        provider: ownca
+      loop: "{{ groups['dbservers'] }}"
+  vars:
+    - CA_FOLDER: "/home/{{ UNAME }}/ca"
+    - DB_CA_KEY: "{{ CA_FOLDER }}/ca-key.pem"
+    - DB_CA_CSR: "{{ CA_FOLDER }}/ca-cert.csr"
+    - DB_CA_CRT: "{{ CA_FOLDER }}/ca-cert.pem"
+  tags: galera_tls
+
+- hosts: dbservers
+  become: yes
+  tasks:
+    - name: "Include galera CA cert"
+      copy:
+        src: "{{ CA_FOLDER }}/ca-cert.pem"
+        dest: "/etc/mysql/keys/ca-cert.pem"
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
+        mode: '0644'
+
+    - name: "Include galera db cert"
+      copy:
+        src: "{{ CA_FOLDER }}/{{ inventory_hostname }}_galera.crt"
+        dest: "/etc/mysql/keys/{{ inventory_hostname }}_galera_cert.pem"
+        owner: "{{ UNAME }}"
+        group: "{{ UNAME }}"
+        mode: '0644'
+  vars:
+    - CA_FOLDER: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/ca"
+  tags: galera_tls
+
+- hosts: aslans01
+  become: yes
+  tasks:
+    - name: Remove CA directory
+      file:
+        path: "{{ CA_FOLDER }}"
+        state: absent
+  vars:
+    - CA_FOLDER: "/home/{{ UNAME }}/ca"
+
+
+# === DB setup === #
+
 - hosts: dbservers
   become: yes
   vars_files:
     - /vagrant/mysql_passwords.yml
   roles:
+    - add-to-trusted-user-group
     - mariadb
     - asl-dbserver
-    - add-to-trusted-user-group
   vars:
     trusted_user: mysql
-  tags: [ never, setup ]
+  tags: setup
 
 - hosts: dbservers
   become: yes

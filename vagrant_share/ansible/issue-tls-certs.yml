@@ -32,10 +32,15 @@
       set_fact:
         SAN: "{{ 'DNS:' + ansible_hostname + '.internal.imovies.ch, DNS:' + ansible_hostname}}"
 
+    - name: Add IP SAN for databases
+      set_fact:
+        SAN: "{{ SAN + ', IP:' + ansible_eth1.ipv4.address }}"
+      when: "'dbservers' in groups and inventory_hostname in groups['dbservers']"
+
     # Externally reachable servers have the imovies domain as SAN
     - name: Add external SAN
       set_fact:
-        SAN: "{{ SAN + ', DNS:www.imovies.ch' }}"
+        SAN: "{{ SAN + ', DNS:imovies.ch, DNS:www.imovies.ch' }}"
       when: "'webservers' in groups and ansible_hostname in groups['webservers']"
 
     - name: Create CSR for HTTPS keys
@@ -211,12 +216,21 @@
     - name: Convert private key to pkcs#1
       command: "openssl rsa -in /etc/ssl/trusted/private/iMovies_{{ansible_hostname}}_tls_key.pem -out /etc/mysql/keys/iMovies_{{ inventory_hostname }}_tls_key.pem"
 
+    - name: Combine key and certificate for socat (galera)
+      shell: >-
+        cat /etc/mysql/keys/iMovies_{{ inventory_hostname }}_tls_key.pem
+        /etc/pki/tls/certs/iMovies_{{ inventory_hostname }}_tls.crt
+        > /etc/mysql/keys/iMovies_{{ inventory_hostname }}_tls_key_cert.pem
+
     - name: Fix mysql private key permissions
       file:
-        path: "/etc/mysql/keys/iMovies_{{ inventory_hostname }}_tls_key.pem"
+        path: "{{ item }}"
         owner: "{{ UNAME }}"
         group: "{{ UNAME }}"
         mode: 0600
+      with_items:
+          - "/etc/mysql/keys/iMovies_{{ inventory_hostname }}_tls_key.pem"
+          - "/etc/mysql/keys/iMovies_{{ inventory_hostname }}_tls_key_cert.pem"
 
 - hosts: webservers
   become: yes

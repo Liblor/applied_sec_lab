@@ -199,8 +199,7 @@ namespace CertServer.Controllers
                                         new GeneralNames(
                                             new GeneralName(
                                                 GeneralName.UniformResourceIdentifier,
-                                                // Trim the 'aslcert' part of the hostname
-                                                string.Format(CAConfig.CrlDistributionPointFormatString, Environment.MachineName.Substring(7))
+                                                CAConfig.CrlDistributionPoint
                                                 )
                                             )
                                         ),
