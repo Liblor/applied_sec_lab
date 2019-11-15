@@ -16,7 +16,6 @@
 - include: password.yml
 - include: cron.yml
 - include: ctrlaltdel.yml
-- include: auditd.yml
 - include: disablemod.yml
 - include: users.yml
 - include: suid.yml
