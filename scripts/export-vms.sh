@@ -10,8 +10,8 @@ do
 	fi
 
 	printf "Halting $vm\n"
-	vagrant halt "$vm";
+	vagrant halt "$vm"
 
-	# Remove shared folder vagrant if it exists, silent error if it doesn't
-	VBoxManage sharedfolder remove "$vm" --name vagrant 2> /dev/null;
+	printf "Exporting $vm\n"
+	VBoxManage export "$vm" -o "./build/$vm.ova"
 done
