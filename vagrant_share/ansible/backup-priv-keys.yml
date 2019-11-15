@@ -6,6 +6,7 @@
   become: yes
   roles:
     - role: revoke-certs
+      when: FORCE_BKP_KEY_REGEN
   vars:
     ca_folder: "/home/{{ UNAME }}/root_ca"
     openssl_conf_name: Root-CA-openssl.cnf
@@ -47,6 +48,9 @@
       when: FORCE_BKP_KEY_REGEN
 
 - import_playbook: generate-root-crl.yml
+  when: FORCE_BKP_KEY_REGEN
+  vars:
+    revoke_intermediate_certs: false
 - import_playbook: distribute-crl.yml
   when: FORCE_BKP_KEY_REGEN
 
