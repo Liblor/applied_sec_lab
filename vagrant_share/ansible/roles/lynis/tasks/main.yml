@@ -1,0 +1,17 @@
+---
+# TODO Install the package directly from CISOFY.
+- name: Install the package
+  package:
+    name: lynis
+    state: present
+    update_cache: true
+
+- name: Audit the system
+  command: lynis audit system --no-colors --quiet
+
+- name: Parse the report of the audit
+  shell: cat /var/log/lynis-report.dat | grep warning | sed -E 's/[^|]+\|([^|]*)\|.*/\1/g'
+  register: out
+
+- debug:
+    var: out.stdout_lines
