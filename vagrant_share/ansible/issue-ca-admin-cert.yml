@@ -1,0 +1,22 @@
+---
+# The first cert server signs the admin CA cert for the reviewing group
+- hosts: "{{ groups['certservers'][0] }}"
+  become: yes
+  tasks:
+    - name: Obtain CA admin certificate
+      script:
+        cmd: "/vagrant/scripts/issue_ca_admin_cert.py /home/{{ UNAME }}/ca_admin_cert_with_priv_key.pfx"
+      args:
+        executable: python3
+    - name: Pull CA admin certificate to config server
+      synchronize:
+        mode: pull
+        src: "/home/{{ UNAME }}/ca_admin_cert_with_priv_key.pfx"
+        dest: "/home/{{ hostvars[groups['ansservers'][0]]['UNAME'] }}/ca_admin_cert_with_priv_key.pfx"
+        group: false
+        owner: false
+      delegate_to: "{{ groups['ansservers'][0] }}"
+    - name: Remove CA admin certificate from cert server
+      file:
+        state: absent
+        path: "/home/{{ UNAME }}/ca_admin_cert_with_priv_key.pfx"
