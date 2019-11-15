@@ -1,5 +1,7 @@
 ---
 - import_playbook: generate-root-crl.yml
+  vars:
+    revoke_intermediate_certs: true
 
 - hosts: certservers
   become: yes
@@ -88,6 +90,7 @@
         rsync_path: "sudo rsync"
       with_items:
         - "{{ INTERMEDIATE_CERT_PURPOSES }}"
+      when: FORCE_INTERMEDIATE_CA_CERT_REGEN
 
     - name: Fix intermediate CA certificates owner and group
       file:
