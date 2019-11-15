@@ -1,0 +1,23 @@
+---
+- name: disablefs.conf
+  become: 'yes'
+  become_method: sudo
+  file:
+    state: touch
+    path: /etc/modprobe.d/disablefs.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: disable file system kernel modules
+  become: 'yes'
+  become_method: sudo
+  lineinfile:
+    dest: /etc/modprobe.d/disablefs.conf
+    line: "install {{ item }} /bin/true"
+  with_items:
+    - "{{ fs_modules_blacklist }}"
+  tags:
+    - modprobe
+    - security
+...
