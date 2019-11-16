@@ -14,6 +14,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
+using System.Web;
 using WebServer.Authentication;
 using WebServer.HealthChecks;
 
@@ -101,6 +102,19 @@ namespace WebServer
                 }
                 return handler;
             });
+
+            if (Environment.IsProduction())
+            {
+                services.AddCertificateForwarding(options =>
+                {
+                    options.CertificateHeader = "X-SSL-CERT";
+                    options.HeaderConverter = (headerValue) =>
+                    {
+                        // For some reason, nginx URL-encodes the cert.
+                        return new X509Certificate2(HttpUtility.UrlDecodeToBytes(headerValue)); ;
+                    };
+                });
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -117,6 +131,10 @@ namespace WebServer
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            if (Environment.IsProduction())
+                app.UseCertificateForwarding();
+
             app.UseAuthentication();
             app.UseAuthorization();
 

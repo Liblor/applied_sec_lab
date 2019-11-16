@@ -59,6 +59,9 @@ nginx_http_template:
             header_x_forwarded_proto:
               name: X-Forwarded-Proto
               value: $scheme
+            header_ssl_cert:
+              name: X-SSL-CERT
+              value: $ssl_client_escaped_cert
     upstreams:
       upstream:
         name: aspnet
