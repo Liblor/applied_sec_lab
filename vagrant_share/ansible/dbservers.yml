@@ -132,7 +132,7 @@
     - asl-dbserver
   vars:
     trusted_user: mysql
-  tags: setup
+  tags: [ never, setup ]
 
 - hosts: asldb01
   become: yes
