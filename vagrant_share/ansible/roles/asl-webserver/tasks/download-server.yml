@@ -25,3 +25,16 @@
   file:
     state: absent
     path: "/home/{{ UNAME }}/app/WebServer.tar.gz"
+
+- name: Copy static resources to be served by nginx
+  copy:
+    src: "/home/{{ UNAME }}/app/wwwroot/static"
+    dest: "/home/{{ UNAME }}/static"
+    owner: "{{ UNAME }}"
+    group: "{{ UNAME }}"
+    remote_src: yes
+
+- name: Remove static resources from app directory
+  file:
+    state: absent
+    path: "/home/{{ UNAME }}/app/wwwroot/static"
