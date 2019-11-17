@@ -7,11 +7,16 @@
 
 - name: Enable the service
   systemd:
-    name: nftables.service
+    name: nftables
     enabled: yes
     masked: no
 
+# NOTE We need to set a timeout since SSH will not respond.
+# This is due to the tracking module not recognizing the SSH session as a valid
+# connection.
 - name: Start the service
-  command: systemctl restart nftables.service
+  systemd:
+    name: nftables
+    state: restarted
   async: 5
-  poll: 0
+  poll: 1
