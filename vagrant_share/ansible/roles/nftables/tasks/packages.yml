@@ -4,19 +4,3 @@
     name: nftables
     state: present
     update_cache: true
-
-- name: Enable the service
-  systemd:
-    name: nftables
-    enabled: yes
-    masked: no
-
-# NOTE We need to set a timeout since SSH will not respond.
-# This is due to the tracking module not recognizing the SSH session as a valid
-# connection.
-- name: Start the service
-  systemd:
-    name: nftables
-    state: restarted
-  async: 5
-  poll: 1
