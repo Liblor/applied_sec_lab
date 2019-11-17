@@ -6,3 +6,5 @@ ports_output_udp: []
 
 default_input_ports: ssh
 default_output_ports: ssh,domain,http,https,ntp,10514
+
+is_internal_host: false

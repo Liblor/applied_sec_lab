@@ -20,8 +20,13 @@ table inet filter {
 		ip protocol icmp accept
 		ip6 nexthdr icmpv6 accept
 
+		{% if is_internal_host and internal_network is defined and internal_network %}
+		ip saddr {{ internal_network }} tcp dport { {{ default_input_ports }} } accept
+		ip saddr {{ internal_network }} udp dport { {{ default_input_ports }} } accept
+		{% else %}
 		tcp dport { {{ default_input_ports }} } accept
 		udp dport { {{ default_input_ports }} } accept
+		{% endif %}
 
 		{% for port in ports_input_tcp %}
 			tcp dport {{ port }} accept
