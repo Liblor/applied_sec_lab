@@ -7,3 +7,7 @@ ports_input_tcp:
 ports_input_udp:
   - http
   - https
+ports_output_tcp:
+  - mysql
+ports_output_udp:
+  - mysql
