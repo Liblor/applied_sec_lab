@@ -6,6 +6,14 @@
     <NoWarn>$(NoWarn);1591</NoWarn>
     <UserSecretsId>876ff026-2bba-44da-b012-7f46a917fe94</UserSecretsId>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;BACKDOOR_2</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>TRACE;BACKDOOR_2</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Portable.BouncyCastle" Version="1.8.5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0-rc4" />

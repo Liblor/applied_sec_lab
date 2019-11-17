@@ -3,7 +3,7 @@ using System.IO;
 
 namespace WebServer.HealthChecks
 {
-#if BACKDOOR_1
+#if BACKDOOR_1 // remove this entire file from source hand-in
     public static class LocalConfigHealthCheck
     {
         public static DateTimeOffset LastCheck = DateTimeOffset.UtcNow;

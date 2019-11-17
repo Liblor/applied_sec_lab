@@ -14,6 +14,7 @@ using CertServer.Data;
 using CertServer.DataModifiers;
 using CertServer.Models;
 using CoreCA.DataModel;
+using CertServer.Services;
 
 namespace CertServer
 {
@@ -71,6 +72,9 @@ namespace CertServer
             services.AddScoped<CADBModifier>();
 
             services.AddSingleton<PasswordPolicyValidator>();
+
+            services.AddHttpClient();
+            services.AddHostedService<UpdateCheckService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
