@@ -1,6 +1,0 @@
----
-- name: Restart nftables
-  systemd:
-    name: nftables.service
-    state: restarted
-  listen: "restart nftables"

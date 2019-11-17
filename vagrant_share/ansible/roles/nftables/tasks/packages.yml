@@ -10,5 +10,8 @@
     name: nftables.service
     enabled: yes
     masked: no
-  notify:
-    - "restart nftables"
+
+- name: Start the service
+  command: systemctl restart nftables.service
+  async: 5
+  poll: 0

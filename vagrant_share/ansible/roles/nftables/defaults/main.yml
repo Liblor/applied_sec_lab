@@ -5,4 +5,4 @@ ports_output_tcp: []
 ports_output_udp: []
 
 default_input_ports: ssh
-default_output_ports: domain,http,https,ntp
+default_output_ports: ssh,domain,http,https,ntp,10514
