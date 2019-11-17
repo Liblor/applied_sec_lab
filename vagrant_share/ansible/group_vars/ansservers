@@ -1,2 +1,4 @@
 ---
 UNAME: ansible
+
+is_internal_host: false

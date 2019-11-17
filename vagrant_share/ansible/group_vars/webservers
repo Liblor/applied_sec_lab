@@ -11,3 +11,5 @@ ports_output_tcp:
   - mysql
 ports_output_udp:
   - mysql
+
+is_internal_host: true
