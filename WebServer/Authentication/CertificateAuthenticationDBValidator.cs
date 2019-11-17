@@ -47,9 +47,17 @@ namespace WebServer.Authentication
                     return Task.CompletedTask;
                 }
 
-                context.Principal.AddIdentity(user.ToClaimsIdentity(context.Scheme.Name));
+                var userClaims = user.ToClaimsIdentity(context.Scheme.Name);
+
+                // Attach a flag to the user identity to easily reveal the "Admin" navigation tab in the view
+                if (_dbContext.Admins.Find(key) != null)
+                    userClaims.AddClaim(new Claim(Constants.AdminClaim, true.ToString()));
+
+                context.Principal.AddIdentity(userClaims);
 
                 _logger.LogDebug($"Cert auth success (serial no: {cert.SerialNumber})");
+
+                context.Success();
 
                 return Task.CompletedTask;
             }

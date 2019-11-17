@@ -71,6 +71,12 @@ namespace WebServer.Controllers
                     RedirectUri = returnUrl
                 };
 
+                if (_dbContext.Admins.Find(user.Id) != null)
+                {
+                    ViewData["ErrorMessage"] = "CA admins may only use certificate authentication.";
+                    return View(loginDetails);
+                }
+
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                     new ClaimsPrincipal(user.ToClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme)),
                     authProps);
