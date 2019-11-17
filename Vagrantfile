@@ -289,6 +289,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 								chmod 700 ~/.ssh
 								ssh-keygen -t ecdsa -b 521 -f ~/.ssh/imovies_#{master_hostname} -P '' -C '#{ADMIN_UNAME}@imovies.ch'
 								sshpass -p '#{ADMIN_REMOTE_PASSWORD}' ssh-copy-id -i ~/.ssh/imovies_#{master_hostname} -o StrictHostKeyChecking=accept-new #{ADMIN_UNAME}@#{master_hostname}
+								scp -i ~/.ssh/imovies_#{master_hostname} #{ADMIN_UNAME}@#{master_hostname}:/home/ansible/ca_admin_cert_with_priv_key.pfx ~/ca_admin_cert_with_priv_key_#{master_hostname}.pfx
 							EOF1
 
 							# Copy the generated key material to the shared directory.

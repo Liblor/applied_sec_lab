@@ -16,4 +16,6 @@
 - import_playbook: webservers.yml
 - import_playbook: logservers.yml
 
+- import_playbook: issue-ca-admin-cert.yml
+
 - import_playbook: logging.yml
