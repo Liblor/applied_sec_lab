@@ -2,7 +2,7 @@ namespace CertServer.Models
 {
     public class PasswordPolicyValidator
     {
-        private static string passwordList;
+        private string passwordList;
 
         public PasswordPolicyValidator()
         {
