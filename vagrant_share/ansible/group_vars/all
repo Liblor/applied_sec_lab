@@ -25,3 +25,5 @@ TLS_GROUP: tls-trusted
 INTERMEDIATE_CERT_PURPOSES:
   - internal
   - external
+
+internal_network: 172.17.0.1/24

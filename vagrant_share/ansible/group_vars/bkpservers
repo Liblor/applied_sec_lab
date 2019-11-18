@@ -1,2 +1,4 @@
 ---
 UNAME: abc
+
+is_internal_host: true

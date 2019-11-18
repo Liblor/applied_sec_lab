@@ -1,2 +1,11 @@
 ---
 UNAME: abc
+
+ports_input_tcp:
+  - http
+  - https
+ports_input_udp:
+  - http
+  - https
+
+is_internal_host: true
