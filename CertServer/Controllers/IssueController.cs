@@ -151,6 +151,16 @@ namespace CertServer.Controllers
                         hashAlg
                     );
                 }
+                else
+                {
+                    _logger.LogError(
+                        string.Format(
+                            "Unknown encryption algorithm '{0}'.",
+                            cipherSuite.Alg
+                        )
+                    );
+                    throw new CryptographicUnexpectedOperationException();
+                }
 
                 // Add email as SAN
                 SubjectAlternativeNameBuilder sanBuilder = new SubjectAlternativeNameBuilder();
