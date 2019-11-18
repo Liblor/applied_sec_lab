@@ -19,8 +19,8 @@ function pre_unlock() { :; }
 function pre_backup() { :; }
 function post_backup() {
 	{% if inventory_hostname in groups['dbservers'] %}
-	mysqldump imovies -u {{ mysql_backup_username }} -p{{ mysql_backup_password }} > /home/{{ UNAME }}/backup/imovies.dump
-	mysqldump imovies_ca -u {{ mysql_backup_username }} -p{{ mysql_backup_password }} > /home/{{ UNAME }}/backup/imovies_ca.dump
+	mysqldump imovies -u {{ mysql_backup_username }} > /home/{{ UNAME }}/backup/imovies.dump
+	mysqldump imovies_ca -u {{ mysql_backup_username }} > /home/{{ UNAME }}/backup/imovies_ca.dump
 	{% else %}
 	:;
 	{% endif %}
