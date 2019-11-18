@@ -1,0 +1,46 @@
+---
+- name: restart sysctl
+  become: 'yes'
+  become_method: sudo
+  service:
+    name: systemd-sysctl
+    state: restarted
+
+- name: reload systemd
+  become: 'yes'
+  become_method: sudo
+  systemd:
+    daemon_reload: 'yes'
+
+- name: restart sshd
+  become: 'yes'
+  become_method: sudo
+  service:
+    name: sshd
+    state: restarted
+
+- name: apt-get autoremove
+  become: 'yes'
+  become_method: sudo
+  apt:
+    autoremove: 'yes'
+
+- name: apt-get clean
+  become: 'yes'
+  become_method: sudo
+  apt:
+    autoclean: 'yes'
+
+- name: enable haveged
+  become: 'yes'
+  become_method: sudo
+  systemd:
+    name: haveged
+    enabled: 'yes'
+    state: started
+
+- name: update authconfig
+  become: 'yes'
+  become_method: sudo
+  command: authconfig --updateall
+...
