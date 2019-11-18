@@ -8,7 +8,7 @@
 
 - name: Stop service mariaDB, if running
   systemd:
-    name: mysql
+    name: mariadb
     state: stopped
 
 - name: Patch wsrep_sst_mariabackup

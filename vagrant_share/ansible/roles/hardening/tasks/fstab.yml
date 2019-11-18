@@ -1,0 +1,9 @@
+---
+- name: remove floppy from fstab
+  become: 'yes'
+  become_method: sudo
+  lineinfile:
+    path: /etc/fstab
+    state: absent
+    regexp: '^(.*)floppy(.*)$'
+...

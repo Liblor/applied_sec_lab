@@ -1,0 +1,18 @@
+---
+ntp: 0.europe.pool.ntp.org 1.europe.pool.ntp.org
+fallback_ntp: 2.europe.pool.ntp.org 3.europe.pool.ntp.org
+dns: 127.0.0.1
+fallback_dns: 1.1.1.1 9.9.9.9
+dnssec: allow-downgrade
+suid_sgid_blacklist: [/bin/mount, /bin/ping, /bin/ping6, /bin/su, /bin/umount, /usr/bin/bsd-write, /usr/bin/chage, /usr/bin/chfn, /usr/bin/chsh, /usr/bin/mlocate, /usr/bin/newgrp, /usr/bin/wall, /usr/bin/write]
+random_ack_limit: "{{ 1000000 | random(start=1000) }}"
+packages_debian: [acct, apparmor-profiles, apparmor-utils, haveged, libpam-apparmor, libpam-cracklib, libpam-tmpdir, needrestart, tcpd, vlock]
+packages_blacklist: [avahi*, avahi-*, beep, git, pastebinit, popularity-contest, rsh*, talk*, telnet*, tftp*, whoopsie, xinetd, yp-tools, ypbind]
+net_modules_blacklist: [dccp, sctp, rds, tipc]
+fs_modules_blacklist: [cramfs, freevxfs, hfs, hfsplus, jffs2, squashfs, udf, vfat]
+misc_modules_blacklist: [bluetooth, bnep, btusb, firewire-core, floppy, n_hdlc, net-pf-31, pcspkr, soundcore, thunderbolt, usb-midi, usb-storage]
+limit_nofile_soft: 512
+limit_nofile_hard: 1024
+limit_nproc_soft: 512
+limit_nproc_hard: 1024
+...

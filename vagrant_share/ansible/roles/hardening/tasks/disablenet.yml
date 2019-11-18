@@ -1,0 +1,23 @@
+---
+- name: disablenet.conf
+  become: 'yes'
+  become_method: sudo
+  file:
+    state: touch
+    path: /etc/modprobe.d/disablenet.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: disable kernel network modules
+  become: 'yes'
+  become_method: sudo
+  lineinfile:
+    dest: /etc/modprobe.d/disablenet.conf
+    line: "install {{ item }} /bin/true"
+  with_items:
+    - "{{ net_modules_blacklist }}"
+  tags:
+    - modprobe
+    - security
+...

@@ -24,9 +24,7 @@ clean:
 
 .PHONY: halt
 halt:
-	vagrant ssh asldb02 -c "sudo systemctl stop mariadb"
 	vagrant halt
-
 
 .PHONY: push
 push:
