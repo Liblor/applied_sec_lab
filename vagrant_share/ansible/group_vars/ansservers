@@ -1,3 +1,5 @@
 ---
 UNAME: ansible
 USER_SHELL: /bin/bash
+
+is_internal_host: false

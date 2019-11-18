@@ -1,0 +1,6 @@
+---
+- name: Install the package
+  package:
+    name: nftables
+    state: present
+    update_cache: true
