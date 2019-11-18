@@ -1,3 +1,8 @@
 ---
 UNAME: abc
 USER_SHELL: /sbin/nologin
+
+ports_input_tcp:
+  - 10514
+
+is_internal_host: true

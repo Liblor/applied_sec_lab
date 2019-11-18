@@ -1,3 +1,5 @@
 ---
 UNAME: borg_backup
 USER_SHELL: /bin/bash
+
+is_internal_host: true

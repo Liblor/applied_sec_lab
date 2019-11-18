@@ -1,3 +1,14 @@
 ---
 UNAME: mysql
 USER_SHELL: /sbin/nologin
+
+ports_input_tcp:
+  - mysql
+  - 4444
+  - 4567
+  - 4568
+ports_input_udp:
+  - mysql
+  - 4567
+
+is_internal_host: true
