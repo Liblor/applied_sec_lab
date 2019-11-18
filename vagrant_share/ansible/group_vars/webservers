@@ -1,2 +1,15 @@
 ---
 UNAME: webserver
+
+ports_input_tcp:
+  - http
+  - https
+ports_input_udp:
+  - http
+  - https
+ports_output_tcp:
+  - mysql
+ports_output_udp:
+  - mysql
+
+is_internal_host: true

@@ -1,0 +1,6 @@
+---
+- name: Apply the configuration
+  systemd:
+    name: nftables.service
+    state: reloaded
+  listen: "reload nftables"
