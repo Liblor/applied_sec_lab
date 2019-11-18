@@ -24,6 +24,14 @@
     group: root
     mode: '0644'
 
+- name: mysqldump user config
+  template:
+    src: mysqldump.cnf.j2
+    dest: /etc/mysql/mariadb.conf.d/mysqldump.cnf
+    owner: mysql
+    group: mysql
+    mode: '0600'
+
 - name: Disable mariadb autostart as joiner
   systemd:
     name: mariadb
