@@ -1,0 +1,23 @@
+#!/usr/sbin/nft -f
+
+# {{ ansible_managed }}
+
+flush ruleset
+
+table inet filter {
+	chain global {
+		ct state established,related accept
+	}
+
+	chain input {
+		type filter hook input priority 0;
+		policy accept;
+		jump global
+	}
+
+	chain output {
+		type filter hook output priority 0;
+		policy accept;
+		jump global
+	}
+}

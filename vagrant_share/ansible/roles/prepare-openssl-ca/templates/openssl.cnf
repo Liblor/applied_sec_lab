@@ -1,0 +1,68 @@
+#
+# OpenSSL config file for iMovies Root CA
+#
+
+####################################################################
+[ ca ]
+default_ca = CA_default
+
+####################################################################
+[ CA_default ]
+dir            = {{ ca_folder }}
+certs          = $dir/certs
+crl_dir        = $dir/crl
+database       = $dir/index.txt
+serial         = $dir/serial
+new_certs_dir  = $dir/newcerts
+
+certificate = "{{ ca_cert_path }}"
+private_key = "{{ ca_priv_key_path }}"
+
+crlnumber         = $dir/crlnumber
+crl               = $dir/{{ crl_file_name }}
+default_crl_days  = 30
+
+default_md    = sha512
+name_opt      = ca_default
+cert_opt      = ca_default
+preserve      = no
+default_days  = 730
+
+policy = policy_match
+
+# CSR are trusted to provide valid SANs since they are generated
+# from the internal infrastructure only.
+copy_extensions = copy
+
+# For the CA policy
+[ policy_match ]
+countryName            = match
+stateOrProvinceName    = match
+organizationName       = match
+organizationalUnitName = optional
+commonName             = supplied
+emailAddress           = optional
+
+[ v3_intermediate_ca ]
+basicConstraints       = critical, CA:true, pathlen:0
+keyUsage               = critical, digitalSignature, keyCertSign, cRLSign
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = issuer
+
+[ server_cert ]
+basicConstraints        = CA:FALSE
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = issuer:always
+keyUsage                = critical, digitalSignature, keyEncipherment
+extendedKeyUsage        = serverAuth, clientAuth
+nsCertType              = client, server
+
+[ backup_cert ]
+basicConstraints        = CA:FALSE
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = issuer:always
+keyUsage                = dataEncipherment
+crlDistributionPoints   = @crl_info
+
+[ crl_info ]
+URI.0 = {{ CRL_DISTRIBUTION_POINT }}

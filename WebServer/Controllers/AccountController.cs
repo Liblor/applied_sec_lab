@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication;
+using CoreCA.Client;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,9 +17,11 @@ namespace WebServer.Controllers
     public class AccountController : Controller
     {
         private readonly IMoviesUserContext _dbContext;
+        private readonly CoreCAClient _caClient;
 
-        public AccountController(IMoviesUserContext dbContext)
+        public AccountController(CoreCAClient caClient, IMoviesUserContext dbContext)
         {
+            _caClient = caClient;
             _dbContext = dbContext;
         }
 
@@ -68,6 +71,12 @@ namespace WebServer.Controllers
                     RedirectUri = returnUrl
                 };
 
+                if (_dbContext.Admins.Find(user.Id) != null)
+                {
+                    ViewData["ErrorMessage"] = "CA admins may only use certificate authentication.";
+                    return View(loginDetails);
+                }
+
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                     new ClaimsPrincipal(user.ToClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme)),
                     authProps);
@@ -93,7 +102,6 @@ namespace WebServer.Controllers
         {
             if (ModelState.IsValid)
             {
-
                 bool success = false;
 
                 var user = _dbContext.Users.Find(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
@@ -126,6 +134,32 @@ namespace WebServer.Controllers
             {
                 return View();
             }
+        }
+
+        [HttpGet, Authorize]
+        public IActionResult UpdatePassword()
+        {
+            return View();
+        }
+
+        [HttpPost, Authorize]
+        public async Task<IActionResult> UpdatePassword(UpdatePasswordDetails details)
+        {
+            if (!ModelState.IsValid)
+                return View(details);
+
+            string uid = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            if (await _caClient.ChangePassword(uid, details.OldPassword, details.NewPassword))
+            {
+                TempData["SuccessMessage"] = "Password updated successfully.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Updating password failed.";
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost, Authorize]

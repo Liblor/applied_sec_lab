@@ -1,0 +1,49 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: Add group for SSH
+      group:
+        name: sshuser
+        state: present
+    - name: Add Vagrant user to SSH group
+      user:
+        name: vagrant
+        groups: sshuser
+        append: yes
+
+- hosts: bkpservers
+  become: yes
+  tasks:
+  - name: Add user to sshuser group
+    user:
+      name: "{{ UNAME }}"
+      groups: sshuser
+      append: yes
+
+- hosts: all, !ansservers
+  become: yes
+  tasks:
+    - name: Add Ansible user to SSH group
+      user:
+        name: ansible
+        groups: sshuser
+        append: yes
+
+- hosts: ansservers
+  become: yes
+  tasks:
+    - name: Add admin user to SSH group
+      user:
+        name: admin
+        groups: sshuser
+        append: yes
+
+- hosts: all
+  become: yes
+  roles:
+    - nftables
+    - hardening
+    - lynis
+  vars:
+    ssh_allow_groups: sshuser

@@ -1,0 +1,19 @@
+---
+- name: Enable the service
+  systemd:
+    name: nftables.service
+    enabled: yes
+    masked: no
+
+- name: Install the intermediate configuration
+  template:
+    src: nftables-intermediate.conf.j2
+    dest: /etc/nftables.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Apply the intermediate configuration
+  systemd:
+    name: nftables.service
+    state: reloaded

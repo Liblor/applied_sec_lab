@@ -1,2 +1,21 @@
 ---
 UNAME: coreca
+USER_SHELL: /sbin/nologin
+
+DB_SERVER: "{{ groups['dbservers'][ groups['certservers'].index(ansible_hostname) ] }}"
+DB_PORT: 3306
+DB_IMOVIES_NAME: imovies
+DB_IMOVIES_CA_NAME: imovies_ca
+DB_USER: "{{ ansible_hostname }}"
+DB_PASSWORD: "{{ lookup('vars', 'mysql_' + ansible_hostname + '_password') }}"
+
+ports_input_tcp:
+  - https
+ports_input_udp:
+  - https
+ports_output_tcp:
+  - mysql
+ports_output_udp:
+  - mysql
+
+is_internal_host: true

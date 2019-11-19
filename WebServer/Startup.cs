@@ -1,3 +1,5 @@
+using CoreCA.Client;
+using CoreCA.DataModel;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -9,8 +11,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
+using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
+using System.Web;
 using WebServer.Authentication;
+using WebServer.HealthChecks;
 
 namespace WebServer
 {
@@ -29,9 +35,23 @@ namespace WebServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var webServerOptionsSection = Configuration.GetSection("WebServer");
+
+            services.AddOptions<WebServerOptions>()
+                .Bind(webServerOptionsSection)
+                .ValidateDataAnnotations();
+
+            var webServerOptions = webServerOptionsSection.Get<WebServerOptions>();
+
+            services.AddHealthChecks()
+                .AddDbContextCheck<IMoviesUserContext>()
+                .AddDbContextCheck<IMoviesCertContext>()
+                .AddCheck<CertServerHealthCheck>(nameof(CertServerHealthCheck));
+
             services.AddControllersWithViews(opt =>
             {
                 opt.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+                opt.OutputFormatters.Add(new CrlDerOutputFormatter());
             });
 
             services.AddAuthentication()
@@ -42,8 +62,8 @@ namespace WebServer
                 .AddCertificate(opt =>
                 {
                     opt.AllowedCertificateTypes = CertificateTypes.Chained;
-                    opt.RevocationFlag = X509RevocationFlag.EntireChain;
-                    opt.RevocationMode = X509RevocationMode.NoCheck; // TODO: switch to online
+                    opt.RevocationFlag = X509RevocationFlag.EndCertificateOnly;
+                    opt.RevocationMode = X509RevocationMode.Online;
                     opt.ValidateCertificateUse = true;
                     opt.ValidateValidityPeriod = true;
 
@@ -61,16 +81,49 @@ namespace WebServer
                 policyBuilder.RequireAuthenticatedUser();
 
                 opt.DefaultPolicy = policyBuilder.Build();
+
+                // Admins may only authenticate using certificates
+                var adminPolicy = new AuthorizationPolicyBuilder(
+                    CertificateAuthenticationDefaults.AuthenticationScheme)
+                    .RequireAuthenticatedUser()
+                    .RequireClaim(Constants.AdminClaim)
+                    .Build();
+
+                opt.AddPolicy(Constants.AdminPolicy, adminPolicy);
             });
 
+            services.AddDbContext<IMoviesUserContext>(opt => opt.UseMySql(Configuration.GetConnectionString("IMoviesUserDB")));
+            services.AddDbContext<IMoviesCertContext>(opt => opt.UseMySql(Configuration.GetConnectionString("IMoviesCertDB")));
 
-            if (Environment.IsDevelopment())
-                services.AddDbContext<IMoviesUserContext>(opt => opt.UseInMemoryDatabase("DummyDB"));
-            else
-                services.AddDbContext<IMoviesUserContext>(opt => opt.UseMySql(Configuration.GetConnectionString("IMoviesUserDB")));
-            
             services.AddScoped<CertificateAuthenticationDBValidator>();
             services.AddScoped<CookieAuthenticationDBValidator>();
+
+            services.AddHttpClient<CoreCAClient>(client =>
+            {
+                client.BaseAddress = new Uri(webServerOptions.CoreCAURL);
+            }).ConfigurePrimaryHttpMessageHandler(() => {
+                var handler = new HttpClientHandler();
+                
+                if (!string.IsNullOrEmpty(webServerOptions.ClientCertPath))
+                {
+                    var cert = new X509Certificate2(webServerOptions.ClientCertPath);
+                    handler.ClientCertificates.Add(cert);
+                }
+                return handler;
+            });
+
+            if (Environment.IsProduction())
+            {
+                services.AddCertificateForwarding(options =>
+                {
+                    options.CertificateHeader = "X-SSL-CERT";
+                    options.HeaderConverter = (headerValue) =>
+                    {
+                        // For some reason, nginx URL-encodes the cert.
+                        return new X509Certificate2(HttpUtility.UrlDecodeToBytes(headerValue)); ;
+                    };
+                });
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -81,16 +134,16 @@ namespace WebServer
                     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
             if (Environment.IsDevelopment())
-
             {
                 app.UseDeveloperExceptionPage();
-                // Keep HTTP->HTTPS redirection to test client authentication over SSL during development only; in production,
-                // HTTPS terminates at the nginx reverse proxy and Kestrel only receives plain HTTP, which would cause infinite redirect loops.
-                app.UseHttpsRedirection();
             }
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            if (Environment.IsProduction())
+                app.UseCertificateForwarding();
+
             app.UseAuthentication();
             app.UseAuthorization();
 
@@ -99,8 +152,9 @@ namespace WebServer
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Account}/{action=Index}/{id?}");
+
+                endpoints.MapHealthChecks("/health");
             });
         }
     }
-
 }

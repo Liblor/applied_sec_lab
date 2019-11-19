@@ -1,0 +1,39 @@
+---
+- name: Install script for updating CRL
+  template:
+    src: update_crl.sh.j2
+    dest: /usr/local/bin/update_crl.sh
+    owner: root
+    group: root
+    mode: 0744
+
+- name: Install systemd unit file for updating CRL
+  template:
+    src: update-crl.service.j2
+    dest: /etc/systemd/system/update-crl.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Install systemd timer file for updating CRL
+  template:
+    src: update-crl.timer.j2
+    dest: /etc/systemd/system/update-crl.timer
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Reload the systemd daemon
+  systemd:
+    daemon_reload: yes
+
+- name: Enable the timer
+  systemd:
+    name: update-crl.timer
+    enabled: yes
+    masked: no
+
+- name: Start the timer
+  systemd:
+    name: update-crl.timer
+    state: restarted

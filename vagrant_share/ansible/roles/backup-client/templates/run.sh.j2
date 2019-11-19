@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+
+SCRIPT_NAME='borgbackup'
+SCRIPT_PATH="$(dirname $(readlink -f $0))"
+FILE_LOCK='/tmp/'$SCRIPT_NAME'.lock'
+
+BORG_HOST='aslbkp01'
+BORG_PATH="{{ BACKUP_PATH_ROOT }}/{{ inventory_hostname }}"
+BORG_RSH="sudo -u {{ backup_client_username }} ssh -i /home/{{ backup_client_username }}/.ssh/id_rsa_backup"
+export BORG_RSH
+
+BORG_REPO="ssh://{{ hostvars[groups['bkpservers'][0]]['UNAME'] }}@$BORG_HOST$BORG_PATH"
+export BORG_REPO
+BORG_PASSPHRASE="{{ lookup('vars', 'borg_' + inventory_hostname + '_passphrase') }}"
+export BORG_PASSPHRASE
+
+# Dummy functions.
+function pre_unlock() { :; }
+function pre_backup() { :; }
+function post_backup() {
+	{% if inventory_hostname in groups['dbservers'] %}
+	mysqldump imovies -u {{ mysql_backup_username }} > /home/{{ UNAME }}/backup/imovies.dump
+	mysqldump imovies_ca -u {{ mysql_backup_username }} > /home/{{ UNAME }}/backup/imovies_ca.dump
+	{% else %}
+	:;
+	{% endif %}
+}
+
+source "$SCRIPT_PATH/local.sh"
+
+function unlock() {
+	pre_unlock
+
+	rm -f $FILE_LOCK
+	if [ "$?" != 0 ]; then
+		echo "Lock file could not be removed."
+		exit 1
+	fi
+}
+
+exit_on_failure() {
+	local PRESERVED_STATUS="$?"
+	local EXIT_CODE="$1"
+	local MESSAGE="$2"
+
+	if ! [ $PRESERVED_STATUS -eq 0 ]; then
+		if [ -n "$MESSAGE" ]; then
+			echo "$MESSAGE" >&2
+		fi
+
+		unlock
+		exit $EXIT_CODE
+	fi
+}
+
+function create_backup() {
+	borg create                         \
+		--verbose                       \
+		--filter AME                    \
+		--list                          \
+		--stats                         \
+		--show-rc                       \
+		--compression zstd,16           \
+		--exclude-caches                \
+		::'{hostname}-{now}'            \
+		$BACKUP_DIRECTORIES             \
+	;
+}
+
+exec 1> >(logger -t $SCRIPT_NAME) 2>&1
+trap 'echo Interrupted.; unlock; exit 2' INT TERM
+
+# Check lock file existance.
+if [ ! -e "$FILE_LOCK" ]; then
+	touch "$FILE_LOCK"
+	if [ "$?" != 0 ]; then
+		echo "Lock file could not be created."
+		exit 1
+	fi
+else
+	echo "Borg is already running."
+	exit 1
+fi
+
+pre_backup
+
+echo "Creating backup."
+create_backup
+exit_on_failure 2 "Creating backup failed."
+
+post_backup
+
+unlock
+
+echo "Borg successful."
+exit 0

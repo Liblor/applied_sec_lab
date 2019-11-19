@@ -1,3 +1,8 @@
+# Git artifacts
+*.orig
+
+# Exports of VirtualBox
+build/
 
 # Latex
 *.aux
