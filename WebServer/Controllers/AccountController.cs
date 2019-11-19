@@ -104,8 +104,10 @@ namespace WebServer.Controllers
             {
                 bool success = false;
 
+		var Emails = _dbContext.Users.Where(p => p.Email == userDetails.Email);
+
                 var user = _dbContext.Users.Find(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
-                if (user != null)
+                if (user != null && (Emails.Count() == 0 || user.Email == userDetails.Email ))
                 {
                     user.Email = userDetails.Email;
                     user.FirstName = userDetails.FirstName;
