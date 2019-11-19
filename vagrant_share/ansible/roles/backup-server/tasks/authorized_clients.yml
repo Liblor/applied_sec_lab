@@ -13,3 +13,9 @@
     group: "{{ UNAME }}"
     mode: 0600
     state: file
+
+- name: Add user to sshuser group
+  user:
+    name: "{{ UNAME }}"
+    groups: sshuser
+    append: yes
