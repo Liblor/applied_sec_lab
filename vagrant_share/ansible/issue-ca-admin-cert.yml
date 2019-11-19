@@ -3,13 +3,11 @@
 - hosts: "{{ groups['certservers'][0] }}"
   become: yes
   tasks:
-    - name: Move admin certificate issuing script to config server
-      synchronize:
-        src: /vagrant/scripts/issue_ca_admin_cert.py
-        dest: /tmp/
-
     - name: Obtain CA admin certificate
-      command: "python3 /tmp/issue_ca_admin_cert.py /home/{{ UNAME }}/ca_admin_cert_with_priv_key.pfx"
+      script:
+        cmd: "/vagrant/scripts/issue_ca_admin_cert.py /home/{{ UNAME }}/ca_admin_cert_with_priv_key.pfx"
+      args:
+        executable: python3
 
     - name: Pull CA admin certificate to config server
       synchronize:
@@ -24,8 +22,3 @@
       file:
         state: absent
         path: "/home/{{ UNAME }}/ca_admin_cert_with_priv_key.pfx"
-
-    - name: Remove admin certificate issuing script from certificate server
-      file:
-        name: /tmp/issue_ca_admin_cert.py
-        state: absent
