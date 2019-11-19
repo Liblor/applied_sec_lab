@@ -26,7 +26,13 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Cert" asp-action="Index">Certificates</a>
                         </li>
-                    </ul>
+                        @if (User.Identity.IsAuthenticated && User.HasClaim(c => c.Type == CoreCA.DataModel.Constants.AdminClaim))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Index">Admin dashboard</a>
+                            </li>
+                        }
+                        </ul>
                 </div>
                 <div class="navbar-collapse collapse order-3 dual-collapse2">
                     <ul class="navbar-nav ml-auto">
