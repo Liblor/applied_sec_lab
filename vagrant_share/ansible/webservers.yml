@@ -50,6 +50,10 @@
                 return301:
                   code: 301
                   url: https://$server_name$request_uri
+            static:
+              location: /static
+              custom_options:
+                - alias /home/{{ UNAME }}/app/wwwroot/
           http_demo_conf: false
         reverse_proxy:
           locations:

@@ -29,7 +29,7 @@
         common_name: "iMovies {{ item }} {{ ansible_hostname }} intermediate CA"
         subject_alt_name: "DNS:{{ ansible_hostname }}"
 
-        basic_constraints: "CA:true"
+        basic_constraints: "CA:TRUE"
         key_usage:
           - keyCertSign
           - cRLSign

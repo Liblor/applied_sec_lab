@@ -5,13 +5,11 @@ VisualStudioVersion = 16.0.29324.140
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebServer", "WebServer\WebServer.csproj", "{857C319B-F2AA-4314-ABE0-88DA98E7FB8E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebServer.Tests", "WebServer.Tests\WebServer.Tests.csproj", "{2262B1C7-86D3-4D45-A350-A642C3873C6C}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CertServer", "CertServer\CertServer.csproj", "{9ABE82C3-4829-40D5-91DC-71350760A351}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreCA.DataModel", "CoreCA.DataModel\CoreCA.DataModel.csproj", "{2CD46766-CC30-46F6-A523-886A33664584}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreCA.DataModel", "CoreCA.DataModel\CoreCA.DataModel.csproj", "{2CD46766-CC30-46F6-A523-886A33664584}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreCA.Client", "CoreCA.Client\CoreCA.Client.csproj", "{3D505BA8-5CF8-42DB-9489-4D7E85B9B418}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreCA.Client", "CoreCA.Client\CoreCA.Client.csproj", "{3D505BA8-5CF8-42DB-9489-4D7E85B9B418}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +21,6 @@ Global
 		{857C319B-F2AA-4314-ABE0-88DA98E7FB8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{857C319B-F2AA-4314-ABE0-88DA98E7FB8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{857C319B-F2AA-4314-ABE0-88DA98E7FB8E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2262B1C7-86D3-4D45-A350-A642C3873C6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2262B1C7-86D3-4D45-A350-A642C3873C6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2262B1C7-86D3-4D45-A350-A642C3873C6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2262B1C7-86D3-4D45-A350-A642C3873C6C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9ABE82C3-4829-40D5-91DC-71350760A351}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9ABE82C3-4829-40D5-91DC-71350760A351}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9ABE82C3-4829-40D5-91DC-71350760A351}.Release|Any CPU.ActiveCfg = Release|Any CPU
