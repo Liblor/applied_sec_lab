@@ -1,0 +1,17 @@
+---
+- name: Create the directory for backup repositories
+  file:
+    path: "{{ backup_path }}/"
+    state: directory
+    owner: "{{ UNAME }}"
+    group: "{{ UNAME }}"
+    mode: 0700
+
+- name: Create a directory for each backup client
+  file:
+    path: "{{ backup_path }}/{{ item }}"
+    state: directory
+    owner: "{{ UNAME }}"
+    group: "{{ UNAME }}"
+    mode: 0700
+  loop: "{{ groups['backupclients'] }}"

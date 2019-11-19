@@ -2,6 +2,15 @@
 - hosts: certservers
   become: yes
   roles:
+    - borgbackup
+    - backup-client
+  vars:
+    backup_files:
+      - "/home/{{ UNAME }}/backup"
+
+- hosts: certservers
+  become: yes
+  roles:
     - asl-certserver
   vars_files:
     - /vagrant/mysql_passwords.yml

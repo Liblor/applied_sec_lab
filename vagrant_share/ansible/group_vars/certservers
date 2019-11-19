@@ -1,5 +1,6 @@
 ---
 UNAME: coreca
+USER_SHELL: /sbin/nologin
 
 DB_SERVER: "{{ groups['dbservers'][ groups['certservers'].index(ansible_hostname) ] }}"
 DB_PORT: 3306

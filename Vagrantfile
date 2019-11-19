@@ -47,9 +47,9 @@ hosts = {
 	"logservers" => {
 		"asllog01" => { :ip => "172.17.0.61" },
 	},
-	# "bkpservers" => {
-	#	"aslbkp01" => { :ip => "172.17.0.71" },
-	# }
+	"bkpservers" => {
+		"aslbkp01" => { :ip => "172.17.0.71" },
+	}
 }
 
 clients = {
@@ -57,6 +57,9 @@ clients = {
 		"aslclient01" => { :public_net_ip => "172.16.0.81" },
 	},
 }
+
+# aslans01 is 'hardcoded' as local host
+backupclients = [hosts["certservers"], hosts["dbservers"], hosts["logservers"]]
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 	config.vm.provider "virtualbox"
@@ -214,6 +217,21 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 						SHELL
 					end # hosts
 				end # category_hosts.each
+
+				# Add backupclients
+				hostconf.vm.provision "shell", inline: <<-SHELL
+				echo -e "\n[backupclients]" | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
+				# Add ansible master
+				echo -e '#{master_hostname} ansible_connection=local' | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
+				SHELL
+				backupclients.each do |category|
+					category.each do |hostname, info|
+						hostconf.vm.provision "shell", inline: <<-SHELL
+						# Add hostname
+						echo "#{hostname}" | sudo tee -a "/home/#{ANSIBLE_UNAME}/production"
+						SHELL
+					end # hosts
+				end # backupclients.each
 
 				hostconf.vm.provision "shell", inline: <<-SHELL
 					sudo -i -u #{ANSIBLE_UNAME} bash <<-EOF1

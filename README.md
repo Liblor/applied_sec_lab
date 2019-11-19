@@ -41,6 +41,20 @@ ansible-playbook -e "FORCE_ROOT_CA_CERT_REGEN=true" -i production site.yml
 #### Key revocation
 Intermediate and/or TLS certificates are revoked automatically. A new CRL is generated with openssl every time new certificates are generated with ansible. One CRL for the intermediate certificates is signed by the Root CA, the CRL for the TLS certificates is signed by the intermediate certificate. Both are valid for 30 days and stored in `/etc/pki/tls/crl/`. **The concatenated CRL `/etc/pki/tls/crl/tls_crl_chain.pem` has to be checked everywhere TLS certificates are used.**
 
+#### Private key backup
+To recover private keys encrypted with the backup servers public key, transfer the encrypted file to a machine with access to the private key of the backup server and run:
+```
+openssl rsautl -decrypt -inkey /vagrant/key_store/iMovies_bkp_key.pem -in <encrypted key>.pem.enc -out key.pem -oaep
+```
+
+To extract a EC private key from a Pkcs12 certificate (to compare to the above), run:
+```
+openssl pkcs12 -in <archive name>.pfx -nocerts -out privateKey.pem
+openssl ec -in privateKey.pem -out privateKey_dec.pem
+md5sum privateKey_dec.pem
+# Compare with the MD5 sum of the above key:
+md5sum key.pem
+```
 ## Install environment
 ### Vagrant
 Vagrant creates all VMs automatically, configures their networks and initializes the ansible master server.

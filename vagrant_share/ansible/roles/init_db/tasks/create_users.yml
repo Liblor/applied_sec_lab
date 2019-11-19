@@ -51,3 +51,13 @@
     state: present
     login_user: "{{ mysql_root_username }}"
     login_password: "{{ mysql_root_password }}"
+
+- name: Create database user 'backup'
+  mysql_user:
+    name: "{{ mysql_backup_username }}"
+    password: "{{ mysql_backup_password }}"
+    priv: "*.*:SELECT,LOCK TABLES,SHOW VIEW,EVENT,TRIGGER"
+    host: localhost
+    state: present
+    login_user: "{{ mysql_root_username }}"
+    login_password: "{{ mysql_root_password }}"

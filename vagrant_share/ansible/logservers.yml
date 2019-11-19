@@ -1,2 +1,9 @@
 ---
 - hosts: logservers
+  become: yes
+  roles:
+    - borgbackup
+    - backup-client
+  vars:
+    backup_files:
+      - "/var/log"

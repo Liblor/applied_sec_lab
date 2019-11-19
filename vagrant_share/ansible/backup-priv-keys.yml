@@ -1,0 +1,74 @@
+---
+# We generate one private key and encrypt the private keys of user certificates
+# with this key before we push them to (potentially) multiple backup servers.
+# The private key for this asymmetric encryption is stored offline.
+- hosts: ansservers
+  become: yes
+  roles:
+    - role: revoke-certs
+      when: FORCE_BKP_KEY_REGEN
+  vars:
+    ca_folder: "/home/{{ UNAME }}/root_ca"
+    openssl_conf_name: Root-CA-openssl.cnf
+    crl_name: Root_CA.crl
+    cert_to_revoke: "/home/{{ UNAME }}/root_ca/certs/iMovies_bkp_key.crt"
+    search_pattern: "iMovies_bkp.crt"
+  tasks:
+    - name: Generate RSA key to backup user private keys
+      openssl_privatekey:
+        path: /vagrant/key_store/iMovies_bkp_key.pem
+        type: RSA
+        size: 4096
+        force: "{{ FORCE_BKP_KEY_REGEN }}"
+
+    - name: Create CSR for backup key
+      openssl_csr:
+        path: root_ca/csr/iMovies_bkp_key.csr
+        privatekey_path: /vagrant/key_store/iMovies_bkp_key.pem
+
+        country_name: "{{ COUNTRY_NAME }}"
+        state_or_province_name: "{{ STATE_OR_PROVINCE_NAME }}"
+        locality_name: "{{ LOCALITY_NAME }}"
+        organization_name: "{{ ORGANIZATION_NAME }}"
+        common_name: "Backup Key"
+
+        key_usage:
+          - dataEncipherment
+
+        force: "{{ FORCE_BKP_KEY_REGEN }}"
+
+    - name: Create certificate for backup key
+      command: |
+        openssl ca -batch -config Root-CA-openssl.cnf \
+        -extensions backup_cert -notext \
+        -in csr/iMovies_bkp_key.csr \
+        -out certs/iMovies_bkp.crt
+      args:
+        chdir: root_ca/
+      when: FORCE_BKP_KEY_REGEN
+
+- import_playbook: generate-root-crl.yml
+  when: FORCE_BKP_KEY_REGEN
+  vars:
+    revoke_intermediate_certs: false
+- import_playbook: distribute-crl.yml
+  when: FORCE_BKP_KEY_REGEN
+
+- hosts: certservers
+  become: yes
+  tasks:
+    - name: Create folder for public backup key
+      file:
+        path: /etc/pki/bkp/certs
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Distribute public backup key
+      synchronize:
+        src: root_ca/certs/iMovies_bkp.crt
+        dest: /etc/pki/bkp/certs/
+        owner: false
+        group: false
+      when: FORCE_BKP_KEY_REGEN

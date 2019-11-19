@@ -1,24 +1,7 @@
 ---
-- hosts: ansservers
-  become: yes
-  roles:
-    - role: revoke-all-certs
-      when: FORCE_INTERMEDIATE_CA_CERT_REGEN
+- import_playbook: generate-root-crl.yml
   vars:
-    ca_folder: "/home/{{ UNAME }}/root_ca"
-    openssl_conf_name: Root-CA-openssl.cnf
-    crl_name: Root_CA.crl
-
-# Distribute CRL
-- hosts: all, !ansservers
-  become: yes
-  tasks:
-    - name: Distribute new intermediate CA CRL
-      synchronize:
-        src: root_ca/Root_CA.crl
-        dest: /etc/pki/tls/crl/
-        rsync_path: "sudo rsync"
-      when: FORCE_INTERMEDIATE_CA_CERT_REGEN
+    revoke_intermediate_certs: true
 
 - hosts: certservers
   become: yes
@@ -107,6 +90,7 @@
         rsync_path: "sudo rsync"
       with_items:
         - "{{ INTERMEDIATE_CERT_PURPOSES }}"
+      when: FORCE_INTERMEDIATE_CA_CERT_REGEN
 
     - name: Fix intermediate CA certificates owner and group
       file:
