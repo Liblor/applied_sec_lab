@@ -12,6 +12,15 @@
         groups: sshuser
         append: yes
 
+- hosts: bkpservers
+  become: yes
+  tasks:
+  - name: Add user to sshuser group
+    user:
+      name: "{{ UNAME }}"
+      groups: sshuser
+      append: yes
+
 - hosts: all, !ansservers
   become: yes
   tasks:
