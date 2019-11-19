@@ -20,7 +20,7 @@
                 </button>
             </div>
         }
-        if (ViewData.TryGetValue("ErrorMessage", out successMessage) || TempData.TryGetValue("ErrorMessage", out successMessage))
+        if (ViewData.TryGetValue("ErrorMessage", out errorMessage) || TempData.TryGetValue("ErrorMessage", out errorMessage))
         {
             <div class="alert alert-danger alert-dismissible show" role="alert">
                 @errorMessage
