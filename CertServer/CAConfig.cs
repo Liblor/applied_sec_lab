@@ -13,6 +13,9 @@ namespace CertServer
         public static readonly string CoreCACertPath = "/home/coreca/pki/private/iMovies_external_"
             + System.Environment.MachineName
             + "_Intermediate_CA_cert_and_priv_key.pfx";
+        public static readonly string BackupServerCertPath = "/etc/pki/bkp/certs/iMovies_bkp.crt";
+        public static readonly string BackupFolder = "/home/coreca/backup/";
+        public static readonly string BackupScript = "/etc/borgbackup/run.sh";
 
         public static readonly int UserCertValidityPeriod = 150;
         public static readonly double SerialNumberWarningThreshold = 0.9;

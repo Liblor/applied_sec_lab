@@ -1,5 +1,6 @@
 ---
 UNAME: abc
+USER_SHELL: /sbin/nologin
 
 ports_input_tcp:
   - http

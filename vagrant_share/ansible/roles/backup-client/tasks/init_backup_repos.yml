@@ -1,0 +1,9 @@
+---
+- name: Init Backup repo
+  shell: >-
+    BORG_PASSPHRASE={{ lookup('vars', 'borg_' + inventory_hostname + '_passphrase') }} borg init --encryption=keyfile-blake2
+    --append-only
+    '{{ hostvars[groups['bkpservers'][0]]['UNAME'] }}@{{ item + ":" + BACKUP_PATH_ROOT + "/" + inventory_hostname }}'
+    --rsh 'sudo -u {{ backup_client_username }}
+    ssh -oStrictHostKeyChecking=accept-new -i /home/{{ backup_client_username }}/.ssh/id_rsa_backup'
+  with_items: "{{ groups['bkpservers'] }}"

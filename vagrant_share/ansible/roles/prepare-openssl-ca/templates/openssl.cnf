@@ -50,10 +50,19 @@ subjectKeyIdentifier   = hash
 authorityKeyIdentifier = issuer
 
 [ server_cert ]
-basicConstraints = CA:FALSE
-nsCertType = server
-subjectKeyIdentifier = hash
-authorityKeyIdentifier = issuer:always
-keyUsage = critical, digitalSignature, keyEncipherment
-extendedKeyUsage = serverAuth, clientAuth
-nsCertType = client, server
+basicConstraints        = CA:FALSE
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = issuer:always
+keyUsage                = critical, digitalSignature, keyEncipherment
+extendedKeyUsage        = serverAuth, clientAuth
+nsCertType              = client, server
+
+[ backup_cert ]
+basicConstraints        = CA:FALSE
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = issuer:always
+keyUsage                = dataEncipherment
+crlDistributionPoints   = @crl_info
+
+[ crl_info ]
+URI.0 = {{ CRL_DISTRIBUTION_POINT }}

@@ -80,12 +80,13 @@
 - hosts: certservers
   become: yes
   roles:
-    - role: revoke-all-certs
+    - role: revoke-certs
       when: FORCE_TLS_CERT_REGEN
   vars:
     ca_folder: "/home/{{ UNAME }}/intermediate_ca"
     openssl_conf_name: Intermediate-CA-openssl.cnf
     crl_name: Intermediate_CA.crl
+    search_pattern: "*_tls.crt"
   tasks:
     - name: Transfer CRL to config server
       synchronize:
@@ -104,19 +105,8 @@
         src: tls/crl/
         dest: /etc/pki/tls/crl/
 
-- hosts: all, !ansservers
-  become: yes
-  tasks:
-    - name: Distribute new CRL
-      synchronize:
-        src: /etc/pki/tls/crl/
-        dest: /etc/pki/tls/crl/
-        rsync_path: "sudo rsync"
-
-    - name: Combine Root CA and intermediate CA CRL
-      shell: |
-        cat /etc/pki/tls/crl/Root_CA.crl /etc/pki/tls/crl/Intermediate_CA.crl \
-        > /etc/pki/tls/crl/tls_crl_chain.pem
+- import_playbook: distribute-crl.yml
+  when: FORCE_TLS_CERT_REGEN
 
 # The first core ca signs all internal tls certificates
 - hosts: "{{ groups['certservers'][0] }}"

@@ -3,5 +3,5 @@
   user:
     name: "{{ UNAME }}"
     password_lock: yes
-    shell: /sbin/nologin
+    shell: "{{ USER_SHELL }}"
     append: yes
