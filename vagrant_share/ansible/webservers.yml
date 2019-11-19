@@ -24,7 +24,7 @@
     trusted_user: nginx
     ssl_client_required: false
   vars_files:
-    - nginx_vars.yml
+    - nginx_vars_static.yml
 
 - hosts: webservers
   become: yes
@@ -50,10 +50,6 @@
                 return301:
                   code: 301
                   url: https://$server_name$request_uri
-            static:
-              location: /static
-              custom_options:
-                - alias /home/{{ UNAME }}/app/wwwroot/
           http_demo_conf: false
         reverse_proxy:
           locations:
