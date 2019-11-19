@@ -153,10 +153,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 				end # provider
 
 				hostconf.vm.provision "shell", inline: <<-SHELL
-					# https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#latest-releases-via-apt-debian
-					echo -e "\ndeb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main" | sudo tee -a "/etc/apt/sources.list"
-					sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
-
 					# Install Ansible
 					sudo apt-get update
 					DEBIAN_FRONTEND=noninteractive sudo -E apt-get install -y ansible sshpass
