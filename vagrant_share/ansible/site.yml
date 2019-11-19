@@ -17,5 +17,6 @@
 - import_playbook: logservers.yml
 
 - import_playbook: issue-ca-admin-cert.yml
+  tags: [never, setup]
 
 - import_playbook: logging.yml
