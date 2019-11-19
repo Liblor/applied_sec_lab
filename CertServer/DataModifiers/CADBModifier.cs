@@ -102,7 +102,6 @@ namespace CertServer.DataModifiers
             return _dbContext.Database.BeginTransaction();
         }
 
-        // XXX: Test if CRL signature is correct
         public X509Crl GenerateCRL()
         {
             var coreCApkcs = new Org.BouncyCastle.Pkcs.Pkcs12Store(
@@ -124,7 +123,6 @@ namespace CertServer.DataModifiers
 
             foreach (PublicCertificate pubCert in revokedPubCerts)
             {
-                //XXX: add crlreason to pubCert DB
                 crlGen.AddCrlEntry(
                     new Org.BouncyCastle.Math.BigInteger(pubCert.GetSerialNumber().SerialNrBytes),
                     now,

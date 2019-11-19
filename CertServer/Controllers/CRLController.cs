@@ -28,7 +28,6 @@ namespace CertServer.Controllers
         /// </remarks>
         /// <returns>Signed CRL in DER-encoded format</returns>
 
-        // XXX: Return type?
         [Produces(Constants.CrlMimeType)]
         [ProducesResponseType(200)]
         [HttpGet("[controller]")]
