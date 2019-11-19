@@ -2,29 +2,59 @@
 - hosts: webservers
   become: yes
   roles:
-    - aspdotnet
+    - add-to-trusted-user-group
     - asl-webserver
+  vars:
+    trusted_user: "{{ UNAME }}"
+    crl_directory: /etc/pki/tls/crl
+    root_crl: /etc/pki/tls/crl/Root_CA.crl
+    intermediate_crl: /etc/pki/tls/crl/Intermediate_CA.crl
+    chained_crl: /etc/pki/tls/crl/tls_crl_chain.pem
+
+  vars_files:
+    - /vagrant/mysql_passwords.yml
+
+- hosts: webservers
+  become: yes
+  roles:
+    - nginxinc.nginx
+    - nginx-ssl-client
+    - add-to-trusted-user-group
+  vars:
+    trusted_user: nginx
+    ssl_client_required: false
+  vars_files:
+    - nginx_vars.yml
+
+- hosts: webservers
+  become: yes
+  roles:
     - nginxinc.nginx
   vars:
     nginx_http_template_enable: true
     nginx_http_template:
-      default:
+      unencrypted:
         template_file: http/default.conf.j2
-        conf_file_name: default.conf
+        conf_file_name: unencrypted.conf
         conf_file_location: /etc/nginx/conf.d/
-        port: 80
-        server_name: localhost
-        error_page: /usr/share/nginx/html
-        autoindex: false
-        add_headers:
-          x_frame_options:
-            name: X-Frame-Options
-            value: "SAMEORIGIN"
-            always: true
+        listen:
+          listen_all:
+            ip: 0.0.0.0
+            port: 80
+        server_name: "{{ ansible_hostname }}"
+        web_server:
+          locations:
+            redirect:
+              location: /
+              returns:
+                return301:
+                  code: 301
+                  url: https://$server_name$request_uri
+          http_demo_conf: false
         reverse_proxy:
           locations:
             aspnet:
-              location: /
+              location: /crl/revoked.crl
               proxy_pass: http://aspnet
               proxy_http_version: 1.1
               proxy_set_header:
@@ -43,14 +73,3 @@
                 header_x_forwarded_proto:
                   name: X-Forwarded-Proto
                   value: $scheme
-        upstreams:
-          upstream:
-            name: aspnet
-            lb_method: least_conn
-            zone_name: aspnet
-            zone_size: 64k
-            sticky_cookie: false
-            servers:
-              aspnet_1:
-                address: localhost
-                port: 5000

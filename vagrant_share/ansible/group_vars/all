@@ -6,13 +6,32 @@ STATE_OR_PROVINCE_NAME: Zurich
 LOCALITY_NAME: Zurich
 ORGANIZATION_NAME: iMovies
 
+CRL_DISTRIBUTION_POINT: "http://imovies.ch/crl/revoked.crl"
+
 # Folders
 VAGRANT_SHARED_FOLDERNAME: vagrant
 
 # Regenerate certificates
 FORCE_ROOT_CA_CERT_REGEN: false
 FORCE_INTERMEDIATE_CA_CERT_REGEN: "{{FORCE_ROOT_CA_CERT_REGEN}}"
+FORCE_BKP_KEY_REGEN: "{{FORCE_ROOT_CA_CERT_REGEN}}"
 FORCE_TLS_CERT_REGEN: "{{FORCE_INTERMEDIATE_CA_CERT_REGEN}}"
 
 # Save user secrets ID compiled into certserver release
 CERTSERVER_USER_SECRETS_ID: 876ff026-2bba-44da-b012-7f46a917fe94
+
+# Members of this group have access to the TLS private key
+TLS_GROUP: tls-trusted
+
+# Different intermediate certificates are created for the following purposes.
+# Attention, the code relies on the order of this list!
+INTERMEDIATE_CERT_PURPOSES:
+  - internal
+  - external
+
+
+BACKUP_SSH_PUBK_LOCAL_PATH_PREFIX: "/tmp/id_rsa_"
+BACKUP_PATH_ROOT: "/backups"
+backup_client_username: "backup_client"
+internal_network: 172.17.0.1/24
+

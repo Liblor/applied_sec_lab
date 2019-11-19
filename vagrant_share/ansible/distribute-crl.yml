@@ -1,0 +1,14 @@
+---
+- hosts: all, !ansservers
+  become: yes
+  tasks:
+    - name: Distribute new CRL
+      synchronize:
+        src: /etc/pki/tls/crl/
+        dest: /etc/pki/tls/crl/
+        rsync_path: "sudo rsync"
+
+    - name: Combine Root CA and intermediate CA CRL
+      shell: |
+        cat /etc/pki/tls/crl/Root_CA.crl /etc/pki/tls/crl/Intermediate_CA.crl \
+        > /etc/pki/tls/crl/tls_crl_chain.pem

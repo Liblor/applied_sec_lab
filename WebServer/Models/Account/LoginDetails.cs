@@ -1,16 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebServer.Models.Account
 {
     public class LoginDetails
     {
+        [Required, StringLength(64, MinimumLength = 1)]
         [Display(Name = "User ID")]
-        [StringLength(64, MinimumLength = 1)]
-        [Required]
         public string Id { get; set; }
 
-        [Display(Name = "Password")]
         [Required, DataType(DataType.Password)]
+        [Display(Name = "Password")]
         public string Password { get; set; }
     }
 }

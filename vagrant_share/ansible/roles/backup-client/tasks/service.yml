@@ -1,0 +1,55 @@
+---
+- name: Create directory for backup script
+  file:
+    path: /etc/borgbackup/
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Install backup script
+  template:
+    src: run.sh.j2
+    dest: /etc/borgbackup/run.sh
+    owner: root
+    group: root
+    mode: 0700
+
+- name: Generate script configuration
+  template:
+    src: local.sh.j2
+    dest: /etc/borgbackup/local.sh
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Install systemd service file
+  template:
+    src: borgbackup.service.j2
+    dest: /etc/systemd/system/borgbackup.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Install systemd timer file
+  template:
+    src: borgbackup.timer.j2
+    dest: /etc/systemd/system/borgbackup.timer
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Reload the systemd daemon
+  systemd:
+    daemon_reload: yes
+
+- name: Enable the timer
+  systemd:
+    name: borgbackup.timer
+    enabled: yes
+    masked: no
+
+- name: Start the timer
+  systemd:
+    name: borgbackup.timer
+    state: restarted

@@ -1,6 +1,7 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using CoreCA.DataModel;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.Extensions.Logging;
 using WebServer.Models;
@@ -25,9 +26,8 @@ namespace WebServer.Authentication
 
             using (var chain = new X509Chain())
             {
-                // We build the chain to merely obtain the full issuer's certificate from the machine store, hence the Revocation.NoCheck flag.
-                // Revocation and validity should have already been checked earlier.
-                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
+                chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EndCertificateOnly;
                 chain.Build(cert);
 
                 // 0th element is our leaf cert
@@ -47,9 +47,17 @@ namespace WebServer.Authentication
                     return Task.CompletedTask;
                 }
 
-                context.Principal.AddIdentity(user.ToClaimsIdentity(context.Scheme.Name));
+                var userClaims = user.ToClaimsIdentity(context.Scheme.Name);
+
+                // Attach a flag to the user identity to easily reveal the "Admin" navigation tab in the view
+                if (_dbContext.Admins.Find(key) != null)
+                    userClaims.AddClaim(new Claim(Constants.AdminClaim, true.ToString()));
+
+                context.Principal.AddIdentity(userClaims);
 
                 _logger.LogDebug($"Cert auth success (serial no: {cert.SerialNumber})");
+
+                context.Success();
 
                 return Task.CompletedTask;
             }

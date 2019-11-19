@@ -1,0 +1,8 @@
+BACKUP_DIRECTORIES='
+{% if backup_files is defined and backup_files %}
+{% for file in backup_files %}
+	{{ file }}
+{% endfor %}
+{% endif %}
+'
+

@@ -1,0 +1,9 @@
+---
+- name: aslcert allow manual backup
+  template:
+    src: run_backup.j2
+    dest: /etc/sudoers.d/run_backup
+    owner: root
+    group: root
+    mode: 0440
+  when: inventory_hostname in groups['certservers']

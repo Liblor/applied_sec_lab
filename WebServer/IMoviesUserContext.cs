@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+using CoreCA.DataModel;
+using Microsoft.EntityFrameworkCore;
 using WebServer.Models;
 
 namespace WebServer
@@ -11,5 +12,15 @@ namespace WebServer
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Admin> Admins { get; set; }
+
+        // Fix capitalisation of table name
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>()
+                .ToTable(Constants.IMoviesUserTableName);
+            modelBuilder.Entity<Admin>()
+                .ToTable(Constants.IMoviesAdminTableName);
+        }
     }
 }

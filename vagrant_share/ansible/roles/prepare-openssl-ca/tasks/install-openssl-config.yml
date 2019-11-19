@@ -1,0 +1,47 @@
+---
+- name: Create CA folder and default subfolders
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ UNAME }}"
+    group: "{{ UNAME }}"
+    mode: 0700
+  with_items:
+    - "{{ ca_folder }}/csr"
+    - "{{ ca_folder }}/private"
+    - "{{ ca_folder }}/certs"
+    - "{{ ca_folder }}/newcerts"
+    - "{{ ca_folder }}/revokedcerts"
+
+- name: Create empty default index file
+  copy:
+    content: ""
+    dest: "{{ ca_folder }}/index.txt"
+    force: no
+    owner: "{{ UNAME }}"
+    group: "{{ UNAME }}"
+    mode: 0600
+
+- name: Install openssl config file
+  template:
+    src: openssl.cnf
+    dest: "{{ ca_folder }}/{{ openssl_conf_name }}"
+    owner: "{{ UNAME }}"
+    group: "{{ UNAME }}"
+    mode: 0600
+  tags: [ never, setup ]
+
+# Note: The setup tag prevent that the crlnumber is overwritten
+# in the running system which would cause openssl to fail because
+# of duplicate serial numbers.
+- name: Install default files with content
+  template:
+    src: "{{ item }}"
+    dest: "{{ ca_folder }}/{{ item }}"
+    owner: "{{ UNAME }}"
+    group: "{{ UNAME }}"
+    mode: 0600
+  with_items:
+    - crlnumber
+    - serial
+  tags: [ never, setup ]

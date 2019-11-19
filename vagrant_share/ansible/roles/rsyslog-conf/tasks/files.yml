@@ -1,0 +1,18 @@
+---
+- name: Add configuration for receiving logs
+  template:
+    src: receive.conf.j2
+    dest: "/etc/rsyslog.d/receive.conf"
+    owner: root
+    group: root
+    mode: 0644
+  when: rsyslog_conf_receive
+
+- name: Add configuration for sending logs
+  template:
+    src: send.conf.j2
+    dest: "/etc/rsyslog.d/send.conf"
+    owner: root
+    group: root
+    mode: 0644
+  when: rsyslog_conf_send
