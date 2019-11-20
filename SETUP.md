@@ -79,7 +79,7 @@ see "CA Administrator Panel".
 
 
 ## Requirements
-512MiB for each nonclient VM
+512MiB for each nonclient VM  
 1024MiB for the client VM
 
 If you have more RAM available, feel free to add some RAM in the VirtualBox
