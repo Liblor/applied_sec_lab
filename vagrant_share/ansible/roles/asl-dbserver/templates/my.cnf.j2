@@ -156,7 +156,7 @@ ssl-cert="/etc/pki/tls/certs/iMovies_{{ inventory_hostname }}_tls.crt"
 [galera]
 wsrep_on=ON
 wsrep_provider=/usr/lib/galera/libgalera_smm.so
-wsrep_cluster_address="gcomm://{{ groups['dbservers'] | map('extract', hostvars, ['ansible_eth1', 'ipv4', 'address']) | join(',') }}""
+wsrep_cluster_address="gcomm://{{ groups['dbservers'] | map('extract', hostvars, ['ansible_eth1', 'ipv4', 'address']) | join(',') }}"
 binlog_format=row
 default_storage_engine=InnoDB
 innodb_autoinc_lock_mode=2
