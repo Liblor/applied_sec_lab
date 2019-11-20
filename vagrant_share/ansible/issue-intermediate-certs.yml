@@ -130,6 +130,7 @@
       with_nested:
         - "{{ INTERMEDIATE_CERT_PURPOSES }}"
         - "{{ groups['certservers'] }}"
+      when: FORCE_INTERMEDIATE_CA_CERT_REGEN
 
     - name: Apply new certificate
       command: update-ca-certificates
