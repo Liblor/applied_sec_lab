@@ -1,1 +1,3 @@
 Threat	Countermeasure	Likelihood	Impact
+Employees: Use the root CA's private key to sign intermediate CA, user or internal TLS certificates for impersonation	The root CA's private key is stored offline in a well protected safe, to which only few system administrators have access 	Low	High
+Organized Crime, Governmental Agency, Skilled Hacker: Compromise core CA and steal private key to impersonate and decrypt emails of arbitrary informants	The root CA's private key is stored offline	Low	High
