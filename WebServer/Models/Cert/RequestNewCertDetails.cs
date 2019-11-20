@@ -6,7 +6,6 @@ namespace WebServer.Models.Cert
 {
     public class RequestNewCertDetails
     {
-        // TODO: re-think arbitrary min-length
         [Required, DataType(DataType.Password)]
         [Display(Name = "Certificate encryption passphrase"), StringLength(256, MinimumLength = Constants.MinPassphraseLength)]
         public string Passphrase { get; set; }
