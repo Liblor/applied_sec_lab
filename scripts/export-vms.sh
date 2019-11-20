@@ -10,7 +10,7 @@ do
 	fi
 
 	printf "Halting $vm\n"
-	vagrant halt "$vm"
+	VBoxManage controlvm "$vm" acpipowerbutton
 
 	printf "Exporting $vm\n"
 	VBoxManage export "$vm" -o "./build/$vm.ova"
