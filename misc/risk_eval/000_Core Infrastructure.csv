@@ -1,6 +1,5 @@
-Threat	Countermeasure	Likelihood	Impact
-Nature: Earthquake, major natural disaster destroys server	We use two database servers stationed in different countries	Low	Medium
-Nature: Hardware failure, defective component	We use RAID 1 with three disks to prevent data lose. Additionally, we take regular backups and have two database servers in different countries. Lastly, an administrator is on call 24/7.	Medium	Medium
-Nature: Pollution, dust decreases lifespan of components	Clean server room every 3 month by specialized cleaning crew	Medium	Medium
-Governmental Agency, Independent contractors: Cleaning staff adds malicious hardware	Cleaning staff is monitored by iMovies security staff	Medium	High	Renting a rack space in a data centre would ensure professional access control and certified security standards.
-System administrator adds malicious hardware component	Background check on system administrators, employing multiple system administrators	Medium	High	Renting a rack space in a data centre would ensure professional access control and prevent that authorised staff can physically access the server without being recorded. However, system administrators might take longer to replace defective components.
+Threat	Countermeasure	Likelihood	Impact	Additional Countermeasures
+Nature: Earthquake, major natural disaster destroys server	The core infrastructure (web server, database and core CA) is completely redundant (instances in CH and IS)	Medium	Low
+Nature: Hardware failure, defective component	Regular backups, geographically redundant infrastructure, an administrator is on call 24/7	Medium	Low
+Nature: Pollution, dust decreases lifespan of components	Clean server room every three month by specialized cleaning crew	Medium	Low
+Governmental Agency, Independent Contractors, System Administrator: Malicious hardware is added	Cleaning staff is monitored by iMovies security staff, background checks are performed on system administrators before hiring them	Medium	High	Renting a rack space in a data centre would ensure professional access control and certified security standards.
