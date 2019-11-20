@@ -134,8 +134,7 @@ backup:    iZ4x0ZXIFZzXs4SDWwy1O3VlxUi9k0OV
 ### iMovies employees
 
 The users in the system are as has been defined in the legacy database assignment.
-Only the `ms` got promoted to an administrator,
-See the previous section for details on the `admin` user.
+Only the `ms` got promoted to an administrator.
 
 ## VM Requirements
 
