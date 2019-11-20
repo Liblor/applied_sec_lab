@@ -1,1 +1,3 @@
-Threat	Countermeasure	Likelihood	Impact
+Threat	Countermeasure	Likelihood	Impact	Additional Countermeasures
+Nature: Earthquake, major natural disaster or hardware failure destroys configuration server	Fast automatic reconfiguration of new Ansible server with Vagrant, Ansible playbooks with server configurations stored in remote git repository	Medium	Low
+Nature: Earthquake, major natural disaster or hardware failure destroys log or backup server	Server locations have low seismic activity	Medium	Medium	Add geographically redundant log and backup server
