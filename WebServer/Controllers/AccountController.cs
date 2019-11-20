@@ -96,7 +96,7 @@ namespace WebServer.Controllers
         }
 
         [HttpPost, Authorize]
-        public IActionResult Update(UserDetails userDetails)
+        public async Task<IActionResult> Update(UserDetails userDetails)
         {
             if (ModelState.IsValid)
             {
@@ -112,6 +112,7 @@ namespace WebServer.Controllers
                     user.LastName = userDetails.LastName;
 
                     _dbContext.Users.Update(user);
+                    await _caClient.RevokeCertificate(user.Id);
 
                     _dbContext.SaveChanges();
                     success = true;
