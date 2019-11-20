@@ -52,12 +52,12 @@ asllog01:  7FLnAnajiNcfqcCJPcY2tu9LvuHEFu
 
 ### Mysql:
 ```
-root: Zfm-u5abCoR4VwuubR.XR8GPMy6BVM
+root:      Zfm-u5abCoR4VwuubR.XR8GPMy6BVM
 aslcert01: qecyKAFp7_xwYYbc8t6b!5VtGV,9Zu
-aslcert02: "_e6DBAffv7bN2whs6aXNM57p-RDbvY"
-aslweb01: "L-MVpXEWLNykPf..4Ji-cPxbfZNJKL"
-aslweb02: H,maSD9v7riNthPf8AJv-,hpZZJufv
-backup: iZ4x0ZXIFZzXs4SDWwy1O3VlxUi9k0OV
+aslcert02: _e6DBAffv7bN2whs6aXNM57p-RDbvY
+aslweb01:  L-MVpXEWLNykPf..4Ji-cPxbfZNJKL
+aslweb02:  H,maSD9v7riNthPf8AJv-,hpZZJufv
+backup:    iZ4x0ZXIFZzXs4SDWwy1O3VlxUi9k0OV
 ```
 
 ### Client aka aslclient01:
