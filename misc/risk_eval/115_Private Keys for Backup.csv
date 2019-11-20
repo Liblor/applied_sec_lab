@@ -1,0 +1,4 @@
+Threat	Countermeasure	Likelihood	Impact	Additional Countermeasures
+Employees: use the private key to decrypt the backup of user's private keys to eavesdrop or impersonate them	The backup private key is stored offline in a well protected safe, only few system administrators have access to it	Medium	High	Enforce a procedure that multiple system administrators are required to access the backup private key and strictly monitor its usage.
+Organized Crime, Governmental Agency: Compromise the backup key to recover user private keys and eavesdrop on the communication of arbitrary informants	The backup private key is stored offline in a well protected safe	Low	High
+Malware, Skilled Hacker: Encrypt backup private key and request ransom	Key is stored offline, users can still download their private key from the database, where it is stored encrypted with a passphrase	Low	High

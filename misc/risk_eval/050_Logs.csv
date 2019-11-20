@@ -1,0 +1,4 @@
+Threat	Countermeasure	Likelihood	Impact	Additional Countermeasures
+Nature: Logs are lost due to natural disaster or hardware failure	Regular backups of logs	Medium	Low
+Governmental Agency, Skilled Hacker: Gain access to logs by compromising log server	Log information is restricted to necessary, non-sensitive information, log server is not exposed to the public network	Low	Low
+Skilled Hacker: Tamper with logs to cover tracks of malicious activities	Logs are append only (internal servers cannot modify existing entries), logs are backed up regularly	Medium	Medium	Pull logs instead of pushing them to prevent that servers can choose to not send their logs and further reduce the attack surface of the log server. Alternatively, implement monitoring to immediately raise an alarm if a host does not send its logs.

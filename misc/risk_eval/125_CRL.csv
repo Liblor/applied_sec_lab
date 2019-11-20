@@ -1,0 +1,3 @@
+Threat	Countermeasure	Likelihood	Impact	Additional Countermeasures
+Nature: Loss of CRL distribution point due to hardware failure or a defective component	Redundant architecture; CRL is hosted on both, geographically separated, web servers	Medium	Low
+Employees, Skilled Hacker: Remove or garble CRL for DoS by SSL authentication failure	The CRL is re-fetched automatically every ten minutes	Medium	Medium	Implement monitoring to check the CRL's availability.

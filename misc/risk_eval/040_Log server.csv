@@ -1,3 +1,0 @@
-Threat	Countermeasure	Likelihood	Impact
-"Nature: Earthquake, major natural disaster destroys server, hardware failure"	"Regular backups of logs"	Low	Low
-"Governmental Agency, skilled hacker, organized crime: Gain control over backup server"	"Restricting log information to necessary, non-sensitive information"	Low	Low
