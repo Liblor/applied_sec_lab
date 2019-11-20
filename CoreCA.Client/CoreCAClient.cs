@@ -15,7 +15,6 @@ namespace CoreCA.Client
 
     public class CoreCAClient
     {
-        // TODO: consider centralizing the endpoint URLs (currently hardcoded per-method)
         private readonly HttpClient _httpClient;
         private readonly ILogger _logger;
 

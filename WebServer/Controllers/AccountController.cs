@@ -64,7 +64,6 @@ namespace WebServer.Controllers
                 var authProps = new AuthenticationProperties
                 {
                     AllowRefresh = true,
-                    // TODO: reevaluate arbitrary expiration
                     ExpiresUtc = DateTimeOffset.UtcNow.AddHours(1),
                     IsPersistent = true,
                     IssuedUtc = DateTimeOffset.UtcNow,
@@ -81,7 +80,6 @@ namespace WebServer.Controllers
                     new ClaimsPrincipal(user.ToClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme)),
                     authProps);
 
-                // TODO: assess potential open redirect vulnerability
                 if (!string.IsNullOrWhiteSpace(returnUrl))
                     return Redirect(returnUrl);
 
@@ -114,7 +112,6 @@ namespace WebServer.Controllers
                     user.LastName = userDetails.LastName;
 
                     _dbContext.Users.Update(user);
-                    // TODO Revoke all certificates not matching the new information.
 
                     _dbContext.SaveChanges();
                     success = true;
