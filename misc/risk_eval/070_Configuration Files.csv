@@ -1,1 +1,3 @@
-Threat	Countermeasure	Likelihood	Impact
+Threat	Countermeasure	Likelihood	Impact	Additional Countermeasures
+Employees: intentional or accidental mistake in ansible configuration files	Automated configuration can be tested on accurate local mirror of the instance which is created using Vagrant	Medium	Medium	Monitor changes to the configuration files, enforce reviews of substantial changes.
+Skilled Hacker, Malware: encrypt configuration files, demand ransom	Specially hardened server, firewall, configuration files are backed up and stored in a remote git repository	Medium	Low
