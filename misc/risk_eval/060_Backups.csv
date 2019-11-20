@@ -1,1 +1,4 @@
-Threat	Countermeasure	Likelihood	Impact
+Threat	Countermeasure	Likelihood	Impact	Additional Countermeasures
+Employees: Misconfigured or disabled backup routine	Regular manual backup evaluation	Low	Medium
+Employees: Physically access backup server and copy the hard disk	User private keys are protected by asymmetric encryption where the decryption key is kept offline, logs, databases and configuration files are encrypted symmetrically	Medium	Medium	Prevent that data can be recovered from the cloned disk (e.g.\ by recovering the symmetric key and decrypting), either by encrypting all data with asymmetrically or enabling disk encryption.
+Skilled Hacker, Malware: Encrypt backups and demand ransom	Backup server is only accessible from the internal network, configuration files, logs, and the database are also stored on the running hosts, users private keys can still be retrieved by users from the passphrase encrypted database table entry	Low	Medium
