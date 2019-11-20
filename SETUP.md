@@ -18,30 +18,68 @@ Shut them down in the reverse order. This is especially important for the
 database servers (asldb02 asldb01), as the synchronization might break
 otherwise and it will need manual intervention.
 
-Note: the 02 VMs are for the redundant system only, they are not required to
+Note that the VMs with the name `asl*02` are for the redundant system only, they are not required to
 find the backdoors and to run the setup.
 
+In the following we will explain how to access the machines.
+All credentials you need are provided below.
+See the troubleshooting section below in case you need help.
+
+## Access the user interface
+
+The client machine (`aslclient01`) is pre-configured and can simply be used to access the web UI.
+Start the client machine and login as `user`.
+Then click the `Login` launcher on the desktop.
+There you can login as one of the users provided in the legacy database from the assignment.
+
+## Access the CA administrator panel
+
+Unfortunately the deadline was strict, so we did not have time to explain this section.
+
+## Access the network as Admin
+
+The Ansible master is the central configuration server.
+Its SSH port is exposed to the public Internet (here: the public network).
+Admins can use this server to control other hosts in the network and to access them.
+
+The client machine can be used to access Ansible master.
+Simply login as user `admin` using the VirtualBox UI, and issue the following command in a terminal.
+
+```
+ssh -i ~/.ssh/imovies_aslans01 admin@aslans01
+```
+
+In order to access other machines, you have to switch to the user `ansible` using `sudo su ansible`.
+
+To access the Ansible master from your own host, SSH into `aslans01` as `admin`.
+This can be done using the provided private SSH key only.
+We provide you the following command for convenience.
+You will have to find the missing environment variable `$ANSIBLE_MASTER_IP` yourself.
+Hint: You were already provided with some other way to access this machine.
+
+```
+ssh \
+	-o UserKnownHostsFile=/dev/null \
+	-o StrictHostKeyChecking=no \
+	-o IdentitiesOnly=yes \
+	-i "./imovies_aslans01" \
+	admin@$ANSIBLE_MASTER_IP
+```
 
 ## Credentials
 
-### Config Server aka aslans01 
-
-In order to access other machines, ssh into aslans01 as `admin`, change to the
-`ansible` using `sudo su ansible`. You can now access the other servers
-using ssh.
-
-#### admin user
+### admin user
 ```
 Username: admin
 Password: CKLwhksWCuLzFWXRqoZdMinUfVj_aS
 ```
 
-#### ansible user
+### ansible user
 ```
 Passphrase for ~/.ssh/id_rsa: UURf_Uko5s0qDxEkhKkX0A6lGAJO1WzWWy2XJMJd
 ```
 
-### Borg Backup:
+### Borg backup:
 ```
 aslcert01: t4YT3duRqCAjw7KVewM2JZxTcpQ7Pm
 aslcert02: CjshGpKEeJVHnvRt5Q9W75zCaBGeSg
@@ -67,26 +105,25 @@ Password: password
 ```
 
 ### CA Administrator Panel:
-Client Certificate for CA administrator is located at
-`/home/admin/caadmin_cert_with_priv_key_aslans01.pfx`, this is the `ms` user.
-```
-Passphrase: correct horse battery staple
-```
+
+The client certificate for the CA administrator is located at `/home/admin/caadmin_cert_with_priv_key_aslans01.pfx`.
+The password for the certificate is `correct horse battery staple`.
+The corresponding user has the ID `ms` in our system.
 
 ### iMovies employees
-Same as in legacy DB, except that `ms` got promoted to Admin,
-see "CA Administrator Panel".
 
+The users in the system are as has been defined in the legacy database assignment.
+Only the `ms` got promoted to an administrator,
+See the previous section for details on the `admin` user.
 
-## Requirements
-512MiB for each nonclient VM  
-1024MiB for the client VM
+## VM Requirements
 
-If you have more RAM available, feel free to add some RAM in the VirtualBox
-settings for a faster environment.
+1024 MiB for the client VM
+512 MiB for other VMs
 
-## Help
-* Loris Reiff <lreiff@student.ethz.ch>
-* Miro Haller <mihaller@student.ethz.ch>
-* Raphael Eikenberg <reikenberg@student.ethz.ch>
-* Robertas Maleckas <rmaleckas@student.ethz.ch>
+If you have more RAM available, feel free to add some RAM in the VirtualBox settings for a faster environment.
+
+## Troubleshooting
+
+In case you have trouble installing the setup or need help otherwise, mail us at `help@imovies.ch`.
+Our office hours are from Monday to Friday, 10am to 5pm.

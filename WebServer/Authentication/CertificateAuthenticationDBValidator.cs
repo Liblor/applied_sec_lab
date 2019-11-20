@@ -34,10 +34,7 @@ namespace WebServer.Authentication
                 // 1st element must contain the issuer's cert
                 var caCert = chain.ChainElements[1].Certificate;
 
-                // TODO: properly check the certificate identity against config/Core CA server/etc.
-
                 // For now, assume the DB is keyed on whatever gets entered into the cert subject field, whether thats an UID, email address, or something else entirely.
-                // TODO: consider edge cases/alternatives (e.g. explicitly using a different field, fallback mechanism, etc)
                 string key = cert.GetNameInfo(X509NameType.SimpleName, false);
                 User user = _dbContext.Users.Find(key);
 

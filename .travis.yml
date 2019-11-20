@@ -10,7 +10,6 @@ mono: none
 dotnet: 3.0.100
 
 # Should run `dotnet test` once some tests are added
-# TODO: consider including version/buildid info in the artifact
 script:
   - dotnet build --configuration Release
   - dotnet publish --configuration Release --no-build

@@ -125,13 +125,10 @@ namespace WebServer.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // TODO: Enable XSRF protection for HttpPost endpoints if not present by default
         // TODO: Rate limit
         [HttpPost]
         public async Task<IActionResult> New(RequestNewCertDetails details)
         {
-            // TODO: consider validating credentials here before making the request
-
             if (!ModelState.IsValid)
             {
                 var viewModel = FetchCertificatesData();
