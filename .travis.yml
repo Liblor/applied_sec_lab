@@ -14,8 +14,8 @@ dotnet: 3.0.100
 script:
   - dotnet build --configuration Release
   - dotnet publish --configuration Release --no-build
-  - tar -zcvf CertServer.tar.gz -C CertServer/bin/Release/netcoreapp3.0/publish/ .
-  - tar -zcvf WebServer.tar.gz -C WebServer/bin/Release/netcoreapp3.0/publish/ .
+  - tar -zcvf CertServer.tar.gz --exclude '*.deps.json' -C CertServer/bin/Release/netcoreapp3.0/publish/ .
+  - tar -zcvf WebServer.tar.gz --exclude '*.deps.json' -C WebServer/bin/Release/netcoreapp3.0/publish/ .
 
 deploy:
   provider: releases
