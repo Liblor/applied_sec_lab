@@ -1,13 +1,15 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Cryptography;
 
 namespace CoreCA.DataModel
 {
+    public enum EncryptionAlgorithms {RSA, ECDSA};
+
     public class CipherSuite
     {
-        // TODO: consider replacing string Alg/HashAlg fields with enums
         [Required]
-        public string Alg { get; set; }
+        public EncryptionAlgorithms Alg { get; set; }
         [Required]
         public string HashAlg { get; set; }
 
@@ -19,7 +21,8 @@ namespace CoreCA.DataModel
             {
                 CipherSuite cipherSuite = (CipherSuite) obj;
 
-                return cipherSuite.Alg.Equals(Alg)
+                return cipherSuite != null
+                    && cipherSuite.Alg.Equals(Alg)
                     && cipherSuite.HashAlg.Equals(HashAlg)
                     && cipherSuite.KeySize == KeySize;
             }
@@ -36,7 +39,8 @@ namespace CoreCA.DataModel
 
         public override int GetHashCode()
         {
-            return (Alg + HashAlg + KeySize).GetHashCode();
+            string cipherSuiteName = string.Format("{0}-{1}-{2}", Alg, HashAlg, KeySize);
+            return cipherSuiteName.GetHashCode();
         }
 
     }

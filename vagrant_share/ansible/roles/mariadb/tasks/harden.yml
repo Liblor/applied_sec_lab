@@ -2,8 +2,6 @@
 #
 # Perform the steps of mysql_secure_installation
 #
-# XXX: Make reexecutable, check if not already hardnend, otherwise error:
-# Access denied for user 'root'@'localhost'
 - name: Remove anonymous users
   command: 'mysql -NBe "{{ item }}"'
   with_items:
@@ -25,8 +23,6 @@
   with_items:
     - FLUSH PRIVILEGES
 
-
-# TODO: Make sure, password isn't logged in some history
 - name: Set root password
   command: 'mysql -NBe "{{ item }}"'
   with_items:

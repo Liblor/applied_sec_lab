@@ -1,4 +1,5 @@
 using CoreCA.DataModel;
+using System.Security.Cryptography;
 
 namespace CertServer
 {
@@ -27,18 +28,18 @@ namespace CertServer
         {
             // Different ECDSA curves are only supported on Windows.
             new CipherSuite {
-                Alg = "ECDSA",
-                HashAlg = "SHA512",
+                Alg = EncryptionAlgorithms.ECDSA,
+                HashAlg = HashAlgorithmName.SHA512.Name,
                 KeySize = 521
             },
             new CipherSuite {
-                Alg = "RSA",
-                HashAlg = "SHA512",
+                Alg = EncryptionAlgorithms.RSA,
+                HashAlg = HashAlgorithmName.SHA512.Name,
                 KeySize = 4096
             },
             new CipherSuite {
-                Alg = "RSA",
-                HashAlg = "SHA512",
+                Alg = EncryptionAlgorithms.RSA,
+                HashAlg = HashAlgorithmName.SHA512.Name,
                 KeySize = 2048
             }
         };

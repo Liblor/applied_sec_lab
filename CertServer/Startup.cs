@@ -22,13 +22,7 @@ namespace CertServer
     {
         public Startup(IConfiguration configuration)
         {
-            var builder = new ConfigurationBuilder();
-
-            // XXX: Implement better solution for DB password
-            builder.AddUserSecrets<Startup>();
-            builder.AddConfiguration(configuration);
-
-            Configuration = builder.Build();
+            Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
@@ -84,9 +78,6 @@ namespace CertServer
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            // XXX: Only run https server
-            // app.UseHttpsRedirection();
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger(c =>

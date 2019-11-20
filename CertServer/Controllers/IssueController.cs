@@ -128,7 +128,7 @@ namespace CertServer.Controllers
 
                 CertificateRequest req = null;
 
-                if (cipherSuite.Alg.Equals("RSA"))
+                if (cipherSuite.Alg.Equals(EncryptionAlgorithms.RSA))
                 {
                     privKey = RSA.Create(cipherSuite.KeySize);
                     privKeyExport = ((RSA) privKey).ToPem();
@@ -140,7 +140,7 @@ namespace CertServer.Controllers
                         RSASignaturePadding.Pss
                     );
                 }
-                else if (cipherSuite.Alg.Equals("ECDSA"))
+                else if (cipherSuite.Alg.Equals(EncryptionAlgorithms.ECDSA))
                 {
                     privKey = ECDsa.Create();
                     privKeyExport = ((ECDsa) privKey).ToPem();

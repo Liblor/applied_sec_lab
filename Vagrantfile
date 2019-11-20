@@ -137,8 +137,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 				hostconf.vm.box = OS_BOX
 				hostconf.vm.hostname = master_hostname
 
-				# TODO: Adapt to put masters in DMZ and route their
-				# traffic to internal network
 				hostconf.vm.network "private_network",
 					ip: "#{master_info[:ip]}",
 					virtualbox__intnet: VB_INTRANET_NAME
