@@ -1,1 +1,4 @@
-Threat	Countermeasure	Likelihood	Impact
+Threat	Countermeasure	Likelihood	Impact	Additional Countermeasures
+Nature: Submarine cable gets damaged by tectonic plate shift	Redundant infrastructure in CH and IS, both locations are close to multiple submarine cables	Low	Medium
+Employee: Configuration mistake leads to network outage	Redundant infrastructure with automatic load balancing seamlessly switches to the other instance	Medium	Low
+Organized Crime, Skilled Hacker: DoS attack to throttle network connection	Redundant infrastructure with load balancing is able to handle more traffic than a single one	High	Medium	Add an additional load balancer to remove the single point of failure that it currently is. Or outsource load balancing to a CDN (since it is not security critical) and benefit from their DoS protection.
