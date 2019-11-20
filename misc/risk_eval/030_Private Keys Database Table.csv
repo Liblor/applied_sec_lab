@@ -1,1 +1,3 @@
 Threat	Countermeasure	Likelihood	Impact
+Employees, independent contractors: Physical access or abuse of access rights to dump the database table	Private keys are encrypted with a user provided passphrase, which is not stored persistently	Medium	Low
+Skilled hacker: Compromise database server by exploiting configuration or software issues to leak data	This server is not accessible from the public network (firewall rules), the private keys are encrypted	Low	Low
