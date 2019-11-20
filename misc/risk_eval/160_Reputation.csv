@@ -1,2 +1,3 @@
 Threat	Countermeasure	Likelihood	Impact
-Script Kiddy: penetrates any critical component	Up-to-date software, skilled employees	Low	Medium
+Script Kiddy: penetrates a critical component	Up-to-date software, skilled employees	Low	Medium
+Skilled hacker: leaks user data	Hardened network, restrictive data access	Low Medium

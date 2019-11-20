@@ -1,1 +1,2 @@
 Threat	Countermeasure	Likelihood	Impact
+Governmental agencies, Organized crime, Skilled hacker: Access different user accounts, revoke keys, use social engineering	Session timeouts, requesting user password when issuing new certificates	low low
