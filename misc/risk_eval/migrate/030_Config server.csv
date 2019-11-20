@@ -1,0 +1,7 @@
+Threat	Countermeasure	Likelihood	Impact	Additional Countermeasures
+"Nature: Earthquake, major natural disaster destroys server, hardware failure"	"Fast automatic reconfiguration of new ansible server with Vagrant, Ansible playbooks with server configurations stored in remote git repository"	Low	Low	
+Employees: System administrator misconfigures servers intentionally or by accident	Background checks for high-privilege system administrators, automated configuration, multiple system administrators	Medium	Medium	Implement policy where the presence of multiple system administrators is required for important configuration changes. 
+"Gov. Agency, independent contractors: Server manipulation"	"Cleaning staff is monitored by iMovies security staff"	Medium	Low	
+"Skilled hacker, organized crime: Gain control over server, install ransomware for blackmailing"	"Specially hardened server, firewall, only SSH port publicly available, system administrators are reminded by apticron to keep software up to date.
+
+Countermeasures listed above for hardware failure are effective against loss of disks access through encryption as well."	Medium	Low	
