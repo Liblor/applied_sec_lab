@@ -9,3 +9,6 @@ RestartSec=10
 KillSignal=SIGINT
 User={{ UNAME }}
 EnvironmentFile=/etc/systemd/system/asl-webserver.env
+
+[Install]
+WantedBy=multi-user.target
