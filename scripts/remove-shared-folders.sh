@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-for vm in `VBoxManage list vms | awk '{print $1}'`;
+for vm in `VBoxManage list vms | tac | awk '{print $1}'`;
 do
 	vm=$(echo "$vm" | tr -d '"');
 
