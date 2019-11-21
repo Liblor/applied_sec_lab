@@ -26,7 +26,7 @@ database servers (asldb02 asldb01), as the synchronization might break
 otherwise and it will need manual intervention.
 
 Note that the VMs with the name `asl*02` are for the redundant system only, they are not required to
-find the backdoors and to run the setup.
+find the backdoors and to run the setup. Also the extended setup is only available via polybox.
 
 In the following we will explain how to access the machines.
 
@@ -39,11 +39,12 @@ There you can login as one of the users provided in the legacy database from the
 
 ## Access the CA administrator panel
 
-Unfortunately the deadline was strict, so we did not have time to explain this section.
-It's there, promised!
-
-Okay, one hint.
-Only the user `ms` has administrative permissions.
+Only the user `ms` has administrator permissions, however you don't have a private key
+to login with this user. If you want to test the CA admin panel, create a
+private key and certificate for a user via the web interface. Then use
+the remote system administrator capabilities to execute
+`INSERT INTO admins VALUES ('a3');` on asldb01 where "a3" is the user id of the admin.
+If this part is unclear to you, drop us a line.
 
 ## Access the network as Admin
 
@@ -59,6 +60,7 @@ ssh -i ~/.ssh/imovies_aslans01 admin@aslans01
 ```
 
 In order to access other machines, you have to switch to the user `ansible` using `sudo su ansible`.
+Then you can ssh into asldb01 with `ssh asldb01`.
 
 To access the Ansible master from your own host, SSH into `aslans01` as `admin`.
 This can be done using the provided private SSH key only.
