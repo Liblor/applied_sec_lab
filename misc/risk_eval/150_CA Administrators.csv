@@ -1,3 +1,3 @@
 Threat	Countermeasure	Likelihood	Impact
 Nature: Harm to CA administrator due to environmental disaster, loss of manpower	Encrypted data can be recovered with the backup of the private key	Low	Low
-Governmental Agencies, Organized Crime: Kidnapping or controlling of CA administrators, leak of internal information		Low	Low
+Governmental Agencies, Organized Crime: Kidnapping or controlling of CA administrators, leak of internal information	-	Low	Low

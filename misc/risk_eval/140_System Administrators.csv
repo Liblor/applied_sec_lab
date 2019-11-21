@@ -1,3 +1,3 @@
 Threat	Countermeasure	Likelihood	Impact
 Nature: harm to system administrator due to environmental disaster, loss of knowledge	Good documentation, automated configuration scripts instead of not repeatable actions	Low	Low
-Governmental Agencies, Organized Crime: kidnapping or controlling of system administrators, full compromise of the system		Low	High
+Governmental Agencies, Organized Crime: kidnapping or controlling of system administrators, full compromise of the system	-	Low	High
