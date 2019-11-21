@@ -136,6 +136,12 @@ backup:    iZ4x0ZXIFZzXs4SDWwy1O3VlxUi9k0OV
 The users in the system are as has been defined in the legacy database assignment.
 Only the `ms` got promoted to an administrator.
 
+## Download via Polybox
+
+https://polybox.ethz.ch/index.php/s/sEmfG90srncKmuj
+
+Password: syssec
+
 ## VM Requirements
 
 - 1024 MiB for the client VM
