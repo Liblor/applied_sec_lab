@@ -10,7 +10,7 @@ do
 	fi
 
 	printf "Halting $vm\n"
-	VBoxManage controlvm "$vm" acpipowerbutton
+	VBoxManage controlvm "$vm" acpipowerbutton 2> /dev/null
 
 	# Remove shared folder vagrant if it exists, silent error if it doesn't
 	VBoxManage sharedfolder remove "$vm" --name vagrant 2> /dev/null
