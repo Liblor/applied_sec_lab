@@ -1,6 +1,6 @@
 Threat	Countermeasure	Likelihood	Impact
-Nature: Destroying of all digital copies of the software	Redundant storage	low	medium
-Employees: Introducing bugs or leaking copies	Automated tests, regular manual checks, strict NDA upon hiring	low medium
-Visitors: Picking up hardware with digital copies	Security scan at entrances and exits	low low
-Ex-employees: Leaking source code	Extended period of validity of NDA	low low
-Governmental agencies: Introducing backdoors	Hardened network, compartmentalization of services	low medium
+Nature: destroying of all digital copies of the software	Redundant storage	Low	Medium
+Employees: introducing bugs or leaking copies	Automated tests, regular manual checks, strict NDA upon hiring	Low	Medium
+Visitors: picking up hardware with digital copies	Security scan at entrances and exits	Low	Low
+Ex-Employees: leaking source code	Extended period of validity of NDA	Low	Low
+Governmental agencies: introducing backdoors	Hardened network, compartmentalization of services	Low	Medium
