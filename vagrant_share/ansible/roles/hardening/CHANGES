@@ -1,0 +1,15 @@
+Following changes have been made to the source licensed under Apache 2.0
+
+* Remove vulnerability identification numbers
+* Change standard NTP server
+* Remove ./tasks/pkgupdate.yml
+* SSHd config
+    - Allow remote root login
+    - Comment out "IgnoreUserKnownHosts yes"
+    - Remove banner
+    - Increase ClientAliveCountMax
+* Modify Lynis command and added post-processing
+* Remove auditd
+
+The specific changes can be found in the repo https://github.com/Liblor/applied_sec_lab, with
+`git log --name-status ./applied_sec_lab/vagrant_share/ansible/roles/hardening`
