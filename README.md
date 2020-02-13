@@ -1,150 +1,138 @@
 [![Build Status](https://travis-ci.com/Liblor/applied_sec_lab.svg?token=v2htoQjxNh7zAtUbzeQt&branch=master)](https://travis-ci.com/Liblor/applied_sec_lab)
 
-# applied_sec_lab
-Applied Security Laboratory - AS19
+# Applied Security Laboratory - AS19
 
-## Details
+## Certificate Authority
+> [...] the students will also perform a team project: based on a set of functional and security requirements, they will design and implement a prototypical IT system. In addition, they will conduct a thorough security analysis and devise appropriate security measures for their systems. Finally, they will carry out a technical and conceptual review of another team's system. All project work will be performed in teams and must be properly documented. 
 
-### Web server
+[ETHZ - Applied Security Lab](https://infsec.ethz.ch/education/as2019/seclab.html)
 
-### Core CA
-#### Ansible Certificate Generation
+The task description can be found under [assignment](https://github.com/Liblor/applied_sec_lab#Assignment).
+A description of our design can be found [here](https://github.com/Liblor/applied_sec_lab/tree/master/description/Applied_Security_Lab_group_1_System_Description_incl_backdoors.pdf).
 
-Rough overview over the certificate generation by ansible:
-- **Root CA keys and certificates** are generated in `/vagrant/key_store/iMovies_Root_CA_key.pem`. This folder is considered to be offline, because we will remove this shared folder, together with all vagrant users, for the final production environment as the last step of ansible. The Root CA certificate is copied to all machines into `/usr/local/share/ca-certificates/iMovies_Root_CA.crt` and installed using `update-ca-certificates`.
-- **Intermediate CA keys** are generated on the certservers in `/home/coreca/pki/private/iMovies_<purpose>_<hostname>_Intermediate_CA_key.pem`. Each core CA has two intermediate certificates for the following purposes:
-  - **internal**: To sign TLS certificates for the internal infrastructure
-  - **external**: To sign client certificates
+## Group Members
+* Loris Reiff - [Liblor](https://github.com/Liblor/applied_sec_lab)
+* Miro Haller - [Miro-H](https://github.com/Miro-H)
+* Raphael Eikenberg - [eikendev](https://github.com/eikendev)
+* Robertas Maleckas - [RequestForCoffee](https://github.com/RequestForCoffee)
 
-  The reason for this is that the serial numbers of those certificates do not collide, as internal certificates are not in the DB. The CSR of those intermediate certificates is sent to the config server and signed with the Root CA key, the resulting certificate is transferred back to the certserver and stored in `/home/coreca/pki/certs/iMovies_<purpose>_<hostname>_Intermediate_CA.crt`.
-- **TLS keys** are generated on each host in `/etc/ssl/trusted/private/iMovies_aslcert01_tls_key.pem`. All members of the group `tls-trusted` have access to this key. A CSR is created and sent over the config server to the first certserver (aslcert01), which signs a certificate with the intermediate key. The resulting certificate is sent back over the config server to the respective servers and stored in the public folder `/etc/pki/tls/certs/iMovies_aslcert01_tls.crt`.
+## Requirements
+* VirtualBox
+* vagrant
 
-Short summary of paths for normal servers (neither cert nor config servers):
-- `/usr/local/share/ca-certificates/iMovies_Root_CA.crt` trusted root CA certificate
-- `/etc/ssl/trusted/` private key material accessible to `tls-trusted` group
-- `/etc/pki/tls/` publicly readable certificates and CRLs
-
-The ansible script will not regenerate those keys every time it is run. Instead it can be instructed to regenerate the keys as follows:
-- Regenerate only TLS keys:
-```bash
-ansible-playbook -e "FORCE_TLS_CERT_REGEN=true" -i production site.yml
+## Build
+Create virtual machines and start them:
 ```
-- Regenerate intermediate keys and TLS keys (the latter have to be regenerated because they were signed by the old intermediate keys)
-```bash
-ansible-playbook -e "FORCE_INTERMEDIATE_CA_CERT_REGEN=true" -i production site.yml
-```
-- Regenerate root CA keys and all other keys
-```bash
-ansible-playbook -e "FORCE_ROOT_CA_CERT_REGEN=true" -i production site.yml
+make build
 ```
 
-#### Key revocation
-Intermediate and/or TLS certificates are revoked automatically. A new CRL is generated with openssl every time new certificates are generated with ansible. One CRL for the intermediate certificates is signed by the Root CA, the CRL for the TLS certificates is signed by the intermediate certificate. Both are valid for 30 days and stored in `/etc/pki/tls/crl/`. **The concatenated CRL `/etc/pki/tls/crl/tls_crl_chain.pem` has to be checked everywhere TLS certificates are used.**
-
-#### Private key backup
-To recover private keys encrypted with the backup servers public key, transfer the encrypted file to a machine with access to the private key of the backup server and run:
+Export virtual machines as .ova
 ```
-openssl rsautl -decrypt -inkey /vagrant/key_store/iMovies_bkp_key.pem -in <encrypted key>.pem.enc -out key.pem -oaep
+make release
 ```
 
-To extract a EC private key from a Pkcs12 certificate (to compare to the above), run:
-```
-openssl pkcs12 -in <archive name>.pfx -nocerts -out privateKey.pem
-openssl ec -in privateKey.pem -out privateKey_dec.pem
-md5sum privateKey_dec.pem
-# Compare with the MD5 sum of the above key:
-md5sum key.pem
-```
-## Install environment
-### Vagrant
-Vagrant creates all VMs automatically, configures their networks and initializes the ansible master server.
+## Assignment
+The (fictional) company iMovies produces independent movies of various kind
+but with a focus on investigative reporting. Therefore, information exchanged
+within the company and with informants must be handled confidentially.
+To do so, iMovies wants to take its first steps towards PKI-based services.
+For this reason, a simple certificate authority (CA) should be implemented, with
+which employees can be provided with digital certificates. These certificates will
+be used for secure e-mail communication.
 
-To install, do the following:
-- Install [vagrant](https://www.vagrantup.com/)
-- Run `vagrant up` inside this repository
+### Functional Requirements
+The entire functionality must be accessible to a remote client (outside the company’s network).
 
-To stop the VMs:
-- `vagrant halt`
+#### Certificate Issuing Process
+The company already maintains a MySQL database in which all employees are
+listed, along with their personal data as well as a user ID and a password. This
+database is a legacy system, which cannot be migrated. The CA should verify
+authorized certificate requests on the basis of this database.
+The process of granting certificates should be as follows:
 
-To reinstall the architecture:
-- Run `vagrant destroy` (add option `-f` to destroy all VMs without asking)
-- Run `vagrant up`
+1. The user logs in via a web form by entering his user ID and his password.
+The user ID and password are verified by consulting the information stored
+in the database. Alternatively, login using a valid certificate is also possible;
+2. The user is shown the user information stored in the database. If required,
+the user may correct this information and any changes will be applied to
+the database;
+3. A certificate is issued based on the (possibly corrected) user information
+from Step 2;
+4. The user is offered the possibility to download the new certificate, including the corresponding private key, in PKCS#12 format.
 
-View running instances:
-- `vagrant status`
+#### Certificate Revocation Process
+Employees need the possibility to revoke certificates, for example, when their
+private key is compromised or lost.
+The process of revoking a certificate should be as follows:
+1. The affected user authenticates himself to a web application. Authentication can either be certificate-based client authentication over SSL/TLS
+(if the user still holds the certificate and the corresponding private key)
+or the user uses his user name and password stored in the database (if the
+user has lost the certificate or the corresponding private key);
+2. After successful authentication, the certificate in question (or all affected
+certificates of the affected user) will be revoked. Additionally, a new certificate revocation list will be generated and published on the web server.
+Make sure that login with revoked certificates is not possible.
 
-Connect to an instance:
-- `vagrant ssh <name>`
+#### CA Administrator Interface
+Using a dedicated web interface, CA administrators (not necessarily system
+administrators!) can consult the CA’s current state. The interface provides at
+least the following information:
+1. Number of issued certificates;
+2. Number of revoked certificates;
+3. Current serial number.
+CA administrators authenticate themselves with their digital certificate.
 
-To create all VMs and remove Vagrant:
-- make release
+#### Key Backup
+A copy of all keys and certificates issued must be stored in an archive. The
+archive is intended to ensure that encrypted data is still accessible even in the
+case of loss of an employee’s certificate or private key, or even the employee
+himself.
 
-### Ansible
-```
-TODO
-```
+#### System Administration and Maintenance
+The system should provide appropriate and secure interfaces for remote administration from the internet. In addition, an automated back-up solution must
+be implemented, which includes configuration and logging information.
+Note that these interfaces do not need to be especially comfortable or user
+friendly. It is sufficient to provide suitable and simple interfaces with the help
+of standard protocols such as SSH and FTP.
 
-### Certificate generation
-We use OpenSSL to generate the certificates required for client certificate based authentication.
+#### Components to Be Provided
+Web Server: User interfaces, certificate requests, certificate delivery, revocation requests, etc;
+Core CA: Management of user certificates, CA configuration, CA certificates
+and keys, functionality to issue new certificates, etc;
+MySQL Database: Legacy database with user data. The database specification can be found in Section 2.4;
+Backup: Backup of keys and certificates from the Core CA and of configuration
+and logging information.
+Client: Sample client system that allows one to test the CA’s functionality from
+outside the company’s network. The client system should be configured
+such that all functions can be tested. This includes the configuration of a
+special certificate to test the administrator interfaces.
+Describe exactly how these components are distributed on various computers
+and exactly what additional components are required to enforce the security
+measures. The implementation is left up to the project team.
+All systems must be built using VirtualBox, which defines the “hardware”.
+The software is freely choosable. However, the operating systems must be Linux
+variants, and the legacy database requires MySQL.
 
-First, we create the CA's RSA keypair:
-```
-openssl genrsa -out ca.key 4096
-```
+### Security Requirements
+The most important security requirements are:
+* Access control with regard to the CA functionality and data, in particular
+configuration and keys;
+* Secrecy and integrity with respect to the private keys in the key backup.
+Note that the protection of the private keys on users’ computers is the
+responsibility of the individual users;
+* Secrecy and integrity with respect to user data;
+* Access control on all components.
 
-We generate the CA's certificate using the key as follows (entering the various data fields when prompted):
-```
-openssl req -new -x509 -key ca.key -out ca.crt
-```
 
-Another keypair is created for the client certificate:
-```
-openssl genrsa -out client.key 4096
-```
+Derive the necessary security measures from a risk analysis. Use the methodology provided in the book, and justify your design choices using the security principles. Hint: avoid monolithic designs where many functionalities are
+clumped together on a single machine (why?).
 
-Followed by a Certificate Signing Request:
 
-```
-openssl req -new -key client.key -out client.csr
-```
+### Backdoors
+You must build two backdoors into your system. Both backdoors should allow
+remote access to the system(s) and compromise its purpose. The reviewers of
+your system will later have to search for these backdoors.
+Design and implement a first backdoor so that it will be nontrivial but likely
+for the reviewers to find it. Give your best effort when it comes to the second
+backdoor! Try to hide it so well that the reviewers will not find it. Do not forget
+to hide your traces in the end (e.g., shell history).
 
-Before signing the CSR, create a config file (in this case, `client-ext.conf`) with the following contents:
-```ini
-[v3_ca]
-basicConstraints = CA:FALSE
-extendedKeyUsage=clientAuth,emailProtection
-```
-
-To sign the CSR:
-```
-openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out client.crt -extensions v3_ca -extfile client-ext.conf
-```
-
-For a server-side TLS cert, begin by generating yet another keypair and CSR:
-```
-openssl genrsa -out webserver.key 4096
-
-openssl req -new -key webserver.key -out webserver.csr
-```
-
-Before siging the CSR, create a config file (e.g. `server-ext.conf`) with the following contents:
-```ini
-authorityKeyIdentifier=keyid,issuer
-basicConstraints=CA:FALSE
-keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
-subjectAltName = @alt_names
-
-# Modify the domain name as required
-[alt_names]
-DNS.1 = localhost
-```
-
-To sign the CSR:
-```
-openssl x509 -req -in webserver.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out webserver.crt -extfile server-ext.conf
-```
-
-To export the certificate and private key info into PKCS#12:
-```
-openssl pkcs12 -export -out client.pfx -inkey client.key -in client.crt
-```
